@@ -65,6 +65,9 @@ Regarding testing, even if you don't focus on coverage, make sure that the
 tooling is at least present for others to write tests for things they
 implement.
 
+See example pipelines for reference:
+- https://github.com/asabina-de/notumo-music-school-poc/blob/main/.github/workflows/test.yml 
+
 ### Devenv.sh
 
 Optionally, use [devenv](https://devenv.sh) to manage your dev environments.
@@ -104,6 +107,33 @@ server-side logic).
   pom.xml and build.gradle  or the `sonar.projectVersion` parameter, which we
   don't want to focus on setting. Downside and risk of the *Number of days*
   configuration is that we miss out on checks for really slow-moving projects.
+- Define **Action secrets and variables** in GitHub (Settings > Secrets and variables > Actions):
+  - `SONAR_ORGANIZATION` as a repository variable
+  - `SONAR_PROJECT_KEY` as a repository variable
+  - `SONAR_TOKEN` as a **repository secret**
+
+> [!NOTE]
+> The SonarQube GUI will recommend you to create a sonar-project.properties file, but for now we have just passed these details as options in our GH Actions step. Historically sonar-project.properties didn't support variables and we didn't want to hardcode the project and project key magic strings into our codebase, so there is no strong technical reason for avoiding sonar-project.properties. A pro, may be that we just have 1 file to think about when reasoning about our sonar setup, but a con is that the yaml file may not as easy to grok with all the `Dsonar.*` noise in the `with.args` block for the action.
+
+Use the SonarSource/sonarqube-scan-action action to push data to SonarQube and trigger a scan and optionally refer to the block below for an scan step we had in one of our repos and highlights how we circumvented the use of sonar-project.properties:
+
+```yaml
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          # https://docs.sonarsource.com/sonarqube-cloud/advanced-setup/analysis-parameters/
+          args: >
+            -Dsonar.organization=${{ vars.SONAR_ORGANIZATION }}
+            -Dsonar.projectKey=${{ vars.SONAR_PROJECT_KEY }}
+            -Dsonar.javascript.lcov.reportPaths=test-reports/**/lcov.info
+            -Dsonar.sources=src
+            -Dsonar.tests=src,e2e
+            -Dsonar.test.inclusions=src/**/*.test.ts,src/**/*.test.tsx,src/**/*.spec.ts,src/**/*.spec.tsx,e2e/**/*.test.ts,e2e/**/*.spec.ts
+            -Dsonar.exclusions=src/**/*.test.ts,src/**/*.test.tsx,src/**/*.spec.ts,src/**/*.spec.tsx,src/**/*.stories.ts,src/**/*.stories.tsx,src/**/*.stories.mdx
+            -Dsonar.verbose=false
+```
 
 [sonar-new-code]: https://docs.sonarsource.com/sonarqube-server/9.9/project-administration/defining-new-code/
 
