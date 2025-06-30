@@ -15,7 +15,17 @@ repo-specific details.
 - Use [Mermaid
   diagrams](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/creating-diagrams#creating-mermaid-diagrams)
   where you need to scribble
-- 
+
+### Git
+
+- For the sake of convenience, **use git workspaces** such that you can make hotfixes without having to disrupt current work. Note that even stashing changes may be suboptimal at times since it requires a few manual actions to complete (especially if you don't want to stash everything).
+
+  > [!TIP]
+  > My first checkout goes to `$WORKFOLDER/${REPO_NAME}/worktree-NN` where `NN` is a number starting at `00`. This allows me to just start new workspaces by simply doing something like `git workspace add ../worktree-01 [-b] ${TARGET_BRANCH}` and be done with it. You just need to track what your next `NN` is when you are doing this on your setup but git should yell at you if the folder is already occupied.
+
+- Use **branch names from Linear** to allow for a consistent DX of auto-association of your branch to Linear tickets.
+- Prefer to merge stacks (multiple successive branches and their PRs) by merging the `HEAD` (tip). GitHub knows how to auto-mark the affected PRs as resolved.
+
 
 ### Linear
 
@@ -25,6 +35,7 @@ Use Linear for work tracking and planning.
 - File repo issues directly into GitHub and verify that the [Linear
   integration](https://linear.app/asabina/settings/integrations/github) has
   synchronization set up for the relevant repos).
+- Use branch names from Linear
 
 ### GitHub
 
