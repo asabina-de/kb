@@ -1,0 +1,39 @@
+graph TB
+    %% Core Entities
+    User[User]
+    Profile[Profile]
+    Settings[Settings]
+    
+    %% Relationships
+    User ||--|| Profile : has
+    User ||--|| Settings : has
+    
+    %% User Entity
+    User --> |id: string| UserID[User ID]
+    User --> |email: string| UserEmail[Email]
+    User --> |createdAt: timestamp| UserCreated[Created At]
+    User --> |updatedAt: timestamp| UserUpdated[Updated At]
+    
+    %% Profile Entity
+    Profile --> |name: string| ProfileName[Display Name]
+    Profile --> |avatar: string?| ProfileAvatar[Avatar URL]
+    Profile --> |bio: string?| ProfileBio[Biography]
+    
+    %% Settings Entity
+    Settings --> |theme: Theme| SettingsTheme[Theme Preference]
+    Settings --> |notifications: boolean| SettingsNotifications[Notifications Enabled]
+    Settings --> |language: string| SettingsLanguage[Language Preference]
+    
+    %% Enums
+    SettingsTheme --> |light| ThemeLight[Light Theme]
+    SettingsTheme --> |dark| ThemeDark[Dark Theme]
+    SettingsTheme --> |auto| ThemeAuto[Auto Theme]
+    
+    %% Styling
+    classDef entity fill:#e1f5fe,stroke:#0277bd,stroke-width:2px
+    classDef property fill:#f3e5f5,stroke:#7b1fa2,stroke-width:1px
+    classDef enum fill:#e8f5e8,stroke:#2e7d32,stroke-width:1px
+    
+    class User,Profile,Settings entity
+    class UserID,UserEmail,UserCreated,UserUpdated,ProfileName,ProfileAvatar,ProfileBio,SettingsTheme,SettingsNotifications,SettingsLanguage property
+    class ThemeLight,ThemeDark,ThemeAuto enum

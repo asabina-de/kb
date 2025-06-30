@@ -15,7 +15,17 @@ repo-specific details.
 - Use [Mermaid
   diagrams](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/creating-diagrams#creating-mermaid-diagrams)
   where you need to scribble
-- 
+
+### Git
+
+- For the sake of convenience, **use git workspaces** such that you can make hotfixes without having to disrupt current work. Note that even stashing changes may be suboptimal at times since it requires a few manual actions to complete (especially if you don't want to stash everything).
+
+  > [!TIP]
+  > My first checkout goes to `$WORKFOLDER/${REPO_NAME}/worktree-NN` where `NN` is a number starting at `00`. This allows me to just start new workspaces by simply doing something like `git workspace add ../worktree-01 [-b] ${TARGET_BRANCH}` and be done with it. You just need to track what your next `NN` is when you are doing this on your setup but git should yell at you if the folder is already occupied.
+
+- Use **branch names from Linear** to allow for a consistent DX of auto-association of your branch to Linear tickets.
+- Prefer to merge stacks (multiple successive branches and their PRs) by merging the `HEAD` (tip). GitHub knows how to auto-mark the affected PRs as resolved.
+
 
 ### Linear
 
@@ -25,6 +35,7 @@ Use Linear for work tracking and planning.
 - File repo issues directly into GitHub and verify that the [Linear
   integration](https://linear.app/asabina/settings/integrations/github) has
   synchronization set up for the relevant repos).
+- Use branch names from Linear
 
 ### GitHub
 
@@ -65,6 +76,9 @@ Regarding testing, even if you don't focus on coverage, make sure that the
 tooling is at least present for others to write tests for things they
 implement.
 
+See example pipelines for reference:
+- https://github.com/asabina-de/notumo-music-school-poc/blob/main/.github/workflows/test.yml 
+
 ### Devenv.sh
 
 Optionally, use [devenv](https://devenv.sh) to manage your dev environments.
@@ -104,6 +118,33 @@ server-side logic).
   pom.xml and build.gradle  or the `sonar.projectVersion` parameter, which we
   don't want to focus on setting. Downside and risk of the *Number of days*
   configuration is that we miss out on checks for really slow-moving projects.
+- Define **Action secrets and variables** in GitHub (Settings > Secrets and variables > Actions):
+  - `SONAR_ORGANIZATION` as a repository variable
+  - `SONAR_PROJECT_KEY` as a repository variable
+  - `SONAR_TOKEN` as a **repository secret**
+
+> [!NOTE]
+> The SonarQube GUI will recommend you to create a sonar-project.properties file, but for now we have just passed these details as options in our GH Actions step. Historically sonar-project.properties didn't support variables and we didn't want to hardcode the project and project key magic strings into our codebase, so there is no strong technical reason for avoiding sonar-project.properties. A pro, may be that we just have 1 file to think about when reasoning about our sonar setup, but a con is that the yaml file may not as easy to grok with all the `Dsonar.*` noise in the `with.args` block for the action.
+
+Use the SonarSource/sonarqube-scan-action action to push data to SonarQube and trigger a scan and optionally refer to the block below for an scan step we had in one of our repos and highlights how we circumvented the use of sonar-project.properties:
+
+```yaml
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          # https://docs.sonarsource.com/sonarqube-cloud/advanced-setup/analysis-parameters/
+          args: >
+            -Dsonar.organization=${{ vars.SONAR_ORGANIZATION }}
+            -Dsonar.projectKey=${{ vars.SONAR_PROJECT_KEY }}
+            -Dsonar.javascript.lcov.reportPaths=test-reports/**/lcov.info
+            -Dsonar.sources=src
+            -Dsonar.tests=src,e2e
+            -Dsonar.test.inclusions=src/**/*.test.ts,src/**/*.test.tsx,src/**/*.spec.ts,src/**/*.spec.tsx,e2e/**/*.test.ts,e2e/**/*.spec.ts
+            -Dsonar.exclusions=src/**/*.test.ts,src/**/*.test.tsx,src/**/*.spec.ts,src/**/*.spec.tsx,src/**/*.stories.ts,src/**/*.stories.tsx,src/**/*.stories.mdx
+            -Dsonar.verbose=false
+```
 
 [sonar-new-code]: https://docs.sonarsource.com/sonarqube-server/9.9/project-administration/defining-new-code/
 
@@ -116,3 +157,57 @@ the non-Graphite way of solving this is fairly minimal. In cases of long stacks
 (trains), there is some manual effort, but it beats the Graphite DX of a top
 merge, triggering the individual rebasing and merging of the PRs into main
 where we actually just want to merge the top and be done with it.
+
+## Documentation Standards
+
+Every project should maintain consistent documentation using our **6-document structure**:
+
+### Core Documentation Files
+
+1. **DECISIONS.md** - Architecture Decision Records (ADR)
+   - Chronicles major technical decisions with full context and rationale
+   - Date-stamped entries with clear decision statements
+   - Includes trade-offs, benefits, and future considerations
+   - Cross-references other documentation files
+
+2. **DESIGN_NOTES.md** - System Design and Data Models
+   - Documents core system architecture using structured schemas
+   - Includes visual diagrams (Mermaid) for complex relationships
+   - Progressive examples from basic to advanced usage
+   - Goals and requirements as actionable checklists
+
+3. **GUIDELINES.md** - Development Standards and Best Practices
+   - Establishes coding standards and operational readiness patterns
+   - Principle-first approach with practical examples
+   - Testing strategy guidance and observability patterns
+   - Clear do/don't examples with explanations
+
+4. **LINTING_FORMATTING.md** - Code Quality Standards
+   - Tool specifications (ESLint, Prettier, etc.)
+   - Configuration examples ready for copy-paste
+   - Integration recommendations (pre-commit hooks)
+
+5. **TODO.md** - Task Management using Now/Next/Later/Never Framework
+   - **Now**: Active work, being done this week/cycle
+   - **Next**: Prioritized for upcoming work, next in line  
+   - **Later**: Important but not urgent, future consideration
+   - **Never**: Decided against, with reasoning preserved
+
+### Documentation Principles
+
+- **Single Responsibility**: Each document has a clear, focused purpose
+- **Example-Driven**: Concrete implementations alongside abstract concepts
+- **Cross-Referenced**: Explicit links between related documentation
+- **Living Documents**: Regular updates with TODO tracking
+- **Production Focus**: Explicit attention to operational readiness
+
+### When to Create Each Document
+
+- **Start pragmatically**: Use README.md for basic guidelines and setup
+- **Create TODO.md**: When you need repo-specific scratchpad for gotchas/tech debt
+- **Create GUIDELINES.md**: When README outgrows itself or team needs coding standards
+- **Add DECISIONS.md**: When making significant architectural decisions worth documenting
+- **Add DESIGN_NOTES.md**: When system complexity requires formal design documentation
+- **Add LINTING_FORMATTING.md**: When team needs automated code quality standards
+
+See `templates/` directory for starter templates of each document type.
