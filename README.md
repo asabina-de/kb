@@ -157,3 +157,57 @@ the non-Graphite way of solving this is fairly minimal. In cases of long stacks
 (trains), there is some manual effort, but it beats the Graphite DX of a top
 merge, triggering the individual rebasing and merging of the PRs into main
 where we actually just want to merge the top and be done with it.
+
+## Documentation Standards
+
+Every project should maintain consistent documentation using our **6-document structure**:
+
+### Core Documentation Files
+
+1. **DECISIONS.md** - Architecture Decision Records (ADR)
+   - Chronicles major technical decisions with full context and rationale
+   - Date-stamped entries with clear decision statements
+   - Includes trade-offs, benefits, and future considerations
+   - Cross-references other documentation files
+
+2. **DESIGN_NOTES.md** - System Design and Data Models
+   - Documents core system architecture using structured schemas
+   - Includes visual diagrams (Mermaid) for complex relationships
+   - Progressive examples from basic to advanced usage
+   - Goals and requirements as actionable checklists
+
+3. **GUIDELINES.md** - Development Standards and Best Practices
+   - Establishes coding standards and operational readiness patterns
+   - Principle-first approach with practical examples
+   - Testing strategy guidance and observability patterns
+   - Clear do/don't examples with explanations
+
+4. **LINTING_FORMATTING.md** - Code Quality Standards
+   - Tool specifications (ESLint, Prettier, etc.)
+   - Configuration examples ready for copy-paste
+   - Integration recommendations (pre-commit hooks)
+
+5. **TODO.md** - Task Management using Now/Next/Later/Never Framework
+   - **Now**: Active work, being done this week/cycle
+   - **Next**: Prioritized for upcoming work, next in line  
+   - **Later**: Important but not urgent, future consideration
+   - **Never**: Decided against, with reasoning preserved
+
+### Documentation Principles
+
+- **Single Responsibility**: Each document has a clear, focused purpose
+- **Example-Driven**: Concrete implementations alongside abstract concepts
+- **Cross-Referenced**: Explicit links between related documentation
+- **Living Documents**: Regular updates with TODO tracking
+- **Production Focus**: Explicit attention to operational readiness
+
+### When to Create Each Document
+
+- **Start pragmatically**: Use README.md for basic guidelines and setup
+- **Create TODO.md**: When you need repo-specific scratchpad for gotchas/tech debt
+- **Create GUIDELINES.md**: When README outgrows itself or team needs coding standards
+- **Add DECISIONS.md**: When making significant architectural decisions worth documenting
+- **Add DESIGN_NOTES.md**: When system complexity requires formal design documentation
+- **Add LINTING_FORMATTING.md**: When team needs automated code quality standards
+
+See `templates/` directory for starter templates of each document type.

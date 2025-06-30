@@ -1,0 +1,63 @@
+# Project TODOs
+
+This document serves as a **capture buffer** for repository-specific tasks, technical debt, and quick developer insights that haven't yet been formalized in the issue tracker (Linear). 
+
+> [!TIP]
+> When we say **capture buffer** we mean *buffer* as a temporary store. Serious points will need to be moved over to Linear and linked back into this docs, ideally. As a team, it would be a solid housekeeping practice to at a fixed interval, examine this doc and compare it to Linear, move things over that need moving and retire the bits that are no longer needed.
+
+## Purpose & Workflow
+
+**Use this file for:**
+- Quick capture of technical debt discovered during development
+- "Gotchas" and improvement opportunities noticed in code
+- Repository-specific setup/tooling issues
+- Refactoring opportunities that don't warrant immediate Linear tickets
+
+**Workflow:**
+1. **Developers add items here** during development (low friction)
+2. **Weekly review** to evaluate which items should become Linear tickets
+3. **Periodic sync** between TODOs.md and Linear (automated or manual)
+4. **Mark completed** when items are done (either here or via Linear)
+5. **Monthly archival** - Move old Completed/Never items to `ARCHIVE.md` to prevent endless growth
+
+## Now
+
+- [ ] 
+
+## Next
+
+- [ ] 
+
+## Later
+
+- [ ] 
+
+## Completed
+
+- [x] 
+
+## Never
+
+- [ ] 
+
+---
+
+## Notes
+
+### Format
+Use format: `file/path.ts: Brief description (Impact: Performance/Security/DevEx, Effort: S/M/L)`
+
+**Examples:**
+- `src/api/users.ts: N+1 query causing slow dashboard loads (Impact: Performance, Effort: M)`
+- `README.md: Missing Redis setup steps (Impact: DevEx, Effort: S)`
+- `~~Real-time chat~~ → Polling sufficient for now (Reason: Complexity vs value, Date: 2024-01-15)`
+
+### Archival Process
+**Monthly cleanup:** Move items older than 30 days from Completed/Never sections to `ARCHIVE.md`
+
+Keep recent items (last 30 days) in this file for:
+- Progress visibility during weekly reviews
+- Recent decision context
+- Quick reference for similar issues
+
+*Older items available in [TODO.ARCHIVE.md](./TODO.ARCHIVE.md) for institutional knowledge*
