@@ -195,6 +195,20 @@ Every project should maintain consistent documentation using our **6-document st
    - **Later**: Important but not urgent, future consideration
    - **Never**: Decided against, with reasoning preserved
 
+### AI Guidance Files
+
+For projects using AI development tools:
+
+7. **AGENTS.md** - General AI agent guidelines
+
+   - Development workflow and commit strategy
+   - Documentation update patterns
+   - Communication guidelines
+
+8. **CLAUDE.md** - Claude-specific instructions
+   - References AGENTS.md for core guidelines
+   - Claude-specific behaviors and tool usage
+
 ### Documentation Principles
 
 - **Single Responsibility**: Each document has a clear, focused purpose

@@ -19,7 +19,8 @@ For every new project, copy the appropriate templates and customize them:
 2. **TODO.md** → When you need a scratchpad for repo-specific gotchas
 3. **GUIDELINES.md** → When README gets too long or team needs formal standards
 4. **DECISIONS.md** → When making significant architectural choices
-5. **Others** → Only when complexity demands it
+5. **AI Guidance** → When using AI development tools (AGENTS.md + CLAUDE.md)
+6. **Others** → Only when complexity demands it
 
 ## When to Create Each Document
 
@@ -71,6 +72,21 @@ For every new project, copy the appropriate templates and customize them:
 - Prevents style inconsistencies
 - Automates code quality checks
 - Establishes tool configurations
+
+### Add When Using AI Development Tools:
+
+**AGENTS.md** - General AI agent guidelines
+
+- Development workflow and commit strategy
+- Documentation update patterns
+- Communication guidelines
+- Project-specific environment setup
+
+**CLAUDE.md** - Claude-specific instructions
+
+- References AGENTS.md for core guidelines
+- Claude-specific behaviors and tool usage
+- Should be minimal, pointing to AGENTS.md for most guidance
 
 ## Template Customization Guide
 
