@@ -5,11 +5,13 @@ This document captures the core system design, data models, and architectural pa
 ## Goals & Requirements
 
 ### Core Goals
+
 - [ ] Goal 1: Clear, measurable objective
 - [ ] Goal 2: Another objective
 - [ ] Goal 3: Third objective
 
 ### Requirements
+
 - [ ] Functional requirement 1
 - [ ] Functional requirement 2
 - [ ] Non-functional requirement 1 (performance, security, etc.)
@@ -36,14 +38,15 @@ graph TB
 **Purpose**: Brief description of what this entity represents and why it exists.
 
 **Schema Structure**:
+
 ```yaml
 # Human-readable authoring format
 user:
-  id: string          # Unique identifier
-  email: string       # User's email address
+  id: string # Unique identifier
+  email: string # User's email address
   profile:
-    name: string      # Display name
-    avatar: string?   # Optional profile image URL
+    name: string # Display name
+    avatar: string? # Optional profile image URL
   settings:
     theme: light | dark
     notifications: boolean
@@ -52,6 +55,7 @@ user:
 ```
 
 **JSON Runtime Format**:
+
 ```json
 {
   "id": "usr_123456",
@@ -71,7 +75,8 @@ user:
 
 **Usage Examples**:
 
-*Basic Usage*:
+_Basic Usage_:
+
 ```yaml
 # Simple user creation
 user:
@@ -83,7 +88,8 @@ user:
     notifications: true
 ```
 
-*Advanced Usage*:
+_Advanced Usage_:
+
 ```yaml
 # User with complex profile and relationships
 user:
@@ -116,19 +122,19 @@ classDiagram
         +DateTime createdAt
         +DateTime updatedAt
     }
-    
+
     class Profile {
         +String name
         +String avatar
         +String bio
     }
-    
+
     class Settings {
         +Theme theme
         +Boolean notifications
         +Boolean advancedFeatures
     }
-    
+
     User ||--|| Profile : has
     User ||--|| Settings : has
 ```
@@ -138,6 +144,7 @@ classDiagram
 ### Core Patterns
 
 **RESTful Endpoints**:
+
 ```
 GET    /api/users          - List users
 POST   /api/users          - Create user
@@ -147,6 +154,7 @@ DELETE /api/users/{id}     - Delete user
 ```
 
 **Request/Response Examples**:
+
 ```typescript
 // GET /api/users/123
 interface UserResponse {
@@ -174,6 +182,7 @@ interface CreateUserRequest {
 **Purpose**: What problem does this pattern solve?
 
 **Implementation**:
+
 ```typescript
 // Code example showing the pattern
 class ExamplePattern {
@@ -182,6 +191,7 @@ class ExamplePattern {
 ```
 
 **Usage Guidelines**:
+
 - When to use this pattern
 - When NOT to use this pattern
 - Common pitfalls to avoid
@@ -189,20 +199,24 @@ class ExamplePattern {
 ## Performance Considerations
 
 ### Caching Strategy
+
 - [ ] Cache layer 1: Description
 - [ ] Cache layer 2: Description
 
 ### Database Optimization
+
 - [ ] Index strategy
 - [ ] Query optimization patterns
 
 ## Security Model
 
 ### Authentication
+
 - [ ] Auth method 1
 - [ ] Auth method 2
 
 ### Authorization
+
 - [ ] Permission model
 - [ ] Role-based access control
 
