@@ -7,11 +7,13 @@ This document defines code quality standards, formatting rules, and automated to
 ### ESLint Configuration
 
 **Installation:**
+
 ```bash
 npm install --save-dev eslint @typescript-eslint/parser @typescript-eslint/eslint-plugin
 ```
 
 **Configuration (`.eslintrc.json`):**
+
 ```json
 {
   "parser": "@typescript-eslint/parser",
@@ -53,11 +55,13 @@ npm install --save-dev eslint @typescript-eslint/parser @typescript-eslint/eslin
 ### Prettier Configuration
 
 **Installation:**
+
 ```bash
 npm install --save-dev prettier eslint-config-prettier eslint-plugin-prettier
 ```
 
 **Configuration (`.prettierrc`):**
+
 ```json
 {
   "semi": true,
@@ -73,6 +77,7 @@ npm install --save-dev prettier eslint-config-prettier eslint-plugin-prettier
 ```
 
 **Prettier Ignore (`.prettierignore`):**
+
 ```
 node_modules/
 dist/
@@ -86,6 +91,7 @@ build/
 ### TypeScript
 
 **tsconfig.json:**
+
 ```json
 {
   "compilerOptions": {
@@ -105,13 +111,12 @@ build/
     "noEmit": true,
     "jsx": "react-jsx"
   },
-  "include": [
-    "src"
-  ]
+  "include": ["src"]
 }
 ```
 
 **Type Definition Standards:**
+
 ```typescript
 // Use interfaces for object shapes
 interface User {
@@ -121,7 +126,7 @@ interface User {
 }
 
 // Use type aliases for unions and computed types
-type Status = 'pending' | 'completed' | 'failed';
+type Status = "pending" | "completed" | "failed";
 type UserWithStatus = User & { status: Status };
 
 // Avoid any, use unknown or specific types
@@ -133,6 +138,7 @@ const parseJson = (input: string): unknown => {
 ### React/JSX
 
 **Component Standards:**
+
 ```typescript
 // Functional components with TypeScript
 interface Props {
@@ -141,10 +147,10 @@ interface Props {
   isLoading?: boolean;
 }
 
-const MyComponent: React.FC<Props> = ({ 
-  title, 
-  onSave, 
-  isLoading = false 
+const MyComponent: React.FC<Props> = ({
+  title,
+  onSave,
+  isLoading = false
 }) => {
   return (
     <div className="my-component">
@@ -160,11 +166,13 @@ const MyComponent: React.FC<Props> = ({
 ### Pre-commit Hooks
 
 **Installation:**
+
 ```bash
 npm install --save-dev husky lint-staged
 ```
 
 **Package.json Configuration:**
+
 ```json
 {
   "husky": {
@@ -173,13 +181,8 @@ npm install --save-dev husky lint-staged
     }
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx}": [
-      "eslint --fix",
-      "prettier --write"
-    ],
-    "*.{json,css,md}": [
-      "prettier --write"
-    ]
+    "*.{js,jsx,ts,tsx}": ["eslint --fix", "prettier --write"],
+    "*.{json,css,md}": ["prettier --write"]
   }
 }
 ```
@@ -201,6 +204,7 @@ npm install --save-dev husky lint-staged
 ### VS Code Settings
 
 **`.vscode/settings.json`:**
+
 ```json
 {
   "editor.formatOnSave": true,
@@ -219,6 +223,7 @@ npm install --save-dev husky lint-staged
 ```
 
 **Recommended Extensions (`.vscode/extensions.json`):**
+
 ```json
 {
   "recommendations": [
@@ -233,6 +238,7 @@ npm install --save-dev husky lint-staged
 ## NPM Scripts
 
 **Package.json Scripts:**
+
 ```json
 {
   "scripts": {
@@ -251,22 +257,22 @@ npm install --save-dev husky lint-staged
 ### Tailwind CSS (if used)
 
 **Configuration:**
+
 ```javascript
 // tailwind.config.js
 module.exports = {
-  content: [
-    "./src/**/*.{js,jsx,ts,tsx}",
-  ],
+  content: ["./src/**/*.{js,jsx,ts,tsx}"],
   theme: {
     extend: {},
   },
   plugins: [],
-}
+};
 ```
 
 ### CSS Modules (if used)
 
 **Naming Convention:**
+
 ```css
 /* Button.module.css */
 .button {
@@ -298,25 +304,25 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '18'
-          cache: 'npm'
-          
+          node-version: "18"
+          cache: "npm"
+
       - name: Install dependencies
         run: npm ci
-        
+
       - name: Run linting
         run: npm run lint
-        
+
       - name: Check formatting
         run: npm run format:check
-        
+
       - name: Type checking
         run: npm run type-check
-        
+
       - name: Run tests
         run: npm run test
 ```
@@ -326,12 +332,14 @@ jobs:
 ### ESLint Issues
 
 **Disable rules for specific lines:**
+
 ```typescript
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const data: any = legacyApiResponse;
 ```
 
 **Disable rules for entire files:**
+
 ```typescript
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // Legacy file with lots of any types
@@ -340,11 +348,13 @@ const data: any = legacyApiResponse;
 ### Prettier Conflicts
 
 **Resolve ESLint/Prettier conflicts:**
+
 ```bash
 npm install --save-dev eslint-config-prettier
 ```
 
 Add to `.eslintrc.json` extends array:
+
 ```json
 {
   "extends": [

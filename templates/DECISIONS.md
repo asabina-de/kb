@@ -1,6 +1,22 @@
 # Architecture Decision Records
 
-This document chronicles major technical decisions made during the project lifecycle. Each entry includes the context, rationale, trade-offs, and future considerations to preserve institutional knowledge.
+This document chronicles **finalized architectural decisions** that have been thoroughly considered and chosen. Many decisions start as explorations in [DESIGN_NOTES.md](./DESIGN_NOTES.md) and graduate here when mature.
+
+## Decision Lifecycle
+
+**From exploration to decision:**
+
+1. **Explore** alternatives and iterate in DESIGN_NOTES.md
+2. **Mature** the design through examples and trade-off analysis
+3. **Graduate** to this document with full decision context
+4. **Leave breadcrumb** in DESIGN_NOTES.md pointing to final decision
+
+**Each decision entry should include:**
+
+- What was decided and why
+- What alternatives were considered
+- Trade-offs and implications
+- Implementation guidance
 
 ## Decision Template
 
@@ -15,18 +31,22 @@ This document chronicles major technical decisions made during the project lifec
 **Implementation**: How was this decision implemented? Include code examples if relevant.
 
 **Benefits**: What did we gain from this decision?
+
 - Benefit 1
 - Benefit 2
 
 **Trade-offs**: What did we give up or compromise on?
+
 - Trade-off 1
 - Trade-off 2
 
 **Future Considerations**: What should future developers know about this decision?
+
 - Future consideration 1
 - Future consideration 2
 
 **Related Documentation**: Links to relevant files
+
 - [DESIGN_NOTES.md](./DESIGN_NOTES.md) - Related design patterns
 - [GUIDELINES.md](./GUIDELINES.md) - Implementation guidelines
 
@@ -40,18 +60,20 @@ This document chronicles major technical decisions made during the project lifec
 
 **Context**: The application needed centralized state management for user authentication, theme preferences, and notification system. Team wanted to minimize external dependencies while maintaining predictable state updates.
 
-**Rationale**: 
+**Rationale**:
+
 - Built-in React solution reduces bundle size
 - Team already familiar with React patterns
 - Application state complexity doesn't justify Redux overhead
 - TypeScript integration works seamlessly with Context API
 
-**Implementation**: 
+**Implementation**:
+
 ```typescript
 // AppContext.tsx
 interface AppState {
   user: User | null;
-  theme: 'light' | 'dark';
+  theme: "light" | "dark";
   notifications: Notification[];
 }
 
@@ -65,22 +87,26 @@ const { state, dispatch } = useContext(AppContext);
 ```
 
 **Benefits**:
+
 - Reduced bundle size by ~50KB (Redux + middleware)
 - Simplified state debugging with React DevTools
 - Better TypeScript inference
 - Familiar patterns for React developers
 
 **Trade-offs**:
+
 - Manual optimization needed for performance
 - No time-travel debugging
 - Custom middleware required for async actions
 - Limited ecosystem compared to Redux
 
 **Future Considerations**:
+
 - Monitor performance as component tree grows
 - Consider Redux if complex async state patterns emerge
 - Document state update patterns in [GUIDELINES.md](./GUIDELINES.md)
 
 **Related Documentation**:
+
 - [DESIGN_NOTES.md](./DESIGN_NOTES.md) - State schema definitions
 - [GUIDELINES.md](./GUIDELINES.md) - Context usage patterns
