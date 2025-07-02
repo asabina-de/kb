@@ -1,6 +1,22 @@
 # Architecture Decision Records
 
-This document chronicles major technical decisions made during the project lifecycle. Each entry includes the context, rationale, trade-offs, and future considerations to preserve institutional knowledge.
+This document chronicles **finalized architectural decisions** that have been thoroughly considered and chosen. Many decisions start as explorations in [DESIGN_NOTES.md](./DESIGN_NOTES.md) and graduate here when mature.
+
+## Decision Lifecycle
+
+**From exploration to decision:**
+
+1. **Explore** alternatives and iterate in DESIGN_NOTES.md
+2. **Mature** the design through examples and trade-off analysis
+3. **Graduate** to this document with full decision context
+4. **Leave breadcrumb** in DESIGN_NOTES.md pointing to final decision
+
+**Each decision entry should include:**
+
+- What was decided and why
+- What alternatives were considered
+- Trade-offs and implications
+- Implementation guidance
 
 ## Decision Template
 

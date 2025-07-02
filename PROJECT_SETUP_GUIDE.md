@@ -13,14 +13,16 @@ For every new project, copy the appropriate templates and customize them:
 - Use your **README.md** for basic setup instructions and initial guidelines
 - Create docs only when you actually need them
 
-**Common Progression:**
+**Common Progression (by developer workflow relevance):**
 
-1. **README.md** → Basic project info, setup, initial coding guidelines
-2. **TODO.md** → When you need a scratchpad for repo-specific gotchas
-3. **GUIDELINES.md** → When README gets too long or team needs formal standards
-4. **DECISIONS.md** → When making significant architectural choices
-5. **AI Guidance** → When using AI development tools (AGENTS.md + CLAUDE.md)
-6. **Others** → Only when complexity demands it
+1. **README.md** → Project foundation, setup, basic guidelines (include linting for small projects)
+2. **GUIDELINES.md** → When README outgrows itself or team needs formal engineering standards
+3. **TODO.md** → When you need a scratchpad for repo-specific gotchas/tasks
+4. **DESIGN_NOTES.md** → When exploring complex designs (iteration scratchpad)
+5. **DECISIONS.md** → When graduating mature designs from DESIGN_NOTES.md exploration
+6. **LINTING_FORMATTING.md** → Only when team size or complexity demands separate file
+7. **AI Guidance** → When using AI development tools (AGENTS.md + CLAUDE.md)
+8. **Visual diagrams** → When system relationships become complex
 
 ## When to Create Each Document
 
@@ -51,12 +53,12 @@ For every new project, copy the appropriate templates and customize them:
 
 ### Add When System Complexity Grows:
 
-**DESIGN_NOTES.md** - When you have 3+ entities or complex relationships
+**DESIGN_NOTES.md** - When exploring complex designs
 
-- Core data models and schemas
-- API design patterns
-- System architecture overview
-- Business logic documentation
+- **Use as iteration scratchpad** for evolving ideas and alternatives
+- Core data models and schemas (draft versions)
+- API design patterns exploration
+- **Graduate mature designs to DECISIONS.md** with full rationale
 
 **Visual Diagrams (.mmd files)** - When relationships become complex
 
@@ -67,11 +69,11 @@ For every new project, copy the appropriate templates and customize them:
 
 ### Add When Team Grows:
 
-**LINTING_FORMATTING.md** - When multiple developers join
+**LINTING_FORMATTING.md** - Only when team size or complexity demands it
 
-- Prevents style inconsistencies
-- Automates code quality checks
-- Establishes tool configurations
+- **For small projects**: Embed basic linting setup in README.md or GUIDELINES.md
+- **For larger teams**: Create separate file to prevent GUIDELINES.md bloat
+- Prevents style inconsistencies and automates code quality checks
 
 ### Add When Using AI Development Tools:
 

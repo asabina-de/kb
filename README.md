@@ -158,54 +158,71 @@ where we actually just want to merge the top and be done with it.
 
 ## Documentation Standards
 
-Every project should maintain consistent documentation using our **6-document structure**:
+Every project should maintain consistent documentation using our **structured documentation approach**:
 
 ### Core Documentation Files
 
-1. **DECISIONS.md** - Architecture Decision Records (ADR)
+_Ordered by developer workflow relevance_
 
-   - Chronicles major technical decisions with full context and rationale
-   - Date-stamped entries with clear decision statements
-   - Includes trade-offs, benefits, and future considerations
-   - Cross-references other documentation files
+1. **README.md** (`./README.md`) - Project Foundation
 
-2. **DESIGN_NOTES.md** - System Design and Data Models
+   - Project overview, setup instructions, basic guidelines
+   - Links to detailed documentation in `docs/` directory
+   - Entry point for new developers and contributors
+   - For small projects, may include basic linting/formatting setup
 
-   - Documents core system architecture using structured schemas
-   - Includes visual diagrams (Mermaid) for complex relationships
-   - Progressive examples from basic to advanced usage
-   - Goals and requirements as actionable checklists
-
-3. **GUIDELINES.md** - Development Standards and Best Practices
+2. **GUIDELINES.md** (`./docs/GUIDELINES.md`) - Development Standards and Best Practices
 
    - Establishes coding standards and operational readiness patterns
    - Principle-first approach with practical examples
    - Testing strategy guidance and observability patterns
-   - Clear do/don't examples with explanations
+   - Engineering best practices and team workflows
 
-4. **LINTING_FORMATTING.md** - Code Quality Standards
+3. **TODO.md** (`./docs/TODO.md`) - Task Management using Now/Next/Later/Never Framework
 
-   - Tool specifications (ESLint, Prettier, etc.)
-   - Configuration examples ready for copy-paste
-   - Integration recommendations (pre-commit hooks)
-
-5. **TODO.md** - Task Management using Now/Next/Later/Never Framework
    - **Now**: Active work, being done this week/cycle
    - **Next**: Prioritized for upcoming work, next in line
    - **Later**: Important but not urgent, future consideration
    - **Never**: Decided against, with reasoning preserved
+   - Repository-specific task scratchpad outside formal ticketing
+
+4. **DESIGN_NOTES.md** (`./docs/DESIGN_NOTES.md`) - Design Iteration and System Models
+
+   - **Scratchpad for evolving ideas** - iterate on designs until mature
+   - Documents core system architecture using structured schemas
+   - Progressive examples from basic to advanced usage
+   - **Graduate mature designs to DECISIONS.md** with clear rationale
+
+5. **DECISIONS.md** (`./docs/DECISIONS.md`) - Architecture Decision Records (ADR)
+
+   - **Final decisions** graduated from DESIGN_NOTES.md exploration
+   - Chronicles major technical decisions with full context and rationale
+   - Date-stamped entries with clear decision statements
+   - Includes trade-offs, benefits, and future considerations
+
+6. **LINTING_FORMATTING.md** (`./docs/LINTING_FORMATTING.md`) - Code Quality Standards _(conditional)_
+
+   - **Create only when team size or complexity demands it**
+   - Tool specifications (ESLint, Prettier, etc.)
+   - Configuration examples ready for copy-paste
+   - For small projects: embed basics in README.md or GUIDELINES.md
+
+7. **{feature}.mmd** (`./docs/{feature}.mmd`) - Visual Architecture Documentation
+   - Mermaid diagrams for complex system relationships
+   - Class diagrams showing inheritance and composition
+   - Supplement textual explanations with visual clarity
 
 ### AI Guidance Files
 
 For projects using AI development tools:
 
-7. **AGENTS.md** - General AI agent guidelines
+8. **AGENTS.md** (`./AGENTS.md`) - General AI agent guidelines
 
    - Development workflow and commit strategy
    - Documentation update patterns
    - Communication guidelines
 
-8. **CLAUDE.md** - Claude-specific instructions
+9. **CLAUDE.md** (`./CLAUDE.md`) - Claude-specific instructions
    - References AGENTS.md for core guidelines
    - Claude-specific behaviors and tool usage
 
@@ -219,11 +236,17 @@ For projects using AI development tools:
 
 ### When to Create Each Document
 
-- **Start pragmatically**: Use README.md for basic guidelines and setup
-- **Create TODO.md**: When you need repo-specific scratchpad for gotchas/tech debt
-- **Create GUIDELINES.md**: When README outgrows itself or team needs coding standards
-- **Add DECISIONS.md**: When making significant architectural decisions worth documenting
-- **Add DESIGN_NOTES.md**: When system complexity requires formal design documentation
-- **Add LINTING_FORMATTING.md**: When team needs automated code quality standards
+**Start with essentials:**
+
+- **README.md**: Every project foundation - include basic linting setup for small projects
+- **GUIDELINES.md**: When README outgrows itself or team needs coding standards
+
+**Add as workflow demands:**
+
+- **TODO.md**: When you need repo-specific scratchpad for gotchas/tech debt
+- **DESIGN_NOTES.md**: When exploring complex designs - use as iteration scratchpad
+- **DECISIONS.md**: When graduating mature designs from DESIGN_NOTES.md
+- **LINTING_FORMATTING.md**: Only when team size or complexity demands separate file
+- **AI Guidance**: When using AI development tools (AGENTS.md + CLAUDE.md)
 
 See `templates/` directory for starter templates of each document type.

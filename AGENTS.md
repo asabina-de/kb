@@ -14,16 +14,17 @@ This is the **engineering knowledge base** for Asabina. It centralizes documenta
 
 ## Documentation Workflow
 
-### Our 6-Document Structure
+### Our Documentation Structure
 
-When working on projects that follow our standards, understand these documents and when to update them:
+When working on projects that follow our standards, understand these documents and when to update them _(ordered by workflow relevance)_:
 
-1. **DECISIONS.md** - Update when making architectural decisions or documenting trade-offs
-2. **DESIGN_NOTES.md** - Update when working with data models, system architecture, or API design
-3. **GUIDELINES.md** - Update when establishing or modifying coding standards and best practices
-4. **LINTING_FORMATTING.md** - Update when configuring code quality tools
-5. **TODO.md** - **Frequently updated** - Use for task tracking with Now/Next/Later/Never framework
-6. **Visual diagrams (.mmd)** - Update when system relationships change
+1. **README.md** - Project foundation, entry point for new developers
+2. **GUIDELINES.md** - Engineering standards and best practices (most frequently referenced)
+3. **TODO.md** - **Most frequently updated** - Task tracking with Now/Next/Later/Never framework
+4. **DESIGN_NOTES.md** - **Iteration scratchpad** for exploring designs and alternatives
+5. **DECISIONS.md** - **Final decisions** graduated from DESIGN_NOTES.md exploration
+6. **LINTING_FORMATTING.md** - Code quality tools (create only when team size demands it)
+7. **Visual diagrams (.mmd)** - Update when system relationships change
 
 ### TODO.md Usage (Important for AI Agents)
 
@@ -42,9 +43,12 @@ This prevents pollution of main TODO sections with items that need human review.
 
 Follow the pragmatic approach from PROJECT_SETUP_GUIDE.md:
 
-1. Start with README.md for basic guidelines
-2. Create TODO.md when you need a task scratchpad
-3. Create other docs only when actually needed
+1. **Start with README.md** for basic guidelines (include basic linting for small projects)
+2. **Add GUIDELINES.md** when README outgrows itself or team needs engineering standards
+3. **Create TODO.md** when you need a task scratchpad
+4. **Use DESIGN_NOTES.md** as iteration scratchpad for complex designs
+5. **Graduate to DECISIONS.md** when designs mature with full rationale
+6. **Create other docs** only when actually needed
 
 ## Development Practices
 

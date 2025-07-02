@@ -1,6 +1,28 @@
 # Design Notes
 
-This document captures the core system design, data models, and architectural patterns. It serves as the single source of truth for understanding how the system is structured and why.
+This document serves as a **scratchpad for evolving ideas** and system design exploration. Use this space to iterate on designs, explore alternatives, and develop concepts until they mature.
+
+## Design Evolution Workflow
+
+**This document is for iteration and exploration:**
+
+- Draft initial ideas and alternatives here
+- Iterate on designs with examples and diagrams
+- Explore trade-offs and different approaches
+
+**When designs mature, graduate them to DECISIONS.md:**
+
+- Move finalized designs to DECISIONS.md with full rationale
+- Include decision context, trade-offs, and implementation details
+- Leave a breadcrumb here pointing to the final decision
+
+**Example breadcrumb:**
+
+```markdown
+## ~~Challenge Data Model~~ → [DECISIONS.md](./DECISIONS.md#challenge-data-model-v1)
+
+Initial design was drafted here and promoted to DECISIONS.md when sufficiently mature.
+```
 
 ## Goals & Requirements
 
