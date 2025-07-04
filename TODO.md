@@ -1,6 +1,7 @@
 # Now
 
 - [ ] Setup devenv with prettier
+- [ ] Remove example of separate .mmd files since GitHub doesn't allow including of mermaid diagrams by file reference.
 
 # Next
 
