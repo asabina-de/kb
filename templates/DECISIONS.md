@@ -22,11 +22,19 @@ This document chronicles **finalized architectural decisions** that have been th
 
 ### [Date] - [Decision Title]
 
+**Problem**: What is wrong? Why do we need to pick something?
+
+**Implication**: What happens if we don't pick anything here?
+
+**Options Considered**:
+
+- Option A: pros/cons
+- Option B: pros/cons
+- Option C: pros/cons
+
 **Decision**: Brief statement of what was decided.
 
-**Context**: What circumstances led to this decision? What problem were we solving?
-
-**Rationale**: Why did we choose this approach? What were the key factors?
+**Rationale**: Why did we choose this approach? What optimization objectives guided us?
 
 **Implementation**: How was this decision implemented? Include code examples if relevant.
 

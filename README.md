@@ -35,6 +35,28 @@ Use Linear for work tracking and planning.
 - Optionally, you can file repo issues directly into GitHub and verify that the [Linear integration](https://linear.app/asabina/settings/integrations/github) has synchronization set up for the relevant repos).
 - Use branch names from Linear
 
+#### Linear vs GitHub Documentation Decision Framework
+
+**Use Linear when:**
+
+- Business strategy/positioning decisions
+- Marketing/go-to-market decisions
+- Team process/workflow choices
+- Product prioritization rationale
+- Cross-project organizational decisions
+
+**Use GitHub/in-repo when:**
+
+- Implementation-related (architecture, tech stack, APIs)
+- Code-adjacent (deployment, testing, security patterns)
+- Developer-facing (contributing guidelines, setup docs)
+- Needs version control with code changes
+- Agents/automation need access
+
+**Key test:** _"Does this decision affect how code is written, deployed, or maintained?"_ → GitHub. _"Is this about what to build or how to operate as a team?"_ → Linear.
+
+**Default rule:** When in doubt, use in-repo since it's more accessible to agents and developers.
+
 ### GitHub
 
 Use GitHub as the default forge and define GitHub Actions for every new
