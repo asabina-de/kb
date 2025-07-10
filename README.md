@@ -125,9 +125,9 @@ Use the **direnv → devenv → dotenv** trifecta for comprehensive environment 
 
 **Tool Responsibilities:**
 
-- **direnv**: Auto-loads project environment when entering directory
+- **direnv**: Auto-loads project environment when entering directory + executes commands for secret retrieval
 - **devenv**: Provides reproducible development environment with shared configuration
-- **dotenv**: Handles local/secret environment variables via `.env` files
+- **dotenv**: Handles local/static environment variables via `.env` files
 
 **Setup Instructions:**
 
@@ -135,6 +135,10 @@ Use the **direnv → devenv → dotenv** trifecta for comprehensive environment 
 
    ```bash
    export DIRENV_WARN_TIMEOUT=20s
+
+   # Source optional user-specific secrets (gitignored)
+   [[ -f .envrc.local ]] && source .envrc.local
+
    eval "$(devenv direnvrc)"
    use devenv
    ```
@@ -156,19 +160,48 @@ Use the **direnv → devenv → dotenv** trifecta for comprehensive environment 
    ```
 
 3. **Create `.env.example`** with documented variable templates:
+
    ```bash
    # Copy this file to .env and customize for your local development
-   # DATABASE_URL=postgresql://username:password@localhost:5432/dbname
-   # API_KEY=your_api_key_here
+   # DATABASE_URL=postgresql://username:${DB_PASSWORD}@localhost:5432/dbname
+   # API_ENDPOINT=${API_BASE_URL}/v1/users
+   # NODE_ENV=development
    ```
+
+4. **Optional: Create `.envrc.local`** for dynamic secrets (gitignored):
+
+   ```bash
+   # Example: 1Password CLI
+   export DB_PASSWORD=$(op read "op://vault/database/password")
+   export API_BASE_URL="https://api.example.com"
+
+   # Example: AWS SSM
+   # export DB_PASSWORD=$(aws ssm get-parameter --name "/myapp/db-password" --with-decryption --query "Parameter.Value" --output text)
+   # export API_BASE_URL=$(aws ssm get-parameter --name "/myapp/api-url" --query "Parameter.Value" --output text)
+   ```
+
+**Variable Precedence Order:**
+
+1. **`.envrc.local`** (dynamic secrets, highest priority)
+2. **`devenv.nix` env block** (shared configuration)
+3. **`.env`** (static local config, can reference variables from above)
 
 **Key Guidelines:**
 
 - **Shared, non-sensitive config**: Use `devenv.nix` env block
-- **Secrets and local overrides**: Use `.env` files (gitignored)
+- **Dynamic secrets**: Use `.envrc.local` for enterprise secret management (1Password, AWS SSM, GCP Secret Manager)
+- **Static local config**: Use `.env` files for local overrides and development tokens
+- **Variable composition**: `.env` files can reference variables from `.envrc.local` using `${VAR_NAME}` syntax
 - **Documentation**: Maintain `.env.example` with all required variables
 - **Team onboarding**: Include note in README about copying `.env.example` to `.env`
-- **Security**: Add `.env` to `.gitignore` to prevent committing secrets
+- **Security**: Add `.env` and `.envrc.local` to `.gitignore` to prevent committing secrets
+
+**Developer Experience Notes:**
+
+- **New developers**: Can start with just `.env` files for simple setups
+- **Enterprise setups**: Create `.envrc.local` for dynamic secret retrieval as needed
+- **Multiple scenarios**: Use multiple `.env` files (`.env.development`, `.env.test`) that all reference the same dynamic secrets from `.envrc.local`
+- **Debugging**: Run `direnv reload` to test changes to `.envrc.local`
 
 This pattern ensures consistent shared configuration while allowing secure local customization.
 
