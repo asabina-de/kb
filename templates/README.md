@@ -74,6 +74,9 @@ Once you have devenv and direnv installed:
 > [!Note]
 > The project uses `.env` files for local configuration. Copy `.env.example` if it exists and customize for your local setup.
 
+> [!Important]
+> devenv's dotenv only supports simple `key=value` pairs. For dynamic secrets or variable expansion, use `.envrc.local` instead.
+
 ### Alternative Dependency Management
 
 While this project is designed to work with devenv/direnv, you can choose to manage dependencies manually if preferred:

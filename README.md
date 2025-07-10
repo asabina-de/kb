@@ -136,6 +136,9 @@ Use the **direnv → devenv → dotenv** trifecta for comprehensive environment 
    ```bash
    export DIRENV_WARN_TIMEOUT=20s
 
+   # Watch .envrc.local for changes (auto-reload when it changes)
+   [[ -f .envrc.local ]] && watch_file .envrc.local
+
    # Source optional user-specific secrets (gitignored)
    [[ -f .envrc.local ]] && source .envrc.local
 
@@ -164,6 +167,17 @@ Use the **direnv → devenv → dotenv** trifecta for comprehensive environment 
 3. **Create `.env.example`** with documented variable templates:
 
    ```bash
+   # =====================================================================
+   # DEVENV DOTENV LIMITATIONS WARNING
+   # =====================================================================
+   # This .env file only supports simple key=value pairs.
+   # Variable expansion (${VAR}) and command expansion ($(cmd)) do NOT work.
+   #
+   # If you need dynamic values, use .envrc.local instead:
+   # - Dynamic secrets: export API_KEY=$(op read "op://vault/api/key")
+   # - Variable expansion: export DATABASE_URL="postgres://user:${PASSWORD}@localhost/db"
+   # =====================================================================
+
    # Copy this file to .env and customize for your local development
    # DATABASE_URL=postgresql://username:hardcoded_password@localhost:5432/dbname
    # API_ENDPOINT=https://api.example.com/v1/users
