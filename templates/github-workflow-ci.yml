@@ -1,0 +1,86 @@
+# CI Workflow Template with Draft PR Optimization
+#
+# This template demonstrates the optimize_ci pattern for skipping expensive jobs on draft PRs
+# while maintaining manual override capability through workflow_dispatch.
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  checks: write
+  contents: read
+  pull-requests: write
+
+jobs:
+  optimize_ci:
+    # Don't run expensive jobs on draft PRs to save on runner minutes.
+    # On manual runs this job is skipped and expensive jobs will run.
+    if: github.event_name == 'pull_request' && github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    steps: []
+
+  # Lightweight jobs (always run)
+  lint-and-test:
+    name: Lint and Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      # Add your lightweight CI steps here:
+      # - Linting
+      # - Unit tests
+      # - Code formatting checks
+      # - Static analysis
+      - run: echo "Lightweight jobs always run"
+
+  # Expensive jobs (skip on draft PRs)
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: [lint-and-test, optimize_ci]
+    # Run expensive jobs if: optimize_ci succeeded (non-draft PR) OR manual workflow dispatch
+    # The always() ensures this job evaluates even when optimize_ci is skipped
+    if: always() && (github.event_name == 'workflow_dispatch' || needs.optimize_ci.result == 'success')
+    steps:
+      # Add your expensive integration test steps here
+      - run: echo "Expensive integration tests"
+
+  build-artifacts:
+    name: Build Production Artifacts
+    runs-on: ubuntu-latest
+    needs: [integration-tests] # No optimize_ci needed - inherits from integration-tests
+    steps:
+      # Add your build steps here
+      - run: echo "Building production artifacts"
+
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: [build-artifacts] # No optimize_ci needed - inherits from build chain
+    if: github.ref == 'refs/heads/main'
+    steps:
+      # Add your deployment steps here
+      - run: echo "Deploying to staging"
+# CI Skip Options Documentation:
+#
+# Draft PRs: CI automatically skips expensive jobs (integration tests, builds, deployments)
+#            Unit tests and linting still run to provide quick feedback
+#            Use manual workflow dispatch to override and run full CI on drafts
+#
+# Skip Tags: Use [skip ci], [ci skip], or [no ci] in commit messages to skip CI entirely
+#           Cannot be overridden with manual triggers
+#           See: https://docs.github.com/en/actions/managing-workflow-runs/skipping-workflow-runs
+#
+# Pattern Benefits:
+# - Saves runner minutes on draft PRs (especially important for expensive jobs like mobile builds)
+# - Maintains manual override capability for debugging/testing
+# - Provides quick feedback with lightweight jobs
+# - Clean dependency chain - only gate the first expensive job in each chain

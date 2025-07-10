@@ -115,9 +115,44 @@ Regarding testing, even if you don't focus on coverage, make sure that the
 tooling is at least present for others to write tests for things they
 implement.
 
-See example pipelines for reference:
+#### CI Optimization for Draft PRs
+
+To save runner minutes on expensive operations (builds, integration tests), use the **optimize_ci pattern**:
+
+> [!NOTE]
+> Credit to whom credit is due: we learned this pattern from our short stint with Graphite and fell in love with it.
+
+```yaml
+optimize_ci:
+  # Don't run expensive jobs on draft PRs to save on runner minutes.
+  # On manual runs this job is skipped and expensive jobs will run.
+  if: github.event_name == 'pull_request' && github.event.pull_request.draft == false
+  runs-on: ubuntu-latest
+  steps: []
+
+expensive_job:
+  needs: [optimize_ci]
+  # Run expensive jobs if: optimize_ci succeeded (non-draft PR) OR manual workflow dispatch
+  # The always() ensures this job evaluates even when optimize_ci is skipped
+  if: always() && (github.event_name == 'workflow_dispatch' || needs.optimize_ci.result == 'success')
+```
+
+**Key Benefits:**
+
+- Saves significant runner minutes on mobile builds and integration tests
+- Lightweight jobs (linting, unit tests) still provide quick feedback on drafts
+- Manual workflow dispatch provides escape hatch for testing drafts
+- Only gate the first expensive job in each dependency chain
+
+**CI Skip Options:**
+
+- **Draft PRs**: Expensive jobs automatically skipped, lightweight jobs run
+- **Skip strings**: Use `[skip ci]`, `[ci skip]`, or `[no ci]` in commit messages ([GitHub docs](https://docs.github.com/en/actions/managing-workflow-runs/skipping-workflow-runs)). Note that skip strings are nuclear -- there is no way to manually trigger a CI run if a commit contains the skip string. Draft PRs are a bit more flexible in that sense.
+
+See example pipelines and templates:
 
 - https://github.com/asabina-de/notumo-music-school-poc/blob/main/.github/workflows/test.yml
+- [CI workflow template](./templates/github-workflow-ci.yml) with optimize_ci pattern
 
 ### Devenv.sh
 
