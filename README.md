@@ -221,7 +221,8 @@ Use the **direnv → devenv → dotenv** trifecta for comprehensive environment 
    }
    ```
 
-   > [!WARNING] > **devenv's dotenv implementation is basic** - it only supports simple `key=value` pairs without variable substitution (`${VAR}`) or command expansion (`$(cmd)`). This differs from popular dotenv implementations in Node.js or Ruby that support variable expansion. See [devenv's dotenv source](https://github.com/cachix/devenv/blob/main/src/modules/dotenv.nix) for implementation details.
+   > [!WARNING] >
+   > **devenv's dotenv implementation is basic** - it only supports simple `key=value` pairs without variable substitution (`${VAR}`) or command expansion (`$(cmd)`). This differs from popular dotenv implementations in Node.js or Ruby that support variable expansion. See [devenv's dotenv source](https://github.com/cachix/devenv/blob/main/src/modules/dotenv.nix) for implementation details.
 
 3. **Create `.env.example`** with documented variable templates:
 
@@ -327,9 +328,6 @@ server-side logic).
   - `SONAR_PROJECT_KEY` as a repository variable
   - `SONAR_TOKEN` as a **repository secret**
 
-> [!NOTE]
-> The SonarQube GUI will recommend you to create a sonar-project.properties file, but for now we have just passed these details as options in our GH Actions step. Historically sonar-project.properties didn't support variables and we didn't want to hardcode the project and project key magic strings into our codebase, so there is no strong technical reason for avoiding sonar-project.properties. A pro, may be that we just have 1 file to think about when reasoning about our sonar setup, but a con is that the yaml file may not as easy to grok with all the `Dsonar.*` noise in the `with.args` block for the action.
-
 Use the SonarSource/sonarqube-scan-action action to push data to SonarQube and trigger a scan and optionally refer to the block below for an scan step we had in one of our repos and highlights how we circumvented the use of sonar-project.properties:
 
 ```yaml
@@ -349,6 +347,9 @@ Use the SonarSource/sonarqube-scan-action action to push data to SonarQube and t
       -Dsonar.exclusions=src/**/*.test.ts,src/**/*.test.tsx,src/**/*.spec.ts,src/**/*.spec.tsx,src/**/*.stories.ts,src/**/*.stories.tsx,src/**/*.stories.mdx
       -Dsonar.verbose=false
 ```
+
+> [!NOTE]
+> The SonarQube GUI will recommend you to create a sonar-project.properties file, but for now we have just passed these details as options in our GH Actions step. Historically sonar-project.properties didn't support variables. As we didn't want to hardcode the project and project key magic strings into our codebase, we opted out of using the sonar-project.properties file but since that is no longer the limitation, there is no strong technical reason for avoiding sonar-project.properties. One pro of just doing it inline is that we just have 1 file to think about when reasoning about our sonar reporting setup, but a con is that the yaml file may not as easy to grok with all the `Dsonar.*` noise in the `with.args` block for the action.
 
 [sonar-new-code]: https://docs.sonarsource.com/sonarqube-server/9.9/project-administration/defining-new-code/
 
