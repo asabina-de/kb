@@ -128,7 +128,9 @@ optimize_ci:
   # On manual runs this job is skipped and expensive jobs will run.
   if: github.event_name == 'pull_request' && github.event.pull_request.draft == false
   runs-on: ubuntu-latest
-  steps: []
+  steps:
+    - name: Gate for expensive CI jobs
+      run: echo "Running expensive CI jobs on non-draft PR"
 
 expensive_job:
   needs: [optimize_ci]
