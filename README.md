@@ -119,6 +119,59 @@ Downsides:
 - Doesn't play ball very well with mixed approaches such as installing some things with nix and other manually, perhaps my dragging .dmgs into the Applications directory
 - Removes agency from individual devs.
 
+#### Environment Variable Management Pattern
+
+Use the **direnv → devenv → dotenv** trifecta for comprehensive environment management:
+
+**Tool Responsibilities:**
+
+- **direnv**: Auto-loads project environment when entering directory
+- **devenv**: Provides reproducible development environment with shared configuration
+- **dotenv**: Handles local/secret environment variables via `.env` files
+
+**Setup Instructions:**
+
+1. **Configure direnv** (`.envrc`):
+
+   ```bash
+   export DIRENV_WARN_TIMEOUT=20s
+   eval "$(devenv direnvrc)"
+   use devenv
+   ```
+
+2. **Enable dotenv in devenv** (`devenv.nix`):
+
+   ```nix
+   {
+     # Enable loading of .env files for local configuration
+     dotenv.enable = true;
+
+     # Shared environment variables (non-sensitive, team-wide)
+     env = {
+       NODE_ENV = "development";
+       # Add other shared, non-sensitive variables here
+       # For secrets and local overrides, use .env files
+     };
+   }
+   ```
+
+3. **Create `.env.example`** with documented variable templates:
+   ```bash
+   # Copy this file to .env and customize for your local development
+   # DATABASE_URL=postgresql://username:password@localhost:5432/dbname
+   # API_KEY=your_api_key_here
+   ```
+
+**Key Guidelines:**
+
+- **Shared, non-sensitive config**: Use `devenv.nix` env block
+- **Secrets and local overrides**: Use `.env` files (gitignored)
+- **Documentation**: Maintain `.env.example` with all required variables
+- **Team onboarding**: Include note in README about copying `.env.example` to `.env`
+- **Security**: Add `.env` to `.gitignore` to prevent committing secrets
+
+This pattern ensures consistent shared configuration while allowing secure local customization.
+
 > [!TIP]
 > See `templates/README.md` for a complete project template with devenv/direnv setup instructions that you can copy for new projects.
 
