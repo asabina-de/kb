@@ -16,6 +16,9 @@ repo-specific details.
   diagrams](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/creating-diagrams#creating-mermaid-diagrams)
   where you need to scribble
 
+> [!TIP]
+> In your project repos, symlink the `knowledge-base` directory to this repo, just to provide your AI tooling quick-access to this handbook. See our recommendation for [AGENTS.md](./templates/AGENTS.md) and [CLAUDE.md](./templates/CLAUDE.md) which does include references to the knowledge-base trick.
+
 ### Git
 
 For the sake of convenience, **use git workspaces** such that you can make hotfixes without having to disrupt current work. Note that even stashing changes may be suboptimal at times since it requires a few manual actions to complete (especially if you don't want to stash everything).

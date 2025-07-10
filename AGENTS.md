@@ -25,6 +25,9 @@ When working on projects that follow our standards, understand these documents a
 5. **DECISIONS.md** - **Final decisions** graduated from DESIGN_NOTES.md exploration
 6. **LINTING_FORMATTING.md** - Code quality tools (create only when team size demands it)
 7. **Visual diagrams (.mmd)** - Update when system relationships change
+8. **Knowledge base** - use the `knowledge-base` directory, where available for our engineering handbook which includes tooling recommendations and project setup instructions/guidelines.
+
+Raise concerns and suggest improvements or fixes, when you stumble into topics that are not documented but should be on the record to help future developers (human or machine) fast-track to results.
 
 ### TODO.md Usage (Important for AI Agents)
 
