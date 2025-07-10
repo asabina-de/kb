@@ -31,9 +31,28 @@ Prefer to merge stacks (multiple successive branches and their PRs) by merging t
 
 Use Linear for work tracking and planning.
 
+#### Issue and Task Management
+
+**Preferred: Use Linear for all tickets and tasks**
+
 - File work items in [Linear](https://linear.app/asabina)
-- Optionally, you can file repo issues directly into GitHub and verify that the [Linear integration](https://linear.app/asabina/settings/integrations/github) has synchronization set up for the relevant repos).
-- Use branch names from Linear
+- Better delivery metrics, reporting, and team visibility
+- Supports proper sprint planning and project tracking
+- Use branch names from Linear for consistent linking
+
+**GitHub Issues Integration**
+
+- GitHub Issues can sync to Linear via [GitHub Issues Sync](https://linear.app/docs/github)
+- **Requirement**: GitHub Issues Sync must be configured for the repository
+- Only use GitHub Issues if Linear integration is properly set up
+- Verify [Linear integration](https://linear.app/asabina/settings/integrations/github) has synchronization configured for relevant repos
+
+**TODO.md Files - Emergency Escape Hatch**
+
+- Use repository TODO.md files only for quick jot-and-forget tasks
+- Intended to keep developers unblocked and maintain fast development flow
+- **Important**: Migrate important tasks from TODO.md to Linear for proper tracking
+- TODO files are not a substitute for formal project management
 
 #### Linear vs GitHub Documentation Decision Framework
 
