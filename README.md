@@ -159,12 +159,14 @@ Use the **direnv → devenv → dotenv** trifecta for comprehensive environment 
    }
    ```
 
+   > [!WARNING] > **devenv's dotenv implementation is basic** - it only supports simple `key=value` pairs without variable substitution (`${VAR}`) or command expansion (`$(cmd)`). This differs from popular dotenv implementations in Node.js or Ruby that support variable expansion. See [devenv's dotenv source](https://github.com/cachix/devenv/blob/main/src/modules/dotenv.nix) for implementation details.
+
 3. **Create `.env.example`** with documented variable templates:
 
    ```bash
    # Copy this file to .env and customize for your local development
-   # DATABASE_URL=postgresql://username:${DB_PASSWORD}@localhost:5432/dbname
-   # API_ENDPOINT=${API_BASE_URL}/v1/users
+   # DATABASE_URL=postgresql://username:hardcoded_password@localhost:5432/dbname
+   # API_ENDPOINT=https://api.example.com/v1/users
    # NODE_ENV=development
    ```
 
@@ -184,14 +186,14 @@ Use the **direnv → devenv → dotenv** trifecta for comprehensive environment 
 
 1. **`.envrc.local`** (dynamic secrets, highest priority)
 2. **`devenv.nix` env block** (shared configuration)
-3. **`.env`** (static local config, can reference variables from above)
+3. **`.env`** (static local config, simple key=value pairs only)
 
 **Key Guidelines:**
 
 - **Shared, non-sensitive config**: Use `devenv.nix` env block
 - **Dynamic secrets**: Use `.envrc.local` for enterprise secret management (1Password, AWS SSM, GCP Secret Manager)
 - **Static local config**: Use `.env` files for local overrides and development tokens
-- **Variable composition**: `.env` files can reference variables from `.envrc.local` using `${VAR_NAME}` syntax
+- **No variable composition**: `.env` files only support simple `key=value` pairs (no variable substitution)
 - **Documentation**: Maintain `.env.example` with all required variables
 - **Team onboarding**: Include note in README about copying `.env.example` to `.env`
 - **Security**: Add `.env` and `.envrc.local` to `.gitignore` to prevent committing secrets
@@ -200,7 +202,7 @@ Use the **direnv → devenv → dotenv** trifecta for comprehensive environment 
 
 - **New developers**: Can start with just `.env` files for simple setups
 - **Enterprise setups**: Create `.envrc.local` for dynamic secret retrieval as needed
-- **Multiple scenarios**: Use multiple `.env` files (`.env.development`, `.env.test`) that all reference the same dynamic secrets from `.envrc.local`
+- **Multiple scenarios**: Use multiple `.env` files (`.env.development`, `.env.test`) for different static configurations
 - **Debugging**: Run `direnv reload` to test changes to `.envrc.local`
 
 This pattern ensures consistent shared configuration while allowing secure local customization.
