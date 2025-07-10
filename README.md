@@ -119,6 +119,9 @@ Downsides:
 - Doesn't play ball very well with mixed approaches such as installing some things with nix and other manually, perhaps my dragging .dmgs into the Applications directory
 - Removes agency from individual devs.
 
+> [!TIP]
+> See `templates/README.md` for a complete project template with devenv/direnv setup instructions that you can copy for new projects.
+
 ### GCP
 
 Use Google Cloud Platform as the default PaaS or IaaS. Reason being, we're
