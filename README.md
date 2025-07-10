@@ -184,9 +184,18 @@ Use the **direnv → devenv → dotenv** trifecta for comprehensive environment 
    # NODE_ENV=development
    ```
 
-4. **Optional: Create `.envrc.local`** for dynamic secrets (gitignored):
+4. **Create `.envrc.local.example`** with dynamic secret templates:
 
    ```bash
+   # =====================================================================
+   # DYNAMIC SECRETS AND VARIABLE EXPANSION EXAMPLES
+   # =====================================================================
+   # Copy this file to .envrc.local and customize for your secret management setup.
+   # This file demonstrates the dynamic values needed for this project.
+   #
+   # Choose your preferred secret management approach:
+   # =====================================================================
+
    # Example: 1Password CLI
    export DB_PASSWORD=$(op read "op://vault/database/password")
    export API_BASE_URL="https://api.example.com"
@@ -194,7 +203,18 @@ Use the **direnv → devenv → dotenv** trifecta for comprehensive environment 
    # Example: AWS SSM
    # export DB_PASSWORD=$(aws ssm get-parameter --name "/myapp/db-password" --with-decryption --query "Parameter.Value" --output text)
    # export API_BASE_URL=$(aws ssm get-parameter --name "/myapp/api-url" --query "Parameter.Value" --output text)
+
+   # Example: GCP Secret Manager
+   # export DB_PASSWORD=$(gcloud secrets versions access latest --secret="database-password")
+   # export API_BASE_URL=$(gcloud secrets versions access latest --secret="api-base-url")
+
+   # Example: Manual hardcoded values (least secure, but works)
+   # export DB_PASSWORD="your_password_here"
+   # export API_BASE_URL="https://api.example.com"
    ```
+
+5. **Optional: Create `.envrc.local`** for your actual secrets (gitignored):
+   Copy `.envrc.local.example` to `.envrc.local` and customize with your actual secret management commands.
 
 **Variable Precedence Order:**
 
@@ -208,14 +228,14 @@ Use the **direnv → devenv → dotenv** trifecta for comprehensive environment 
 - **Dynamic secrets**: Use `.envrc.local` for enterprise secret management (1Password, AWS SSM, GCP Secret Manager)
 - **Static local config**: Use `.env` files for local overrides and development tokens
 - **No variable composition**: `.env` files only support simple `key=value` pairs (no variable substitution)
-- **Documentation**: Maintain `.env.example` with all required variables
-- **Team onboarding**: Include note in README about copying `.env.example` to `.env`
+- **Documentation**: Maintain `.env.example` and `.envrc.local.example` with all required variables
+- **Team onboarding**: Include notes in README about copying example files to actual config files
 - **Security**: Add `.env` and `.envrc.local` to `.gitignore` to prevent committing secrets
 
 **Developer Experience Notes:**
 
 - **New developers**: Can start with just `.env` files for simple setups
-- **Enterprise setups**: Create `.envrc.local` for dynamic secret retrieval as needed
+- **Enterprise setups**: Copy `.envrc.local.example` to `.envrc.local` and customize for your secret management tool
 - **Multiple scenarios**: Use multiple `.env` files (`.env.development`, `.env.test`) for different static configurations
 - **Debugging**: Run `direnv reload` to test changes to `.envrc.local`
 
