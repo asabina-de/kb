@@ -1,253 +1,57 @@
 # Design Note: [Topic Name]
 
 **Created**: YYYY-MM-DD  
-**Status**: Draft | In Progress | Completed | Archived
+**Status**: Draft
 
-This file serves as a **scratchpad for evolving ideas** and system design exploration for a specific design concern. Use this space to iterate on designs, explore alternatives, and develop concepts until they mature.
+<!-- Delete this template content and replace with your actual design exploration -->
 
-## Design Evolution Workflow
+## Problem Statement
 
-**This file is for iteration and exploration:**
-
-- Draft initial ideas and alternatives here
-- Iterate on designs with examples and diagrams
-- Explore trade-offs and different approaches
-
-**When designs mature, graduate them to DECISIONS.md:**
-
-- Move finalized designs to DECISIONS.md with full rationale
-- Include decision context, trade-offs, and implementation details
-- Update status to "Completed" and move to `design-notes/ARCHIVE/`
-
-**Example completion:**
-
-```markdown
-## Status: Completed → [DECISIONS.md](../DECISIONS.md#challenge-data-model-v1)
-
-Final design was promoted to DECISIONS.md on 2024-01-20.
-This file can be moved to ARCHIVE/ directory.
-```
+What problem are you trying to solve?
 
 ## Goals & Requirements
 
 ### Core Goals
 
-- [ ] Goal 1: Clear, measurable objective
-- [ ] Goal 2: Another objective
-- [ ] Goal 3: Third objective
+- [ ] Goal 1
+- [ ] Goal 2
 
 ### Requirements
 
-- [ ] Functional requirement 1
-- [ ] Functional requirement 2
-- [ ] Non-functional requirement 1 (performance, security, etc.)
+- [ ] Requirement 1
+- [ ] Requirement 2
 
-## System Architecture
+## Design Options
 
-### High-Level Overview
+### Option A: [Approach Name]
 
-[Describe the overall system architecture here]
+**Pros:**
 
-```mermaid
-graph TB
-    A[Client] --> B[API Gateway]
-    B --> C[Service Layer]
-    C --> D[Data Layer]
-```
+- **Cons:**
 
-## Data Models
+-
 
-### Core Entities
+### Option B: [Alternative]
 
-#### Entity Example
+**Pros:**
 
-**Purpose**: Brief description of what this entity represents and why it exists.
+- **Cons:**
 
-**Schema Structure**:
+-
 
-```yaml
-# Human-readable authoring format
-user:
-  id: string # Unique identifier
-  email: string # User's email address
-  profile:
-    name: string # Display name
-    avatar: string? # Optional profile image URL
-  settings:
-    theme: light | dark
-    notifications: boolean
-  createdAt: timestamp
-  updatedAt: timestamp
-```
+## Proposed Solution
 
-**JSON Runtime Format**:
+[Your chosen approach and rationale]
 
-```json
-{
-  "id": "usr_123456",
-  "email": "user@example.com",
-  "profile": {
-    "name": "John Doe",
-    "avatar": "https://example.com/avatar.jpg"
-  },
-  "settings": {
-    "theme": "dark",
-    "notifications": true
-  },
-  "createdAt": "2024-01-15T10:30:00Z",
-  "updatedAt": "2024-01-15T10:30:00Z"
-}
-```
+## Implementation Notes
 
-**Usage Examples**:
+[Key implementation details]
 
-_Basic Usage_:
+## Next Steps
 
-```yaml
-# Simple user creation
-user:
-  email: "new@example.com"
-  profile:
-    name: "New User"
-  settings:
-    theme: "light"
-    notifications: true
-```
+- [ ] Action item 1
+- [ ] Action item 2
 
-_Advanced Usage_:
+---
 
-```yaml
-# User with complex profile and relationships
-user:
-  email: "admin@example.com"
-  profile:
-    name: "Admin User"
-    avatar: "https://cdn.example.com/admin-avatar.jpg"
-    bio: "System administrator with 5+ years experience"
-  settings:
-    theme: "dark"
-    notifications: false
-    advanced_features: true
-  roles:
-    - admin
-    - moderator
-  permissions:
-    - user_management
-    - system_configuration
-```
-
-### Relationships
-
-```mermaid
-classDiagram
-    class User {
-        +String id
-        +String email
-        +Profile profile
-        +Settings settings
-        +DateTime createdAt
-        +DateTime updatedAt
-    }
-
-    class Profile {
-        +String name
-        +String avatar
-        +String bio
-    }
-
-    class Settings {
-        +Theme theme
-        +Boolean notifications
-        +Boolean advancedFeatures
-    }
-
-    User ||--|| Profile : has
-    User ||--|| Settings : has
-```
-
-## API Design
-
-### Core Patterns
-
-**RESTful Endpoints**:
-
-```
-GET    /api/users          - List users
-POST   /api/users          - Create user
-GET    /api/users/{id}     - Get specific user
-PUT    /api/users/{id}     - Update user
-DELETE /api/users/{id}     - Delete user
-```
-
-**Request/Response Examples**:
-
-```typescript
-// GET /api/users/123
-interface UserResponse {
-  data: User;
-  meta: {
-    timestamp: string;
-    version: string;
-  };
-}
-
-// POST /api/users
-interface CreateUserRequest {
-  email: string;
-  profile: {
-    name: string;
-  };
-  settings?: Partial<Settings>;
-}
-```
-
-## Design Patterns
-
-### Pattern 1: [Name]
-
-**Purpose**: What problem does this pattern solve?
-
-**Implementation**:
-
-```typescript
-// Code example showing the pattern
-class ExamplePattern {
-  // Implementation details
-}
-```
-
-**Usage Guidelines**:
-
-- When to use this pattern
-- When NOT to use this pattern
-- Common pitfalls to avoid
-
-## Performance Considerations
-
-### Caching Strategy
-
-- [ ] Cache layer 1: Description
-- [ ] Cache layer 2: Description
-
-### Database Optimization
-
-- [ ] Index strategy
-- [ ] Query optimization patterns
-
-## Security Model
-
-### Authentication
-
-- [ ] Auth method 1
-- [ ] Auth method 2
-
-### Authorization
-
-- [ ] Permission model
-- [ ] Role-based access control
-
-## Related Documentation
-
-- [DECISIONS.md](../DECISIONS.md) - Architecture decisions that shaped this design
-- [GUIDELINES.md](../GUIDELINES.md) - Implementation guidelines for these patterns
-- [TODO.md](../TODO.md) - Planned improvements and extensions
+**When complete**: Graduate to [DECISIONS.md](../DECISIONS.md), update status to "Completed", and move to ARCHIVE/
