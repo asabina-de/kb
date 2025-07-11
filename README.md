@@ -392,16 +392,19 @@ _Ordered by developer workflow relevance_
    - **Never**: Decided against, with reasoning preserved
    - Repository-specific task scratchpad outside formal ticketing
 
-4. **DESIGN_NOTES.md** (`./docs/DESIGN_NOTES.md`) - Design Iteration and System Models
+4. **design-notes/** (`./docs/design-notes/`) - Design Iteration and System Models
 
+   - **Individual design explorations** - one file per design concern to avoid git worktree conflicts
+   - **Naming**: `YYYY-MM-DD.topic-name.md` (e.g., `2024-01-15.user-authentication.md`)
    - **Scratchpad for evolving ideas** - iterate on designs until mature
    - Documents core system architecture using structured schemas
    - Progressive examples from basic to advanced usage
    - **Graduate mature designs to DECISIONS.md** with clear rationale
+   - **Archive**: Move completed explorations to `design-notes/ARCHIVE/`
 
 5. **DECISIONS.md** (`./docs/DECISIONS.md`) - Architecture Decision Records (ADR)
 
-   - **Final decisions** graduated from DESIGN_NOTES.md exploration
+   - **Final decisions** graduated from design-notes/ exploration
    - Chronicles major technical decisions with full context and rationale
    - Date-stamped entries with clear decision statements
    - Includes trade-offs, benefits, and future considerations
@@ -450,8 +453,8 @@ For projects using AI development tools:
 **Add as workflow demands:**
 
 - **TODO.md**: When you need repo-specific scratchpad for gotchas/tech debt
-- **DESIGN_NOTES.md**: When exploring complex designs - use as iteration scratchpad
-- **DECISIONS.md**: When graduating mature designs from DESIGN_NOTES.md
+- **design-notes/**: When exploring complex designs - create individual files to avoid git worktree conflicts
+- **DECISIONS.md**: When graduating mature designs from design-notes/
 - **LINTING_FORMATTING.md**: Only when team size or complexity demands separate file
 - **AI Guidance**: When using AI development tools (AGENTS.md + CLAUDE.md)
 

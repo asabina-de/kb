@@ -1,10 +1,13 @@
-# Design Notes
+# Design Note: [Topic Name]
 
-This document serves as a **scratchpad for evolving ideas** and system design exploration. Use this space to iterate on designs, explore alternatives, and develop concepts until they mature.
+**Created**: YYYY-MM-DD  
+**Status**: Draft | In Progress | Completed | Archived
+
+This file serves as a **scratchpad for evolving ideas** and system design exploration for a specific design concern. Use this space to iterate on designs, explore alternatives, and develop concepts until they mature.
 
 ## Design Evolution Workflow
 
-**This document is for iteration and exploration:**
+**This file is for iteration and exploration:**
 
 - Draft initial ideas and alternatives here
 - Iterate on designs with examples and diagrams
@@ -14,14 +17,15 @@ This document serves as a **scratchpad for evolving ideas** and system design ex
 
 - Move finalized designs to DECISIONS.md with full rationale
 - Include decision context, trade-offs, and implementation details
-- Leave a breadcrumb here pointing to the final decision
+- Update status to "Completed" and move to `design-notes/ARCHIVE/`
 
-**Example breadcrumb:**
+**Example completion:**
 
 ```markdown
-## ~~Challenge Data Model~~ → [DECISIONS.md](./DECISIONS.md#challenge-data-model-v1)
+## Status: Completed → [DECISIONS.md](../DECISIONS.md#challenge-data-model-v1)
 
-Initial design was drafted here and promoted to DECISIONS.md when sufficiently mature.
+Final design was promoted to DECISIONS.md on 2024-01-20.
+This file can be moved to ARCHIVE/ directory.
 ```
 
 ## Goals & Requirements
