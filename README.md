@@ -399,15 +399,18 @@ _Ordered by developer workflow relevance_
    - **Scratchpad for evolving ideas** - iterate on designs until mature
    - Documents core system architecture using structured schemas
    - Progressive examples from basic to advanced usage
-   - **Graduate mature designs to DECISIONS.md** with clear rationale
+   - **Graduate mature designs to decisions/** with clear rationale
    - **Archive**: Move completed explorations to `design-notes/ARCHIVE/`
 
-5. **DECISIONS.md** (`./docs/DECISIONS.md`) - Architecture Decision Records (ADR)
+5. **decisions/** (`./docs/decisions/`) - Architecture Decision Records (ADR)
 
+   - **Individual decision records** - one file per decision to avoid git worktree conflicts
+   - **Naming**: `YYYY-MM-DD.decision-title.md` (e.g., `2024-01-15.state-management-strategy.md`)
    - **Final decisions** graduated from design-notes/ exploration
    - Chronicles major technical decisions with full context and rationale
    - Date-stamped entries with clear decision statements
    - Includes trade-offs, benefits, and future considerations
+   - **Archive**: Move superseded decisions to `decisions/ARCHIVE/`
 
 6. **LINTING_FORMATTING.md** (`./docs/LINTING_FORMATTING.md`) - Code Quality Standards _(conditional)_
 
@@ -454,7 +457,7 @@ For projects using AI development tools:
 
 - **TODO.md**: When you need repo-specific scratchpad for gotchas/tech debt
 - **design-notes/**: When exploring complex designs - create individual files to avoid git worktree conflicts
-- **DECISIONS.md**: When graduating mature designs from design-notes/
+- **decisions/**: When graduating mature designs from design-notes/
 - **LINTING_FORMATTING.md**: Only when team size or complexity demands separate file
 - **AI Guidance**: When using AI development tools (AGENTS.md + CLAUDE.md)
 

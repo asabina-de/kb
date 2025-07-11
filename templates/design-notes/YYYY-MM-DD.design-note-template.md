@@ -54,4 +54,4 @@ What problem are you trying to solve?
 
 ---
 
-**When complete**: Graduate to [DECISIONS.md](../DECISIONS.md), update status to "Completed", and move to ARCHIVE/
+**When complete**: Graduate to [decisions/](../decisions/), update status to "Completed", and move to ARCHIVE/
