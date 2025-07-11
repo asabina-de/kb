@@ -4,7 +4,7 @@ This guide provides a step-by-step process for setting up documentation in new p
 
 ## Quick Start Checklist
 
-For every new project, copy the appropriate templates and customize them:
+For every new project, copy the appropriate [templates](./templates/) and customize them:
 
 ### Pragmatic Approach: Create What You Need
 

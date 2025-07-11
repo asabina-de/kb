@@ -302,7 +302,7 @@ Use the **direnv → devenv → dotenv** trifecta for comprehensive environment 
 This pattern ensures consistent shared configuration while allowing secure local customization.
 
 > [!TIP]
-> See `templates/README.md` for a complete project template with devenv/direnv setup instructions that you can copy for new projects.
+> See [templates/README.md](./templates/README.md) for a complete project template with devenv/direnv setup instructions that you can copy for new projects.
 
 ### GCP
 
@@ -456,4 +456,4 @@ For projects using AI development tools:
 - **LINTING_FORMATTING.md**: Only when team size or complexity demands separate file
 - **AI Guidance**: When using AI development tools (AGENTS.md + CLAUDE.md)
 
-See `templates/` directory for starter templates of each document type.
+See [templates/](./templates/) directory for starter templates of each document type.
