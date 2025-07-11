@@ -221,8 +221,7 @@ Use the **direnv → devenv → dotenv** trifecta for comprehensive environment 
    }
    ```
 
-   > [!WARNING] >
-   > **devenv's dotenv implementation is basic** - it only supports simple `key=value` pairs without variable substitution (`${VAR}`) or command expansion (`$(cmd)`). This differs from popular dotenv implementations in Node.js or Ruby that support variable expansion. See [devenv's dotenv source](https://github.com/cachix/devenv/blob/main/src/modules/dotenv.nix) for implementation details.
+   > [!WARNING] > **devenv's dotenv implementation is basic** - it only supports simple `key=value` pairs without variable substitution (`${VAR}`) or command expansion (`$(cmd)`). This differs from popular dotenv implementations in Node.js or Ruby that support variable expansion. See [devenv's dotenv source](https://github.com/cachix/devenv/blob/main/src/modules/dotenv.nix) for implementation details.
 
 3. **Create `.env.example`** with documented variable templates:
 
