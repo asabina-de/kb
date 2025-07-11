@@ -11,22 +11,38 @@ This document chronicles **finalized architectural decisions** that have been th
 3. **Graduate** to this document with full decision context
 4. **Leave breadcrumb** in DESIGN_NOTES.md pointing to final decision
 
+**Decision versioning:**
+
+- Use numbered files: `01-decision-name.md`, `02-next-decision.md`
+- When superseding: move old decision to `ARCHIVE/` directory
+- New decision gets next sequential number and references superseded decision
+- Maintain continuous numbering (no reuse of numbers)
+
 **Each decision entry should include:**
 
 - What was decided and why
 - What alternatives were considered
 - Trade-offs and implications
 - Implementation guidance
+- Reference to any superseded decisions
 
 ## Decision Template
 
 ### [Date] - [Decision Title]
 
+**Problem**: What is wrong? Why do we need to pick something?
+
+**Implication**: What happens if we don't pick anything here?
+
+**Options Considered**:
+
+- Option A: pros/cons
+- Option B: pros/cons
+- Option C: pros/cons
+
 **Decision**: Brief statement of what was decided.
 
-**Context**: What circumstances led to this decision? What problem were we solving?
-
-**Rationale**: Why did we choose this approach? What were the key factors?
+**Rationale**: Why did we choose this approach? What optimization objectives guided us?
 
 **Implementation**: How was this decision implemented? Include code examples if relevant.
 
@@ -44,6 +60,8 @@ This document chronicles **finalized architectural decisions** that have been th
 
 - Future consideration 1
 - Future consideration 2
+
+**Supersedes**: Reference to any superseded decisions (e.g., ARCHIVE/01-initial-auth.md - 2024-01-15)
 
 **Related Documentation**: Links to relevant files
 

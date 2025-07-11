@@ -16,6 +16,9 @@ repo-specific details.
   diagrams](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/creating-diagrams#creating-mermaid-diagrams)
   where you need to scribble
 
+> [!TIP]
+> In your project repos, symlink the `knowledge-base` directory to this repo, just to provide your AI tooling quick-access to this handbook. See our recommendation for [AGENTS.md](./templates/AGENTS.md) and [CLAUDE.md](./templates/CLAUDE.md) which does include references to the knowledge-base trick.
+
 ### Git
 
 For the sake of convenience, **use git workspaces** such that you can make hotfixes without having to disrupt current work. Note that even stashing changes may be suboptimal at times since it requires a few manual actions to complete (especially if you don't want to stash everything).
@@ -31,9 +34,50 @@ Prefer to merge stacks (multiple successive branches and their PRs) by merging t
 
 Use Linear for work tracking and planning.
 
+#### Issue and Task Management
+
+**Preferred: Use Linear for all tickets and tasks**
+
 - File work items in [Linear](https://linear.app/asabina)
-- Optionally, you can file repo issues directly into GitHub and verify that the [Linear integration](https://linear.app/asabina/settings/integrations/github) has synchronization set up for the relevant repos).
-- Use branch names from Linear
+- Better delivery metrics, reporting, and team visibility
+- Supports proper sprint planning and project tracking
+- Use branch names from Linear for consistent linking
+
+**GitHub Issues Integration**
+
+- GitHub Issues can sync to Linear via [GitHub Issues Sync](https://linear.app/docs/github)
+- **Requirement**: GitHub Issues Sync must be configured for the repository
+- Only use GitHub Issues if Linear integration is properly set up
+- Verify [Linear integration](https://linear.app/asabina/settings/integrations/github) has synchronization configured for relevant repos
+
+**TODO.md Files - Emergency Escape Hatch**
+
+- Use repository TODO.md files only for quick jot-and-forget tasks
+- Intended to keep developers unblocked and maintain fast development flow
+- **Important**: Migrate important tasks from TODO.md to Linear for proper tracking
+- TODO files are not a substitute for formal project management
+
+#### Linear vs GitHub Documentation Decision Framework
+
+**Use Linear when:**
+
+- Business strategy/positioning decisions
+- Marketing/go-to-market decisions
+- Team process/workflow choices
+- Product prioritization rationale
+- Cross-project organizational decisions
+
+**Use GitHub/in-repo when:**
+
+- Implementation-related (architecture, tech stack, APIs)
+- Code-adjacent (deployment, testing, security patterns)
+- Developer-facing (contributing guidelines, setup docs)
+- Needs version control with code changes
+- Agents/automation need access
+
+**Key test:** _"Does this decision affect how code is written, deployed, or maintained?"_ → GitHub. _"Is this about what to build or how to operate as a team?"_ → Linear.
+
+**Default rule:** When in doubt, use in-repo since it's more accessible to agents and developers.
 
 ### GitHub
 
@@ -74,9 +118,46 @@ Regarding testing, even if you don't focus on coverage, make sure that the
 tooling is at least present for others to write tests for things they
 implement.
 
-See example pipelines for reference:
+#### CI Optimization for Draft PRs
+
+To save runner minutes on expensive operations (builds, integration tests), use the **optimize_ci pattern**:
+
+> [!NOTE]
+> Credit to whom credit is due: we learned this pattern from our short stint with Graphite and fell in love with it.
+
+```yaml
+optimize_ci:
+  # Don't run expensive jobs on draft PRs to save on runner minutes.
+  # On manual runs this job is skipped and expensive jobs will run.
+  if: github.event_name == 'pull_request' && github.event.pull_request.draft == false
+  runs-on: ubuntu-latest
+  steps:
+    - name: Gate for expensive CI jobs
+      run: echo "Running expensive CI jobs on non-draft PR"
+
+expensive_job:
+  needs: [optimize_ci]
+  # Run expensive jobs if: optimize_ci succeeded (non-draft PR) OR manual workflow dispatch
+  # The always() ensures this job evaluates even when optimize_ci is skipped
+  if: always() && (github.event_name == 'workflow_dispatch' || needs.optimize_ci.result == 'success')
+```
+
+**Key Benefits:**
+
+- Saves significant runner minutes on mobile builds and integration tests
+- Lightweight jobs (linting, unit tests) still provide quick feedback on drafts
+- Manual workflow dispatch provides escape hatch for testing drafts
+- Only gate the first expensive job in each dependency chain
+
+**CI Skip Options:**
+
+- **Draft PRs**: Expensive jobs automatically skipped, lightweight jobs run
+- **Skip strings**: Use `[skip ci]`, `[ci skip]`, or `[no ci]` in commit messages ([GitHub docs](https://docs.github.com/en/actions/managing-workflow-runs/skipping-workflow-runs)). Note that skip strings are nuclear -- there is no way to manually trigger a CI run if a commit contains the skip string. Draft PRs are a bit more flexible in that sense.
+
+See example pipelines and templates:
 
 - https://github.com/asabina-de/notumo-music-school-poc/blob/main/.github/workflows/test.yml
+- [CI workflow template](./templates/github-workflow-ci.yml) with optimize_ci pattern
 
 ### Devenv.sh
 
@@ -96,6 +177,132 @@ Downsides:
 - [Package repo (nixpkgs)](https://search.nixos.org/packages) may not contain latest-greatest of your target package and overriding this can be tricky (but probably not less tricky if brew doesn't have your target package either)
 - Doesn't play ball very well with mixed approaches such as installing some things with nix and other manually, perhaps my dragging .dmgs into the Applications directory
 - Removes agency from individual devs.
+
+#### Environment Variable Management Pattern
+
+Use the **direnv → devenv → dotenv** trifecta for comprehensive environment management:
+
+**Tool Responsibilities:**
+
+- **direnv**: Auto-loads project environment when entering directory + executes commands for secret retrieval
+- **devenv**: Provides reproducible development environment with shared configuration
+- **dotenv**: Handles local/static environment variables via `.env` files
+
+**Setup Instructions:**
+
+1. **Configure direnv** (`.envrc`):
+
+   ```bash
+   export DIRENV_WARN_TIMEOUT=20s
+
+   # Watch .envrc.local for changes (auto-reload when it changes)
+   [[ -f .envrc.local ]] && watch_file .envrc.local
+
+   # Source optional user-specific secrets (gitignored)
+   [[ -f .envrc.local ]] && source .envrc.local
+
+   eval "$(devenv direnvrc)"
+   use devenv
+   ```
+
+2. **Enable dotenv in devenv** (`devenv.nix`):
+
+   ```nix
+   {
+     # Enable loading of .env files for local configuration
+     dotenv.enable = true;
+
+     # Shared environment variables (non-sensitive, team-wide)
+     env = {
+       NODE_ENV = "development";
+       # Add other shared, non-sensitive variables here
+       # For secrets and local overrides, use .env files
+     };
+   }
+   ```
+
+   > [!WARNING] >
+   > **devenv's dotenv implementation is basic** - it only supports simple `key=value` pairs without variable substitution (`${VAR}`) or command expansion (`$(cmd)`). This differs from popular dotenv implementations in Node.js or Ruby that support variable expansion. See [devenv's dotenv source](https://github.com/cachix/devenv/blob/main/src/modules/dotenv.nix) for implementation details.
+
+3. **Create `.env.example`** with documented variable templates:
+
+   ```bash
+   # =====================================================================
+   # DEVENV DOTENV LIMITATIONS WARNING
+   # =====================================================================
+   # This .env file only supports simple key=value pairs.
+   # Variable expansion (${VAR}) and command expansion ($(cmd)) do NOT work.
+   #
+   # If you need dynamic values, use .envrc.local instead:
+   # - Dynamic secrets: export API_KEY=$(op read "op://vault/api/key")
+   # - Variable expansion: export DATABASE_URL="postgres://user:${PASSWORD}@localhost/db"
+   # =====================================================================
+
+   # Copy this file to .env and customize for your local development
+   # DATABASE_URL=postgresql://username:hardcoded_password@localhost:5432/dbname
+   # API_ENDPOINT=https://api.example.com/v1/users
+   # NODE_ENV=development
+   ```
+
+4. **Create `.envrc.local.example`** with dynamic secret templates:
+
+   ```bash
+   # =====================================================================
+   # DYNAMIC SECRETS AND VARIABLE EXPANSION EXAMPLES
+   # =====================================================================
+   # Copy this file to .envrc.local and customize for your secret management setup.
+   # This file demonstrates the dynamic values needed for this project.
+   #
+   # Choose your preferred secret management approach:
+   # =====================================================================
+
+   # Example: 1Password CLI
+   export DB_PASSWORD=$(op read "op://vault/database/password")
+   export API_BASE_URL="https://api.example.com"
+
+   # Example: AWS SSM
+   # export DB_PASSWORD=$(aws ssm get-parameter --name "/myapp/db-password" --with-decryption --query "Parameter.Value" --output text)
+   # export API_BASE_URL=$(aws ssm get-parameter --name "/myapp/api-url" --query "Parameter.Value" --output text)
+
+   # Example: GCP Secret Manager
+   # export DB_PASSWORD=$(gcloud secrets versions access latest --secret="database-password")
+   # export API_BASE_URL=$(gcloud secrets versions access latest --secret="api-base-url")
+
+   # Example: Manual hardcoded values (least secure, but works)
+   # export DB_PASSWORD="your_password_here"
+   # export API_BASE_URL="https://api.example.com"
+   ```
+
+5. **Optional: Create `.envrc.local`** for your actual secrets (gitignored):
+   Copy `.envrc.local.example` to `.envrc.local` and customize with your actual secret management commands.
+
+**Variable Precedence Order:**
+
+1. **`.envrc.local`** (dynamic secrets, highest priority)
+2. **`devenv.nix` env block** (shared configuration)
+3. **`.env`** (static local config, simple key=value pairs only)
+
+**Key Guidelines:**
+
+- **Shared, non-sensitive config**: Use `devenv.nix` env block
+- **Dynamic secrets**: Use `.envrc.local` for enterprise secret management (1Password, AWS SSM, GCP Secret Manager)
+- **Static local config**: Use `.env` files for local overrides and development tokens
+- **No variable composition**: `.env` files only support simple `key=value` pairs (no variable substitution)
+- **Documentation**: Maintain `.env.example` and `.envrc.local.example` with all required variables
+- **Team onboarding**: Include notes in README about copying example files to actual config files
+- **Security**: Add `.env` and `.envrc.local` to `.gitignore` to prevent committing secrets
+
+**Developer Experience Notes:**
+
+- **New developers**: Can start with just `.env` files for simple setups
+- **Enterprise setups**: Copy `.envrc.local.example` to `.envrc.local` and customize for your secret management tool
+- **Multiple scenarios**: Use multiple `.env` files (`.env.development`, `.env.test`) for different static configurations
+- **Debugging**: Run `direnv reload` to test changes to `.envrc.local`
+
+This pattern ensures consistent shared configuration while allowing secure local customization.
+
+> [!TIP]
+> See [templates/README.md](./templates/README.md) for a complete project template with devenv/direnv setup instructions that you can copy for new projects.
 
 ### GCP
 
@@ -121,9 +328,6 @@ server-side logic).
   - `SONAR_PROJECT_KEY` as a repository variable
   - `SONAR_TOKEN` as a **repository secret**
 
-> [!NOTE]
-> The SonarQube GUI will recommend you to create a sonar-project.properties file, but for now we have just passed these details as options in our GH Actions step. Historically sonar-project.properties didn't support variables and we didn't want to hardcode the project and project key magic strings into our codebase, so there is no strong technical reason for avoiding sonar-project.properties. A pro, may be that we just have 1 file to think about when reasoning about our sonar setup, but a con is that the yaml file may not as easy to grok with all the `Dsonar.*` noise in the `with.args` block for the action.
-
 Use the SonarSource/sonarqube-scan-action action to push data to SonarQube and trigger a scan and optionally refer to the block below for an scan step we had in one of our repos and highlights how we circumvented the use of sonar-project.properties:
 
 ```yaml
@@ -143,6 +347,9 @@ Use the SonarSource/sonarqube-scan-action action to push data to SonarQube and t
       -Dsonar.exclusions=src/**/*.test.ts,src/**/*.test.tsx,src/**/*.spec.ts,src/**/*.spec.tsx,src/**/*.stories.ts,src/**/*.stories.tsx,src/**/*.stories.mdx
       -Dsonar.verbose=false
 ```
+
+> [!NOTE]
+> The SonarQube GUI will recommend you to create a sonar-project.properties file, but for now we have just passed these details as options in our GH Actions step. Historically sonar-project.properties didn't support variables. As we didn't want to hardcode the project and project key magic strings into our codebase, we opted out of using the sonar-project.properties file but since that is no longer the limitation, there is no strong technical reason for avoiding sonar-project.properties. One pro of just doing it inline is that we just have 1 file to think about when reasoning about our sonar reporting setup, but a con is that the yaml file may not as easy to grok with all the `Dsonar.*` noise in the `with.args` block for the action.
 
 [sonar-new-code]: https://docs.sonarsource.com/sonarqube-server/9.9/project-administration/defining-new-code/
 
@@ -249,4 +456,4 @@ For projects using AI development tools:
 - **LINTING_FORMATTING.md**: Only when team size or complexity demands separate file
 - **AI Guidance**: When using AI development tools (AGENTS.md + CLAUDE.md)
 
-See `templates/` directory for starter templates of each document type.
+See [templates/](./templates/) directory for starter templates of each document type.
