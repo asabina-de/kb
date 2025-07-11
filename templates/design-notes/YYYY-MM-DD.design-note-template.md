@@ -248,6 +248,6 @@ class ExamplePattern {
 
 ## Related Documentation
 
-- [DECISIONS.md](./DECISIONS.md) - Architecture decisions that shaped this design
-- [GUIDELINES.md](./GUIDELINES.md) - Implementation guidelines for these patterns
-- [TODOs.md](./TODOs.md) - Planned improvements and extensions
+- [DECISIONS.md](../DECISIONS.md) - Architecture decisions that shaped this design
+- [GUIDELINES.md](../GUIDELINES.md) - Implementation guidelines for these patterns
+- [TODO.md](../TODO.md) - Planned improvements and extensions
