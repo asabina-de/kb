@@ -71,11 +71,10 @@ Once you have devenv and direnv installed:
    devenv shell
    ```
 
-> [!Note]
-> The project uses `.env` files for local configuration. Copy `.env.example` if it exists and customize for your local setup.
+> [!Important] > **Recommended**: Use `.envrc.local` for local configuration when using devenv. This supports dynamic secrets and variable expansion, which devenv handles better than `.env` files.
 
-> [!Important]
-> devenv's dotenv only supports simple `key=value` pairs. For dynamic secrets or variable expansion, use `.envrc.local` instead.
+> [!Note]
+> If you prefer `.env` files, copy `.env.example` if it exists and customize for your local setup. However, devenv's dotenv only supports simple `key=value` pairs.
 
 ### Alternative Dependency Management
 
@@ -128,17 +127,17 @@ This project maintains focused documentation to support both human developers an
 
 ### Documentation Structure
 
-- **[TODOs.md](./docs/TODOs.md)** - Active task list and production readiness items
-- **[DECISIONS.md](./docs/DECISIONS.md)** - Architecture decisions with rationale and trade-offs
-- **[GUIDELINES.md](./docs/GUIDELINES.md)** - Development patterns and coding standards
+- **[TODO.md](./TODO.md)** - Active task list and production readiness items
+- **[decisions/](./decisions/)** - Architecture decisions with rationale and trade-offs
+- **[GUIDELINES.md](./GUIDELINES.md)** - Development patterns and coding standards
 - **[AGENTS.md](./AGENTS.md)** - Guidelines for AI agents working on this codebase
 - **[CLAUDE.md](./CLAUDE.md)** - Claude-specific instructions and workflow
 
 ### Design Process
 
-1. **Early Ideation**: Document ideas and proposals in `DESIGN_NOTES.md`
+1. **Early Ideation**: Document ideas and proposals in `design-notes/`
 2. **RFC Process**: Use PRs with `design` or `rfc` labels for design discussions
-3. **Decision Recording**: Move finalized decisions to `DECISIONS.md` with full context
+3. **Decision Recording**: Move finalized decisions to `decisions/` with full context
 4. **Implementation Guidelines**: Update `GUIDELINES.md` with patterns and standards
 
 This approach enables in-repo design through PRs rather than external knowledge bases.

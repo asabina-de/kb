@@ -221,8 +221,7 @@ Use the **direnv → devenv → dotenv** trifecta for comprehensive environment 
    }
    ```
 
-   > [!WARNING] >
-   > **devenv's dotenv implementation is basic** - it only supports simple `key=value` pairs without variable substitution (`${VAR}`) or command expansion (`$(cmd)`). This differs from popular dotenv implementations in Node.js or Ruby that support variable expansion. See [devenv's dotenv source](https://github.com/cachix/devenv/blob/main/src/modules/dotenv.nix) for implementation details.
+   > [!WARNING] > **devenv's dotenv implementation is basic** - it only supports simple `key=value` pairs without variable substitution (`${VAR}`) or command expansion (`$(cmd)`). This differs from popular dotenv implementations in Node.js or Ruby that support variable expansion. See [devenv's dotenv source](https://github.com/cachix/devenv/blob/main/src/modules/dotenv.nix) for implementation details.
 
 3. **Create `.env.example`** with documented variable templates:
 
@@ -300,6 +299,40 @@ Use the **direnv → devenv → dotenv** trifecta for comprehensive environment 
 - **Debugging**: Run `direnv reload` to test changes to `.envrc.local`
 
 This pattern ensures consistent shared configuration while allowing secure local customization.
+
+#### Development Tools & Pre-commit Hooks
+
+This repository includes automated code quality tools that run via git hooks:
+
+**Formatting & Linting:**
+
+- **nixfmt-rfc-style**: Formats Nix code according to RFC standards
+- **prettier**: Formats JavaScript, TypeScript, JSON, and Markdown files
+- **markdown-link-check**: Validates all markdown links are working
+
+**Pre-commit Commands:**
+
+```bash
+# Run all hooks on all files (recommended before pushing)
+pre-commit run --all-files
+
+# Run specific hook on all files
+pre-commit run prettier --all-files
+pre-commit run nixfmt-rfc-style --all-files
+pre-commit run markdown-link-check --all-files
+
+# Hooks run automatically on commit, but you can skip with --no-verify
+git commit --no-verify  # Skip hooks (not recommended)
+```
+
+**Manual Commands:**
+
+```bash
+# Format specific files
+prettier --write file.md
+nixfmt devenv.nix
+markdown-link-check README.md
+```
 
 > [!TIP]
 > See [templates/README.md](./templates/README.md) for a complete project template with devenv/direnv setup instructions that you can copy for new projects.
@@ -393,19 +426,70 @@ _Ordered by developer workflow relevance_
    - **Never**: Decided against, with reasoning preserved
    - Repository-specific task scratchpad outside formal ticketing
 
-4. **DESIGN_NOTES.md** (`./docs/DESIGN_NOTES.md`) - Design Iteration and System Models
+4. **design-notes/** (`./docs/design-notes/`) - Design Iteration and System Models
 
+   - **Individual design explorations** - one file per design concern to avoid git worktree conflicts
+   - **Naming**: `YYYY-MM-DD.specific-topic-name.md` (e.g., `2024-01-15.user-authentication-strategy.md`)
    - **Scratchpad for evolving ideas** - iterate on designs until mature
    - Documents core system architecture using structured schemas
    - Progressive examples from basic to advanced usage
-   - **Graduate mature designs to DECISIONS.md** with clear rationale
+   - **Dual completion paths**:
+     - **Path A**: Design-before-implementation workflow - early scribbles that mature into immutable architectural decisions
+     - **Path B**: Living implementation documentation that evolves with the system (CI setups, process docs)
+   - **Document nature**: Living, evolving documents (vs immutable decision records)
+   - **Timing flexibility**: Can be created before OR after decisions are made to capture implementation observations
+   - **Archive**: Move outdated explorations to `design-notes/ARCHIVE/`
 
-5. **DECISIONS.md** (`./docs/DECISIONS.md`) - Architecture Decision Records (ADR)
+5. **decisions/** (`./docs/decisions/`) - Architecture Decision Records (ADR)
 
-   - **Final decisions** graduated from DESIGN_NOTES.md exploration
+   - **Individual decision records** - one file per decision to avoid git worktree conflicts
+   - **Naming**: `YYYY-MM-DD.decision-title.md` (e.g., `2024-01-15.state-management-strategy.md`)
+   - **Immutable snapshots** of formal decisions made at specific points in time
+   - **Final decisions** graduated from design-notes/ exploration OR standalone formal decisions
    - Chronicles major technical decisions with full context and rationale
    - Date-stamped entries with clear decision statements
    - Includes trade-offs, benefits, and future considerations
+   - **Should remain largely unchanged** once written (unlike living design notes)
+   - **Archive**: Move superseded decisions to `decisions/ARCHIVE/`
+
+#### GitHub-Native Decision Governance
+
+**Use GitHub's built-in approval system for formal decision traceability:**
+
+**CODEOWNERS Integration:**
+
+```
+# .github/CODEOWNERS
+/docs/decisions/    @tech-lead @architect @security-team
+/docs/design-notes/ @tech-lead
+```
+
+**Idiomatic GitHub Workflow:**
+
+1. Create decision PR with status "Proposed"
+2. CODEOWNERS automatically assigned as reviewers
+3. Required approvals from designated decision makers
+4. Update status to "Accepted" before merge
+5. Merge PR via GitHub UI (creates merge commit on mainline)
+6. Tag the merge commit: `git tag "decision/auth-strategy-v1" <merge-sha>`
+
+**Decision Tags:**
+
+```bash
+# Tag mainline merge commits
+git tag "decision/auth-strategy-v1" <merge-commit-sha>
+
+# List decision tags
+git tag -l "decision/*"
+```
+
+**Benefits:**
+
+- GitHub's PR approval system provides formal sign-off
+- Merge commits create immutable decision points
+- Tags point to mainline (standard practice)
+- Built-in audit trail via GitHub's interface
+- No complex signing workflows required
 
 6. **LINTING_FORMATTING.md** (`./docs/LINTING_FORMATTING.md`) - Code Quality Standards _(conditional)_
 
@@ -451,8 +535,8 @@ For projects using AI development tools:
 **Add as workflow demands:**
 
 - **TODO.md**: When you need repo-specific scratchpad for gotchas/tech debt
-- **DESIGN_NOTES.md**: When exploring complex designs - use as iteration scratchpad
-- **DECISIONS.md**: When graduating mature designs from DESIGN_NOTES.md
+- **design-notes/**: When exploring complex designs - create individual files to avoid git worktree conflicts
+- **decisions/**: When graduating mature designs from design-notes/
 - **LINTING_FORMATTING.md**: Only when team size or complexity demands separate file
 - **AI Guidance**: When using AI development tools (AGENTS.md + CLAUDE.md)
 
