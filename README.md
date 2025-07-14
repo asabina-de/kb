@@ -300,6 +300,40 @@ Use the **direnv → devenv → dotenv** trifecta for comprehensive environment 
 
 This pattern ensures consistent shared configuration while allowing secure local customization.
 
+#### Development Tools & Pre-commit Hooks
+
+This repository includes automated code quality tools that run via git hooks:
+
+**Formatting & Linting:**
+
+- **nixfmt-rfc-style**: Formats Nix code according to RFC standards
+- **prettier**: Formats JavaScript, TypeScript, JSON, and Markdown files
+- **markdown-link-check**: Validates all markdown links are working
+
+**Pre-commit Commands:**
+
+```bash
+# Run all hooks on all files (recommended before pushing)
+pre-commit run --all-files
+
+# Run specific hook on all files
+pre-commit run prettier --all-files
+pre-commit run nixfmt-rfc-style --all-files
+pre-commit run markdown-link-check --all-files
+
+# Hooks run automatically on commit, but you can skip with --no-verify
+git commit --no-verify  # Skip hooks (not recommended)
+```
+
+**Manual Commands:**
+
+```bash
+# Format specific files
+prettier --write file.md
+nixfmt devenv.nix
+markdown-link-check README.md
+```
+
 > [!TIP]
 > See [templates/README.md](./templates/README.md) for a complete project template with devenv/direnv setup instructions that you can copy for new projects.
 
