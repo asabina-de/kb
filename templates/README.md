@@ -127,17 +127,17 @@ This project maintains focused documentation to support both human developers an
 
 ### Documentation Structure
 
-- **[TODOs.md](./docs/TODOs.md)** - Active task list and production readiness items
-- **[DECISIONS.md](./docs/DECISIONS.md)** - Architecture decisions with rationale and trade-offs
+- **[TODO.md](./docs/TODO.md)** - Active task list and production readiness items
+- **[decisions/](./docs/decisions/)** - Architecture decisions with rationale and trade-offs
 - **[GUIDELINES.md](./docs/GUIDELINES.md)** - Development patterns and coding standards
 - **[AGENTS.md](./AGENTS.md)** - Guidelines for AI agents working on this codebase
 - **[CLAUDE.md](./CLAUDE.md)** - Claude-specific instructions and workflow
 
 ### Design Process
 
-1. **Early Ideation**: Document ideas and proposals in `DESIGN_NOTES.md`
+1. **Early Ideation**: Document ideas and proposals in `design-notes/`
 2. **RFC Process**: Use PRs with `design` or `rfc` labels for design discussions
-3. **Decision Recording**: Move finalized decisions to `DECISIONS.md` with full context
+3. **Decision Recording**: Move finalized decisions to `decisions/` with full context
 4. **Implementation Guidelines**: Update `GUIDELINES.md` with patterns and standards
 
 This approach enables in-repo design through PRs rather than external knowledge bases.

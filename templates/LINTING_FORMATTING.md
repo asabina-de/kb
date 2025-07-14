@@ -367,5 +367,5 @@ Add to `.eslintrc.json` extends array:
 ## Related Documentation
 
 - [GUIDELINES.md](./GUIDELINES.md) - Development best practices
-- [DECISIONS.md](./DECISIONS.md) - Tool selection rationale
-- [TODOs.md](./TODOs.md) - Planned tooling improvements
+- [decisions/](./decisions/) - Tool selection rationale
+- [TODO.md](./TODO.md) - Planned tooling improvements
