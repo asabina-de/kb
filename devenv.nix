@@ -6,6 +6,7 @@
   packages = with pkgs; [
     git
     nodePackages.prettier
+    nodePackages.markdown-link-check
   ];
 
   # https://devenv.sh/git-hooks/
