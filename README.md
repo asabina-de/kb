@@ -429,21 +429,27 @@ _Ordered by developer workflow relevance_
 4. **design-notes/** (`./docs/design-notes/`) - Design Iteration and System Models
 
    - **Individual design explorations** - one file per design concern to avoid git worktree conflicts
-   - **Naming**: `YYYY-MM-DD.topic-name.md` (e.g., `2024-01-15.user-authentication.md`)
+   - **Naming**: `YYYY-MM-DD.specific-topic-name.md` (e.g., `2024-01-15.user-authentication-strategy.md`)
    - **Scratchpad for evolving ideas** - iterate on designs until mature
    - Documents core system architecture using structured schemas
    - Progressive examples from basic to advanced usage
-   - **Graduate mature designs to decisions/** with clear rationale
-   - **Archive**: Move completed explorations to `design-notes/ARCHIVE/`
+   - **Dual completion paths**:
+     - **Path A**: Design-before-implementation workflow - early scribbles that mature into immutable architectural decisions
+     - **Path B**: Living implementation documentation that evolves with the system (CI setups, process docs)
+   - **Document nature**: Living, evolving documents (vs immutable decision records)
+   - **Timing flexibility**: Can be created before OR after decisions are made to capture implementation observations
+   - **Archive**: Move outdated explorations to `design-notes/ARCHIVE/`
 
 5. **decisions/** (`./docs/decisions/`) - Architecture Decision Records (ADR)
 
    - **Individual decision records** - one file per decision to avoid git worktree conflicts
    - **Naming**: `YYYY-MM-DD.decision-title.md` (e.g., `2024-01-15.state-management-strategy.md`)
-   - **Final decisions** graduated from design-notes/ exploration
+   - **Immutable snapshots** of formal decisions made at specific points in time
+   - **Final decisions** graduated from design-notes/ exploration OR standalone formal decisions
    - Chronicles major technical decisions with full context and rationale
    - Date-stamped entries with clear decision statements
    - Includes trade-offs, benefits, and future considerations
+   - **Should remain largely unchanged** once written (unlike living design notes)
    - **Archive**: Move superseded decisions to `decisions/ARCHIVE/`
 
 6. **LINTING_FORMATTING.md** (`./docs/LINTING_FORMATTING.md`) - Code Quality Standards _(conditional)_
