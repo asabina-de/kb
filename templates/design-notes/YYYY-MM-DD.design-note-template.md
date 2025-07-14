@@ -3,6 +3,12 @@
 **Created**: YYYY-MM-DD  
 **Status**: Draft | Active | Implemented | Stable | Completed | Deprecated
 
+## Status History
+
+| Date       | Status | Changed By | Notes            |
+| ---------- | ------ | ---------- | ---------------- |
+| YYYY-MM-DD | Draft  | @username  | Initial creation |
+
 <!-- Delete this template content and replace with your actual design exploration -->
 
 ## Status Guide

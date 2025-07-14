@@ -452,6 +452,45 @@ _Ordered by developer workflow relevance_
    - **Should remain largely unchanged** once written (unlike living design notes)
    - **Archive**: Move superseded decisions to `decisions/ARCHIVE/`
 
+#### GitHub-Native Decision Governance
+
+**Use GitHub's built-in approval system for formal decision traceability:**
+
+**CODEOWNERS Integration:**
+
+```
+# .github/CODEOWNERS
+/docs/decisions/    @tech-lead @architect @security-team
+/docs/design-notes/ @tech-lead
+```
+
+**Idiomatic GitHub Workflow:**
+
+1. Create decision PR with status "Proposed"
+2. CODEOWNERS automatically assigned as reviewers
+3. Required approvals from designated decision makers
+4. Update status to "Accepted" before merge
+5. Merge PR via GitHub UI (creates merge commit on mainline)
+6. Tag the merge commit: `git tag "decision/auth-strategy-v1" <merge-sha>`
+
+**Decision Tags:**
+
+```bash
+# Tag mainline merge commits
+git tag "decision/auth-strategy-v1" <merge-commit-sha>
+
+# List decision tags
+git tag -l "decision/*"
+```
+
+**Benefits:**
+
+- GitHub's PR approval system provides formal sign-off
+- Merge commits create immutable decision points
+- Tags point to mainline (standard practice)
+- Built-in audit trail via GitHub's interface
+- No complex signing workflows required
+
 6. **LINTING_FORMATTING.md** (`./docs/LINTING_FORMATTING.md`) - Code Quality Standards _(conditional)_
 
    - **Create only when team size or complexity demands it**

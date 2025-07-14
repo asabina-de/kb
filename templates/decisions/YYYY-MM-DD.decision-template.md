@@ -3,6 +3,12 @@
 **Date**: YYYY-MM-DD  
 **Status**: Proposed | Accepted | Superseded
 
+## Status History
+
+| Date       | Status   | Changed By | Notes            |
+| ---------- | -------- | ---------- | ---------------- |
+| YYYY-MM-DD | Proposed | @username  | Initial proposal |
+
 <!-- Delete this template content and replace with your actual decision -->
 
 ## Problem
