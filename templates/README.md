@@ -127,9 +127,9 @@ This project maintains focused documentation to support both human developers an
 
 ### Documentation Structure
 
-- **[TODO.md](./docs/TODO.md)** - Active task list and production readiness items
-- **[decisions/](./docs/decisions/)** - Architecture decisions with rationale and trade-offs
-- **[GUIDELINES.md](./docs/GUIDELINES.md)** - Development patterns and coding standards
+- **[TODO.md](./TODO.md)** - Active task list and production readiness items
+- **[decisions/](./decisions/)** - Architecture decisions with rationale and trade-offs
+- **[GUIDELINES.md](./GUIDELINES.md)** - Development patterns and coding standards
 - **[AGENTS.md](./AGENTS.md)** - Guidelines for AI agents working on this codebase
 - **[CLAUDE.md](./CLAUDE.md)** - Claude-specific instructions and workflow
 
