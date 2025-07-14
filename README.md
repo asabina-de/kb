@@ -300,6 +300,28 @@ Use the **direnv → devenv → dotenv** trifecta for comprehensive environment 
 
 This pattern ensures consistent shared configuration while allowing secure local customization.
 
+#### PyPI Packages in devenv
+
+For Python packages not available in nixpkgs, use devenv's virtual environment support:
+
+```nix
+languages.python = {
+  enable = true;
+  version = "3.11";
+  venv = {
+    enable = true;
+    requirements = ''
+      markdown-checker
+      some-other-package
+    '';
+  };
+};
+```
+
+**Available tools in this repo:**
+
+- **markdown-checker**: Validates markdown links and paths (`markdown-checker -d . -f check_broken_urls`)
+
 > [!TIP]
 > See [templates/README.md](./templates/README.md) for a complete project template with devenv/direnv setup instructions that you can copy for new projects.
 
