@@ -45,6 +45,8 @@ Follow the tooling and design guidance outlined in the README.
 - Add `[ai:${AI_NAME}]` tag at end of commit titles
 - Example: `feat: add user auth [ai:claude]`
 - Break work into focused, single-concern commits
+- Stick to short commit titles that are less than 80 characters long
+- Add a "Co-authored by:" line in suggested commit messages
 
 ## Communication
 
