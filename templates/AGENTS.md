@@ -1,5 +1,7 @@
 # Agent Development Guidelines
 
+Follow the tooling and design guidance outlined in the README.
+
 ## Development Environment
 
 - [Environment setup instructions]
@@ -13,6 +15,10 @@
 - [Code review process]
 
 ## Documentation Workflow
+
+> [!TIP]
+> Note that some working documents in a repo will be located in the docs
+> subdirectory.
 
 **When making significant changes:**
 
