@@ -35,6 +35,7 @@ Follow the tooling and design guidance outlined in the README.
 ```markdown
 <details>
 <summary>AI-generated TODOs to be reviewed</summary>
+
 - [ ] Your uncertain TODO items here
 </details>
 ```

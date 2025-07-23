@@ -36,6 +36,7 @@ Raise concerns and suggest improvements or fixes, when you stumble into topics t
 ```markdown
 <details>
 <summary>AI-generated TODOs to be reviewed</summary>
+
 - [ ] Your uncertain TODO items here
 </details>
 ```

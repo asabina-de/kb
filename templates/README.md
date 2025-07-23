@@ -71,9 +71,9 @@ Once you have devenv and direnv installed:
    devenv shell
    ```
 
-> [!Important] > **Recommended**: Use `.envrc.local` for local configuration when using devenv. This supports dynamic secrets and variable expansion, which devenv handles better than `.env` files.
+> [!IMPORTANT] > **Recommended**: Use `.envrc.local` for local configuration when using devenv. This supports dynamic secrets and variable expansion, which devenv handles better than `.env` files.
 
-> [!Note]
+> [!NOTE]
 > If you prefer `.env` files, copy `.env.example` if it exists and customize for your local setup. However, devenv's dotenv only supports simple `key=value` pairs.
 
 ### Alternative Dependency Management
