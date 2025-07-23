@@ -498,11 +498,6 @@ git tag -l "decision/*"
    - Configuration examples ready for copy-paste
    - For small projects: embed basics in README.md or GUIDELINES.md
 
-7. **{feature}.mmd** (`./docs/{feature}.mmd`) - Visual Architecture Documentation
-   - Mermaid diagrams for complex system relationships
-   - Class diagrams showing inheritance and composition
-   - Supplement textual explanations with visual clarity
-
 ### AI Guidance Files
 
 For projects using AI development tools:

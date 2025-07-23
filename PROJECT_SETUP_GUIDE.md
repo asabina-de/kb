@@ -60,12 +60,12 @@ For every new project, copy the appropriate [templates](./templates/) and custom
 - API design patterns exploration
 - **Graduate mature designs to DECISIONS.md** with full rationale
 
-**Visual Diagrams (.mmd files)** - When relationships become complex
+**Visual Diagrams** - When relationships become complex
 
-- Entity relationship diagrams
-- System architecture diagrams
-- Flow charts for complex processes
-- Use Mermaid syntax for GitHub integration
+- Entity relationship diagrams (embed Mermaid syntax in markdown files)
+- System architecture diagrams (embed Mermaid syntax in markdown files)
+- Flow charts for complex processes (embed Mermaid syntax in markdown files)
+- Use inline Mermaid blocks for GitHub integration
 
 ### Add When Team Grows:
 
@@ -180,10 +180,8 @@ docs/
 ├── GUIDELINES.md          # Development standards
 ├── LINTING_FORMATTING.md  # Code quality rules
 ├── TODOs.md               # Task tracking
-└── diagrams/              # Visual documentation
-    ├── architecture.mmd   # System architecture
-    ├── data-model.mmd     # Entity relationships
-    └── user-flow.mmd      # User journey flows
+# Note: Mermaid diagrams should be embedded inline in relevant .md files
+# GitHub doesn't support including separate .mmd files
 ```
 
 ### Root Level Files
