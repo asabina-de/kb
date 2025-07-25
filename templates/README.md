@@ -61,35 +61,39 @@ This project uses **devenv** and **direnv** to manage development environments, 
 - **[Devenv](https://devenv.sh/)**: Provides a reproducible development environment with all necessary tools and dependencies. [Installation guide](https://devenv.sh/getting-started/)
 - **[Direnv](https://direnv.net/)**: Automatically loads the project's development environment when you enter the directory. [Installation guide](https://direnv.net/docs/installation.html)
 
-### Environment Activation
+### Environment Setup
 
-Once you have devenv and direnv installed:
+This project uses the **direnv → devenv → dotenv pattern** for environment management. Once you have devenv and direnv installed:
 
-1. **Set up .envrc file**: Copy the template to enable automatic environment loading:
+1. **Set up your local environment** by copying the example files:
 
    ```bash
    cp .envrc.example .envrc
-   ```
-
-   This file implements the **direnv → devenv → dotenv pattern** for environment management.
-
-2. **Allow direnv**: Grant direnv permission to load the environment:
-
-   ```bash
    direnv allow
    ```
 
-3. **Environment Variables** (optional): For sensitive values or dynamic secrets:
+2. **Configure environment variables** (choose the approach this project uses):
 
-   - Copy `.envrc.local.example` to `.envrc.local` for dynamic values (like 1Password lookups)
-   - Copy `.env.example` to `.env` for simple static values
-   - Both files are gitignored for security
+   **If this project uses .envrc.local approach**:
 
-4. **Automatic activation**: Direnv will automatically activate the devenv shell when you `cd` into the project directory
-5. **Manual activation**: If automatic activation doesn't work, you can manually enter the development shell:
    ```bash
-   devenv shell
+   cp .envrc.local.example .envrc.local
+   # Edit .envrc.local with your actual secrets/dynamic values
    ```
+
+   **If this project uses .env approach**:
+
+   ```bash
+   cp .env.example .env
+   # Edit .env with your actual static values
+   ```
+
+3. **Environment activation**:
+   - **Automatic**: Direnv activates the devenv shell when you `cd` into the project
+   - **Manual**: If needed, run `devenv shell`
+
+> [!NOTE]
+> This project uses [**specify: .envrc.local OR .env approach**] for local environment variables. Your working files (`.envrc.local` or `.env`) contain personal configuration and are gitignored. Only the `.example` files are committed to help teammates understand what variables are needed.
 
 For complete environment management documentation, see [knowledge-base environment setup guide](./knowledge-base/README.md#environment-variable-management-pattern).
 

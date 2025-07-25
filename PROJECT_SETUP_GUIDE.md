@@ -8,25 +8,37 @@ For every new project, copy the appropriate [templates](./templates/) and custom
 
 ### Environment Setup (Recommended First Step)
 
-Before diving into documentation, set up your development environment:
+Before diving into documentation, set up environment templates for your project:
 
-1. **Copy environment templates**:
-
-   ```bash
-   cp knowledge-base/templates/.envrc.example .envrc
-   cp knowledge-base/templates/.envrc.local.example .envrc.local.example  # if available
-   cp knowledge-base/templates/.env.example .env.example  # if available
-   ```
-
-2. **Enable direnv**:
+1. **Copy base environment template**:
 
    ```bash
-   direnv allow
+   cp knowledge-base/templates/.envrc.example .envrc.example
    ```
 
-3. **Customize for your project**: Edit `.envrc` if needed and create `.envrc.local` for secrets
+2. **Choose your local environment approach** (pick ONE to keep it simple):
 
-See [knowledge-base/README.md#environment-variable-management-pattern](./README.md#environment-variable-management-pattern) for complete setup instructions and rationale.
+   **Option A: Dynamic secrets (.envrc.local approach)**:
+
+   ```bash
+   cp knowledge-base/templates/.envrc.local.example .envrc.local.example
+   echo ".envrc.local" >> .gitignore
+   ```
+
+   **Option B: Static values (.env approach)**:
+
+   ```bash
+   cp knowledge-base/templates/.env.example .env.example
+   echo ".env" >> .gitignore
+   ```
+
+3. **Document your choice**: Update your project README to specify which approach your team uses
+
+4. **Customize examples**: Edit the `.example` files to document your project's specific environment variables
+
+**For contributors**: Individual developers will later copy these `.example` files to create their working environment files during project setup.
+
+See [knowledge-base/README.md#environment-variable-management-pattern](./README.md#environment-variable-management-pattern) for complete environment management documentation.
 
 ### Pragmatic Approach: Create What You Need
 

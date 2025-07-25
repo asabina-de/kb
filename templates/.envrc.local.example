@@ -1,0 +1,25 @@
+# .envrc.local.example - Dynamic secrets and variables template
+#
+# Copy this file to .envrc.local to set up environment variables that require
+# command expansion or dynamic values (like 1Password lookups).
+#
+# This file supports:
+# - Command expansion: $(command)
+# - Variable expansion: $VAR or ${VAR}
+# - Complex shell operations
+#
+# For simple static values, use .env instead (see .env.example)
+# Note: .envrc.local is automatically loaded by direnv and gitignored for security
+
+# Example: 1Password CLI
+# export GITHUB_PAT=$(op read "op://Employee/GitHub/personal-access-token")
+# export DATABASE_PASSWORD=$(op read "op://Employee/Database/password")
+
+# Example: AWS SSM Parameter Store
+# export API_KEY=$(aws ssm get-parameter --name "/myapp/api-key" --with-decryption --query "Parameter.Value" --output text)
+
+# Example: GCP Secret Manager
+# export DB_PASSWORD=$(gcloud secrets versions access latest --secret="database-password")
+
+# Example: Manual hardcoded values (least secure, but works)
+# export SOME_SECRET="your_secret_here"
