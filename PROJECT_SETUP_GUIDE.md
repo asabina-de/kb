@@ -6,6 +6,28 @@ This guide provides a step-by-step process for setting up documentation in new p
 
 For every new project, copy the appropriate [templates](./templates/) and customize them:
 
+### Environment Setup (Recommended First Step)
+
+Before diving into documentation, set up your development environment:
+
+1. **Copy environment templates**:
+
+   ```bash
+   cp knowledge-base/templates/.envrc.example .envrc
+   cp knowledge-base/templates/.envrc.local.example .envrc.local.example  # if available
+   cp knowledge-base/templates/.env.example .env.example  # if available
+   ```
+
+2. **Enable direnv**:
+
+   ```bash
+   direnv allow
+   ```
+
+3. **Customize for your project**: Edit `.envrc` if needed and create `.envrc.local` for secrets
+
+See [knowledge-base/README.md#environment-variable-management-pattern](./README.md#environment-variable-management-pattern) for complete setup instructions and rationale.
+
 ### Pragmatic Approach: Create What You Need
 
 **Start Simple:**

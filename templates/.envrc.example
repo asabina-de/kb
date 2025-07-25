@@ -1,0 +1,17 @@
+# .envrc.example - Development environment template
+#
+# Copy this file to .envrc to set up your development environment.
+# This file implements the direnv → devenv → dotenv pattern for environment management.
+#
+# See knowledge-base/README.md "Environment Variable Management Pattern" for details.
+
+export DIRENV_WARN_TIMEOUT=20s
+
+# Watch .envrc.local for changes (auto-reload when it changes)
+[[ -f .envrc.local ]] && watch_file .envrc.local
+
+# Source optional user-specific secrets (gitignored)
+[[ -f .envrc.local ]] && source .envrc.local
+
+eval "$(devenv direnvrc)"
+use devenv

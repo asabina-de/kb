@@ -65,16 +65,33 @@ This project uses **devenv** and **direnv** to manage development environments, 
 
 Once you have devenv and direnv installed:
 
-1. **Automatic activation**: Direnv will automatically activate the devenv shell when you `cd` into the project directory
-2. **Manual activation**: If automatic activation doesn't work, you can manually enter the development shell:
+1. **Set up .envrc file**: Copy the template to enable automatic environment loading:
+
+   ```bash
+   cp .envrc.example .envrc
+   ```
+
+   This file implements the **direnv → devenv → dotenv pattern** for environment management.
+
+2. **Allow direnv**: Grant direnv permission to load the environment:
+
+   ```bash
+   direnv allow
+   ```
+
+3. **Environment Variables** (optional): For sensitive values or dynamic secrets:
+
+   - Copy `.envrc.local.example` to `.envrc.local` for dynamic values (like 1Password lookups)
+   - Copy `.env.example` to `.env` for simple static values
+   - Both files are gitignored for security
+
+4. **Automatic activation**: Direnv will automatically activate the devenv shell when you `cd` into the project directory
+5. **Manual activation**: If automatic activation doesn't work, you can manually enter the development shell:
    ```bash
    devenv shell
    ```
 
-> [!IMPORTANT] > **Recommended**: Use `.envrc.local` for local configuration when using devenv. This supports dynamic secrets and variable expansion, which devenv handles better than `.env` files.
-
-> [!NOTE]
-> If you prefer `.env` files, copy `.env.example` if it exists and customize for your local setup. However, devenv's dotenv only supports simple `key=value` pairs.
+For complete environment management documentation, see [knowledge-base environment setup guide](./knowledge-base/README.md#environment-variable-management-pattern).
 
 ### Alternative Dependency Management
 
