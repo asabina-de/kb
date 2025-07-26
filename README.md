@@ -221,7 +221,8 @@ Use the **direnv → devenv → dotenv** trifecta for comprehensive environment 
    }
    ```
 
-   > [!WARNING] > **devenv's dotenv implementation is basic** - it only supports simple `key=value` pairs without variable substitution (`${VAR}`) or command expansion (`$(cmd)`). This differs from popular dotenv implementations in Node.js or Ruby that support variable expansion. See [devenv's dotenv source](https://github.com/cachix/devenv/blob/main/src/modules/dotenv.nix) for implementation details.
+   > [!WARNING]
+   > Devenv's dotenv implementation is basic - it only supports simple `key=value` pairs without variable substitution (`${VAR}`) or command expansion (`$(cmd)`). This differs from popular dotenv implementations in Node.js or Ruby that support variable expansion. See [devenv's dotenv source](https://github.com/cachix/devenv/blob/main/src/modules/dotenv.nix) for implementation details.
 
 3. **Create `.env.example`** with documented variable templates:
 
@@ -275,28 +276,43 @@ Use the **direnv → devenv → dotenv** trifecta for comprehensive environment 
 5. **Optional: Create `.envrc.local`** for your actual secrets (gitignored):
    Copy `.envrc.local.example` to `.envrc.local` and customize with your actual secret management commands.
 
+**Choose Your Approach** (Keep it Simple):
+
+**Recommendation: Pick ONE approach for your project to keep environment setup easy to reason about.**
+
+**Option A: .envrc.local approach** (Recommended for dynamic secrets):
+
+- Use `.envrc.local` for all local environment variables
+- Supports command expansion: `$(op read "...")`, `$(aws ssm get-parameter ...)`
+- Supports variable expansion: `${VAR}`
+- More flexible for enterprise secret management
+
+**Option B: .env approach** (Recommended for simple static values):
+
+- Use `.env` for all local environment variables
+- Simple `key=value` pairs only
+- Easier for developers familiar with standard dotenv
+- No command or variable expansion support
+
 **Variable Precedence Order:**
 
-1. **`.envrc.local`** (dynamic secrets, highest priority)
-2. **`devenv.nix` env block** (shared configuration)
-3. **`.env`** (static local config, simple key=value pairs only)
+1. **`.envrc.local`** OR **`.env`** (your chosen local config approach)
+2. **`devenv.nix` env block** (shared team configuration)
 
 **Key Guidelines:**
 
-- **Shared, non-sensitive config**: Use `devenv.nix` env block
-- **Dynamic secrets**: Use `.envrc.local` for enterprise secret management (1Password, AWS SSM, GCP Secret Manager)
-- **Static local config**: Use `.env` files for local overrides and development tokens
-- **No variable composition**: `.env` files only support simple `key=value` pairs (no variable substitution)
-- **Documentation**: Maintain `.env.example` and `.envrc.local.example` with all required variables
-- **Team onboarding**: Include notes in README about copying example files to actual config files
-- **Security**: Add `.env` and `.envrc.local` to `.gitignore` to prevent committing secrets
+- **Shared, non-sensitive config**: Always use `devenv.nix` env block
+- **Local config**: Choose either `.envrc.local` OR `.env` (not both)
+- **Documentation**: Maintain example files for your chosen approach
+- **Team consistency**: Document which approach your project uses in README
+- **Security**: Add ALL working environment files to `.gitignore` (`.envrc`, `.envrc.local`, `.env`)
+- **Examples committed**: Only `.example` files should be committed for team reference
 
-**Developer Experience Notes:**
+**When to Choose Which:**
 
-- **New developers**: Can start with just `.env` files for simple setups
-- **Enterprise setups**: Copy `.envrc.local.example` to `.envrc.local` and customize for your secret management tool
-- **Multiple scenarios**: Use multiple `.env` files (`.env.development`, `.env.test`) for different static configurations
-- **Debugging**: Run `direnv reload` to test changes to `.envrc.local`
+- **Choose .envrc.local if**: You need dynamic secrets (1Password, AWS SSM, GCP Secret Manager) or variable expansion
+- **Choose .env if**: You have simple static values and want standard dotenv behavior
+- **Avoid mixing**: Don't use both `.envrc.local` AND `.env` in the same project
 
 This pattern ensures consistent shared configuration while allowing secure local customization.
 
@@ -497,11 +513,6 @@ git tag -l "decision/*"
    - Tool specifications (ESLint, Prettier, etc.)
    - Configuration examples ready for copy-paste
    - For small projects: embed basics in README.md or GUIDELINES.md
-
-7. **{feature}.mmd** (`./docs/{feature}.mmd`) - Visual Architecture Documentation
-   - Mermaid diagrams for complex system relationships
-   - Class diagrams showing inheritance and composition
-   - Supplement textual explanations with visual clarity
 
 ### AI Guidance Files
 

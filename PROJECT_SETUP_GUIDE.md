@@ -6,6 +6,46 @@ This guide provides a step-by-step process for setting up documentation in new p
 
 For every new project, copy the appropriate [templates](./templates/) and customize them:
 
+### Environment Setup (Recommended First Step)
+
+Before diving into documentation, set up environment templates for your project:
+
+1. **Copy environment example files**:
+
+   ```bash
+   cp knowledge-base/templates/.envrc.example .envrc.example
+   ```
+
+2. **Choose your local environment approach** (pick ONE to keep it simple):
+
+   **Option A: Dynamic secrets (.envrc.local approach)**:
+
+   ```bash
+   cp knowledge-base/templates/.envrc.local.example .envrc.local.example
+   ```
+
+   **Option B: Static values (.env approach)**:
+
+   ```bash
+   cp knowledge-base/templates/.env.example .env.example
+   ```
+
+3. **Set up .gitignore** to ignore all working environment files:
+
+   ```bash
+   echo ".envrc" >> .gitignore
+   echo ".envrc.local" >> .gitignore
+   echo ".env" >> .gitignore
+   ```
+
+4. **Document your choice**: Update your project README to specify which approach your team uses
+
+5. **Customize examples**: Edit the `.example` files to document your project's specific environment variables
+
+**For contributors**: Individual developers will later copy these `.example` files to create their working environment files during project setup.
+
+See [knowledge-base/README.md#environment-variable-management-pattern](./README.md#environment-variable-management-pattern) for complete environment management documentation.
+
 ### Pragmatic Approach: Create What You Need
 
 **Start Simple:**
@@ -60,12 +100,12 @@ For every new project, copy the appropriate [templates](./templates/) and custom
 - API design patterns exploration
 - **Graduate mature designs to DECISIONS.md** with full rationale
 
-**Visual Diagrams (.mmd files)** - When relationships become complex
+**Visual Diagrams** - When relationships become complex
 
-- Entity relationship diagrams
-- System architecture diagrams
-- Flow charts for complex processes
-- Use Mermaid syntax for GitHub integration
+- Entity relationship diagrams (embed Mermaid syntax in markdown files)
+- System architecture diagrams (embed Mermaid syntax in markdown files)
+- Flow charts for complex processes (embed Mermaid syntax in markdown files)
+- Use inline Mermaid blocks for GitHub integration
 
 ### Add When Team Grows:
 
@@ -180,10 +220,8 @@ docs/
 ├── GUIDELINES.md          # Development standards
 ├── LINTING_FORMATTING.md  # Code quality rules
 ├── TODOs.md               # Task tracking
-└── diagrams/              # Visual documentation
-    ├── architecture.mmd   # System architecture
-    ├── data-model.mmd     # Entity relationships
-    └── user-flow.mmd      # User journey flows
+# Note: Mermaid diagrams should be embedded inline in relevant .md files
+# GitHub doesn't support including separate .mmd files
 ```
 
 ### Root Level Files

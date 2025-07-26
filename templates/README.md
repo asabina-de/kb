@@ -61,20 +61,41 @@ This project uses **devenv** and **direnv** to manage development environments, 
 - **[Devenv](https://devenv.sh/)**: Provides a reproducible development environment with all necessary tools and dependencies. [Installation guide](https://devenv.sh/getting-started/)
 - **[Direnv](https://direnv.net/)**: Automatically loads the project's development environment when you enter the directory. [Installation guide](https://direnv.net/docs/installation.html)
 
-### Environment Activation
+### Environment Setup
 
-Once you have devenv and direnv installed:
+This project uses the **direnv → devenv → dotenv pattern** for environment management. Once you have devenv and direnv installed:
 
-1. **Automatic activation**: Direnv will automatically activate the devenv shell when you `cd` into the project directory
-2. **Manual activation**: If automatic activation doesn't work, you can manually enter the development shell:
+1. **Set up your local environment** by copying the example files:
+
    ```bash
-   devenv shell
+   cp .envrc.example .envrc  # Create your working environment file
+   direnv allow
    ```
 
-> [!IMPORTANT] > **Recommended**: Use `.envrc.local` for local configuration when using devenv. This supports dynamic secrets and variable expansion, which devenv handles better than `.env` files.
+2. **Configure environment variables** (choose the approach this project uses):
+
+   **If this project uses .envrc.local approach**:
+
+   ```bash
+   cp .envrc.local.example .envrc.local
+   # Edit .envrc.local with your actual secrets/dynamic values
+   ```
+
+   **If this project uses .env approach**:
+
+   ```bash
+   cp .env.example .env
+   # Edit .env with your actual static values
+   ```
+
+3. **Environment activation**:
+   - **Automatic**: Direnv activates the devenv shell when you `cd` into the project
+   - **Manual**: If needed, run `devenv shell`
 
 > [!NOTE]
-> If you prefer `.env` files, copy `.env.example` if it exists and customize for your local setup. However, devenv's dotenv only supports simple `key=value` pairs.
+> This project uses [**specify: .envrc.local OR .env approach**] for local environment variables. All working environment files (`.envrc`, `.envrc.local`, or `.env`) contain your personal configuration and are gitignored. Only the `.example` files are committed to help teammates understand what variables are needed.
+
+For complete environment management documentation, see [knowledge-base environment setup guide](./knowledge-base/README.md#environment-variable-management-pattern).
 
 ### Alternative Dependency Management
 
