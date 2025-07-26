@@ -68,7 +68,7 @@ This project uses the **direnv → devenv → dotenv pattern** for environment m
 1. **Set up your local environment** by copying the example files:
 
    ```bash
-   cp .envrc.example .envrc
+   cp .envrc.example .envrc  # Create your working environment file
    direnv allow
    ```
 
@@ -93,7 +93,7 @@ This project uses the **direnv → devenv → dotenv pattern** for environment m
    - **Manual**: If needed, run `devenv shell`
 
 > [!NOTE]
-> This project uses [**specify: .envrc.local OR .env approach**] for local environment variables. Your working files (`.envrc.local` or `.env`) contain personal configuration and are gitignored. Only the `.example` files are committed to help teammates understand what variables are needed.
+> This project uses [**specify: .envrc.local OR .env approach**] for local environment variables. All working environment files (`.envrc`, `.envrc.local`, or `.env`) contain your personal configuration and are gitignored. Only the `.example` files are committed to help teammates understand what variables are needed.
 
 For complete environment management documentation, see [knowledge-base environment setup guide](./knowledge-base/README.md#environment-variable-management-pattern).
 

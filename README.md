@@ -305,7 +305,8 @@ Use the **direnv → devenv → dotenv** trifecta for comprehensive environment 
 - **Local config**: Choose either `.envrc.local` OR `.env` (not both)
 - **Documentation**: Maintain example files for your chosen approach
 - **Team consistency**: Document which approach your project uses in README
-- **Security**: Add your chosen files to `.gitignore`
+- **Security**: Add ALL working environment files to `.gitignore` (`.envrc`, `.envrc.local`, `.env`)
+- **Examples committed**: Only `.example` files should be committed for team reference
 
 **When to Choose Which:**
 

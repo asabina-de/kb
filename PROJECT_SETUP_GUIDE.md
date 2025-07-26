@@ -10,7 +10,7 @@ For every new project, copy the appropriate [templates](./templates/) and custom
 
 Before diving into documentation, set up environment templates for your project:
 
-1. **Copy base environment template**:
+1. **Copy environment example files**:
 
    ```bash
    cp knowledge-base/templates/.envrc.example .envrc.example
@@ -22,19 +22,25 @@ Before diving into documentation, set up environment templates for your project:
 
    ```bash
    cp knowledge-base/templates/.envrc.local.example .envrc.local.example
-   echo ".envrc.local" >> .gitignore
    ```
 
    **Option B: Static values (.env approach)**:
 
    ```bash
    cp knowledge-base/templates/.env.example .env.example
+   ```
+
+3. **Set up .gitignore** to ignore all working environment files:
+
+   ```bash
+   echo ".envrc" >> .gitignore
+   echo ".envrc.local" >> .gitignore
    echo ".env" >> .gitignore
    ```
 
-3. **Document your choice**: Update your project README to specify which approach your team uses
+4. **Document your choice**: Update your project README to specify which approach your team uses
 
-4. **Customize examples**: Edit the `.example` files to document your project's specific environment variables
+5. **Customize examples**: Edit the `.example` files to document your project's specific environment variables
 
 **For contributors**: Individual developers will later copy these `.example` files to create their working environment files during project setup.
 

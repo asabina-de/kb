@@ -1,0 +1,14 @@
+# Environment files - developers create these from .example files
+# See knowledge-base/README.md#environment-variable-management-pattern
+
+# All working environment files (created by developers from examples)
+.envrc
+.envrc.local
+.env
+.env.local
+.env.*.local
+
+# Keep example files committed for team reference:
+# .envrc.example (committed)
+# .envrc.local.example (committed)  
+# .env.example (committed)
