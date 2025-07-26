@@ -205,7 +205,7 @@ Use the **direnv → devenv → dotenv** trifecta for comprehensive environment 
    use devenv
    ```
 
-2. **Enable dotenv in devenv** (`devenv.nix`):
+2. **Optional: **Enable dotenv and configure team-wide shared env vars in devenv\*\* (`devenv.nix`):
 
    ```nix
    {
@@ -221,8 +221,9 @@ Use the **direnv → devenv → dotenv** trifecta for comprehensive environment 
    }
    ```
 
-   > [!WARNING]
-   > Devenv's dotenv implementation is basic - it only supports simple `key=value` pairs without variable substitution (`${VAR}`) or command expansion (`$(cmd)`). This differs from popular dotenv implementations in Node.js or Ruby that support variable expansion. See [devenv's dotenv source](https://github.com/cachix/devenv/blob/main/src/modules/dotenv.nix) for implementation details.
+   Devenv's dotenv implementation is basic - it only supports simple `key=value` pairs without variable substitution (`${VAR}`) or command expansion (`$(cmd)`). This differs from popular dotenv implementations in Node.js or Ruby that support variable expansion. See [devenv's dotenv source](https://github.com/cachix/devenv/blob/main/src/modules/dotenv.nix) for implementation details.
+
+   Only use the `env` attribute to specify variables that are **shared and non-secret** and keep things simple -- if you already have to use `.envrc.local` to source some values dynamically, you may as well just track whatever you need there instead of spreading it across different places.
 
 3. **Create `.env.example`** with documented variable templates:
 
