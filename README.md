@@ -279,7 +279,8 @@ Use the **direnv → devenv → dotenv** trifecta for comprehensive environment 
 
 **Choose Your Approach** (Keep it Simple):
 
-**Recommendation: Pick ONE approach for your project to keep environment setup easy to reason about.**
+> [!TIP]
+> Pick ONE approach for your project to keep environment setup easy to reason about. If you can't use 1 approach, at least actively try to reduce the number of approaches used. Having an env var set over devenv's `env` attribute, a few more through `.env` and some dynamically sourced values in a `.envrc` fragments your config in a way that makes it dificult to debug when things start failing.
 
 **Option A: .envrc.local approach** (Recommended for dynamic secrets):
 
