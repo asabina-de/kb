@@ -90,13 +90,33 @@ to check the health of the repo.
 Remember to do the following for every repo:
 
 - Populate your local config `git config edit --local` to
-  - use your work email and
+  - use your work email by setting `user.email` and
   - sign your commits using your work signing key in 1Password[^git-signing-1password]
 - For every piece of work, start your topic branch using the [branch name provided by Linear](https://linear.app/changelog/2020-04-13-branch-naming).
 - Push your PRs to merge into `main`
 - Where relevant, review PRs individually but feel free to merge stacks into
   `main` when ready. GitHub is smart enough to detect when intermediate PRs in
   a stack have been merged into mainline and will mark those as merged as well.
+
+For my personal config, I may configure the following:
+
+```ini
+[user]
+  email = david@asabina.de
+
+# Copied From 1Password snippet on YYYY-MM-DD
+[user]
+  signingkey = ssh-ed25519 [REDACTED]
+
+[gpg]
+  format = ssh
+
+[gpg "ssh"]
+  program = "/Applications/1Password.app/Contents/MacOS/op-ssh-sign"
+
+[commit]
+  gpgsign = true
+```
 
 [^git-signing-1password]: https://developer.1password.com/docs/ssh/git-commit-signing/#step-1-configure-git-commit-signing-with-ssh
 
