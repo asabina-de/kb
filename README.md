@@ -176,7 +176,10 @@ Downsides:
 - Declared in [Nix](https://nix.dev/tutorials/nix-language.html) -- a bit of an eccentric language which can be quite overwhelming to navigate at times.
 - [Package repo (nixpkgs)](https://search.nixos.org/packages) may not contain latest-greatest of your target package and overriding this can be tricky (but probably not less tricky if brew doesn't have your target package either)
 - Doesn't play ball very well with mixed approaches such as installing some things with nix and other manually, perhaps my dragging .dmgs into the Applications directory
-- Removes agency from individual devs.
+- Removes agency from individual devs where workarounds are trickier to come by.
+
+> [!TIP]
+> Use devenv to manage base dev tooling only and then use more dev-friendly tools to cover the rest. For example, when working on a Flutter app, we may use the devenv to setup core deps like mise and use mise to manage Flutter, Android build tools and Xcode. Managing Flutter, Xcode and Android in devenv itself gets to messy otherwise. Additionally, we may use devenv to install pre-commit and some of the pre-commit tooling we need while managing the pre-commit config the conventional manner and not in a devenv config to allow non-devenv users to play along as well.
 
 #### Environment Variable Management Pattern
 
