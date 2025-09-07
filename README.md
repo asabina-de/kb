@@ -205,10 +205,18 @@ Downsides:
 
 Use the **direnv -> devenv** pattern for environment management:
 
+> [!WARNING]
+> Avoid devenv's `dotenv.enable = true` option: It only supports basic `key=value` pairs without variable expansion (`${VAR}`) or command execution (`$(cmd)`). This differs significantly from standard dotenv libraries in Node.js/Ruby and will cause frustration when developers expect full dotenv functionality. Use `.envrc.local` instead for full bash support.
+
 **Tool Responsibilities:**
 
 - **direnv**: Auto-loads project environment when entering directory + executes commands for dynamic secret retrieval
 - **devenv**: Provides reproducible development environment with shared team configuration
+
+**File Roles:**
+
+- **`.envrc`**: Base configuration template (copied from `.envrc.example`, gitignored)
+- **`.envrc.local`**: Personal secrets and local overrides (copied from `.envrc.local.example`, gitignored)
 
 **Setup Instructions:**
 
@@ -281,7 +289,7 @@ Use the **direnv -> devenv** pattern for environment management:
 - **Shared, non-sensitive config**: Use `devenv.nix` env block
 - **Local config and secrets**: Use `.envrc.local` with full bash support
 - **Security**: Add `.envrc` and `.envrc.local` to `.gitignore`
-- **Documentation**: Commit `.envrc.example` and `.envrc.local.example` for team reference
+- **Documentation**: Commit all `*.example` files (`.envrc.example`, `.envrc.local.example`) for team reference
 - **Simplicity**: Single approach reduces complexity and debugging overhead
 
 This pattern ensures consistent shared configuration while allowing secure local customization.

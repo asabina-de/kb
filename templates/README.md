@@ -63,7 +63,17 @@ This project uses **devenv** and **direnv** to manage development environments, 
 
 ### Environment Setup
 
-This project uses the **direnv -> devenv pattern** for environment management. Once you have devenv and direnv installed:
+This project uses the **direnv → devenv pattern** for environment management:
+
+> [!WARNING]
+> Avoid devenv's `dotenv.enable = true` option: It only supports basic `key=value` pairs without variable expansion (`${VAR}`) or command execution (`$(cmd)`). This differs from standard dotenv libraries and will frustrate developers. Use `.envrc.local` instead for full bash support.
+
+**File Roles:**
+
+- **`.envrc`**: Base configuration template (copied from `.envrc.example`, gitignored)
+- **`.envrc.local`**: Personal secrets and local overrides (copied from `.envrc.local.example`, gitignored)
+
+Once you have devenv and direnv installed:
 
 1. **Set up your local environment** by copying the provided template:
 
@@ -90,7 +100,7 @@ This project uses the **direnv -> devenv pattern** for environment management. O
    - **Manual**: If needed, run `devenv shell`
 
 > [!NOTE]
-> This project uses **.envrc.local** for local environment variables. All working environment files (`.envrc` and `.envrc.local`) contain your personal configuration and are gitignored. Only the `.example` files are committed to help teammates understand what variables are needed.
+> This project uses **.envrc.local** for local environment variables. All working environment files (`.envrc` and `.envrc.local`) contain your personal configuration and are gitignored. Only the `*.example` files (`.envrc.example`, `.envrc.local.example`) are committed to help teammates understand what configuration is needed.
 
 For complete environment management documentation, see [knowledge-base environment setup guide](./knowledge-base/README.md#environment-variable-management-pattern).
 
@@ -132,7 +142,8 @@ While this project is designed to work with devenv/direnv, you can choose to man
 - Package manager (npm/pnpm/yarn)
 - Git and any other tools specified in `devenv.nix`
 
-> [!IMPORTANT] > **Recommendation**: Use devenv/direnv for consistency, but manual management is a valid choice if you prefer to avoid Nix complexity.
+> [!IMPORTANT]
+> Recommendation: Use devenv/direnv for consistency, but manual management is a valid choice if you prefer to avoid Nix complexity.
 
 ## Dependencies
 
