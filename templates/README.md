@@ -65,12 +65,18 @@ This project uses **devenv** and **direnv** to manage development environments, 
 
 This project uses the **direnv → devenv → dotenv pattern** for environment management. Once you have devenv and direnv installed:
 
-1. **Set up your local environment** by copying the example files:
+1. **Set up your local environment** by copying the provided template:
 
    ```bash
-   cp .envrc.example .envrc  # Create your working environment file
-   direnv allow
+   cp .envrc.example .envrc  # Copy the template to create your working environment file
+   direnv allow              # Grant direnv permission to load the environment
    ```
+
+   The included `.envrc.example` template provides:
+
+   - Timeout configuration to prevent direnv hangs during long operations
+   - Auto-watch functionality for `.envrc.local` changes (secrets reload automatically)
+   - Seamless integration with devenv for reproducible development environment
 
 2. **Configure environment variables** (choose the approach this project uses):
 

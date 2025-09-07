@@ -90,13 +90,33 @@ to check the health of the repo.
 Remember to do the following for every repo:
 
 - Populate your local config `git config edit --local` to
-  - use your work email and
+  - use your work email by setting `user.email` and
   - sign your commits using your work signing key in 1Password[^git-signing-1password]
 - For every piece of work, start your topic branch using the [branch name provided by Linear](https://linear.app/changelog/2020-04-13-branch-naming).
 - Push your PRs to merge into `main`
 - Where relevant, review PRs individually but feel free to merge stacks into
   `main` when ready. GitHub is smart enough to detect when intermediate PRs in
   a stack have been merged into mainline and will mark those as merged as well.
+
+For my personal config, I may configure the following:
+
+```ini
+[user]
+  email = david@asabina.de
+
+# Copied From 1Password snippet on YYYY-MM-DD
+[user]
+  signingkey = ssh-ed25519 [REDACTED]
+
+[gpg]
+  format = ssh
+
+[gpg "ssh"]
+  program = "/Applications/1Password.app/Contents/MacOS/op-ssh-sign"
+
+[commit]
+  gpgsign = true
+```
 
 [^git-signing-1password]: https://developer.1password.com/docs/ssh/git-commit-signing/#step-1-configure-git-commit-signing-with-ssh
 
@@ -176,7 +196,10 @@ Downsides:
 - Declared in [Nix](https://nix.dev/tutorials/nix-language.html) -- a bit of an eccentric language which can be quite overwhelming to navigate at times.
 - [Package repo (nixpkgs)](https://search.nixos.org/packages) may not contain latest-greatest of your target package and overriding this can be tricky (but probably not less tricky if brew doesn't have your target package either)
 - Doesn't play ball very well with mixed approaches such as installing some things with nix and other manually, perhaps my dragging .dmgs into the Applications directory
-- Removes agency from individual devs.
+- Removes agency from individual devs where workarounds are trickier to come by.
+
+> [!TIP]
+> Use devenv to manage base dev tooling only and then use more dev-friendly tools to cover the rest. For example, when working on a Flutter app, we may use the devenv to setup core deps like mise and use mise to manage Flutter, Android build tools and Xcode. Managing Flutter, Xcode and Android in devenv itself gets to messy otherwise. Additionally, we may use devenv to install pre-commit and some of the pre-commit tooling we need while managing the pre-commit config the conventional manner and not in a devenv config to allow non-devenv users to play along as well.
 
 #### Environment Variable Management Pattern
 
@@ -190,22 +213,20 @@ Use the **direnv → devenv → dotenv** trifecta for comprehensive environment 
 
 **Setup Instructions:**
 
-1. **Configure direnv** (`.envrc`):
+1. **Configure direnv** by copying the provided template:
 
    ```bash
-   export DIRENV_WARN_TIMEOUT=20s
-
-   # Watch .envrc.local for changes (auto-reload when it changes)
-   [[ -f .envrc.local ]] && watch_file .envrc.local
-
-   # Source optional user-specific secrets (gitignored)
-   [[ -f .envrc.local ]] && source .envrc.local
-
-   eval "$(devenv direnvrc)"
-   use devenv
+   cp .envrc.example .envrc
+   direnv allow
    ```
 
-2. **Enable dotenv in devenv** (`devenv.nix`):
+   This `.envrc.example` template includes:
+
+   - Timeout configuration to prevent direnv hangs
+   - Auto-watch and loading of `.envrc.local` for secrets
+   - Integration with devenv for reproducible development environment
+
+2. **Optional: **Enable dotenv and configure team-wide shared env vars in devenv\*\* (`devenv.nix`):
 
    ```nix
    {
@@ -221,8 +242,9 @@ Use the **direnv → devenv → dotenv** trifecta for comprehensive environment 
    }
    ```
 
-   > [!WARNING]
-   > Devenv's dotenv implementation is basic - it only supports simple `key=value` pairs without variable substitution (`${VAR}`) or command expansion (`$(cmd)`). This differs from popular dotenv implementations in Node.js or Ruby that support variable expansion. See [devenv's dotenv source](https://github.com/cachix/devenv/blob/main/src/modules/dotenv.nix) for implementation details.
+   Devenv's dotenv implementation is basic - it only supports simple `key=value` pairs without variable substitution (`${VAR}`) or command expansion (`$(cmd)`). This differs from popular dotenv implementations in Node.js or Ruby that support variable expansion. See [devenv's dotenv source](https://github.com/cachix/devenv/blob/main/src/modules/dotenv.nix) for implementation details.
+
+   Only use the `env` attribute to specify variables that are **shared and non-secret** and keep things simple -- if you already have to use `.envrc.local` to source some values dynamically, you may as well just track whatever you need there instead of spreading it across different places.
 
 3. **Create `.env.example`** with documented variable templates:
 
@@ -278,7 +300,8 @@ Use the **direnv → devenv → dotenv** trifecta for comprehensive environment 
 
 **Choose Your Approach** (Keep it Simple):
 
-**Recommendation: Pick ONE approach for your project to keep environment setup easy to reason about.**
+> [!TIP]
+> Pick ONE approach for your project to keep environment setup easy to reason about. If you can't use 1 approach, at least actively try to reduce the number of approaches used. Having an env var set over devenv's `env` attribute, a few more through `.env` and some dynamically sourced values in a `.envrc` fragments your config in a way that makes it dificult to debug when things start failing.
 
 **Option A: .envrc.local approach** (Recommended for dynamic secrets):
 
