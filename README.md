@@ -213,20 +213,18 @@ Use the **direnv → devenv → dotenv** trifecta for comprehensive environment 
 
 **Setup Instructions:**
 
-1. **Configure direnv** (`.envrc`):
+1. **Configure direnv** by copying the provided template:
 
    ```bash
-   export DIRENV_WARN_TIMEOUT=20s
-
-   # Watch .envrc.local for changes (auto-reload when it changes)
-   [[ -f .envrc.local ]] && watch_file .envrc.local
-
-   # Source optional user-specific secrets (gitignored)
-   [[ -f .envrc.local ]] && source .envrc.local
-
-   eval "$(devenv direnvrc)"
-   use devenv
+   cp .envrc.example .envrc
+   direnv allow
    ```
+
+   This `.envrc.example` template includes:
+
+   - Timeout configuration to prevent direnv hangs
+   - Auto-watch and loading of `.envrc.local` for secrets
+   - Integration with devenv for reproducible development environment
 
 2. **Optional: **Enable dotenv and configure team-wide shared env vars in devenv\*\* (`devenv.nix`):
 
