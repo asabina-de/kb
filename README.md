@@ -203,13 +203,12 @@ Downsides:
 
 #### Environment Variable Management Pattern
 
-Use the **direnv → devenv → dotenv** trifecta for comprehensive environment management:
+Use the **direnv -> devenv** pattern for environment management:
 
 **Tool Responsibilities:**
 
-- **direnv**: Auto-loads project environment when entering directory + executes commands for secret retrieval
-- **devenv**: Provides reproducible development environment with shared configuration
-- **dotenv**: Handles local/static environment variables via `.env` files
+- **direnv**: Auto-loads project environment when entering directory + executes commands for dynamic secret retrieval
+- **devenv**: Provides reproducible development environment with shared team configuration
 
 **Setup Instructions:**
 
@@ -226,47 +225,21 @@ Use the **direnv → devenv → dotenv** trifecta for comprehensive environment 
    - Auto-watch and loading of `.envrc.local` for secrets
    - Integration with devenv for reproducible development environment
 
-2. **Optional: **Enable dotenv and configure team-wide shared env vars in devenv\*\* (`devenv.nix`):
+2. **Configure shared team environment variables in devenv** (`devenv.nix`):
 
    ```nix
    {
-     # Enable loading of .env files for local configuration
-     dotenv.enable = true;
-
      # Shared environment variables (non-sensitive, team-wide)
      env = {
        NODE_ENV = "development";
+       LOG_LEVEL = "debug";
        # Add other shared, non-sensitive variables here
-       # For secrets and local overrides, use .env files
+       # For secrets and local values, use .envrc.local
      };
    }
    ```
 
-   Devenv's dotenv implementation is basic - it only supports simple `key=value` pairs without variable substitution (`${VAR}`) or command expansion (`$(cmd)`). This differs from popular dotenv implementations in Node.js or Ruby that support variable expansion. See [devenv's dotenv source](https://github.com/cachix/devenv/blob/main/src/modules/dotenv.nix) for implementation details.
-
-   Only use the `env` attribute to specify variables that are **shared and non-secret** and keep things simple -- if you already have to use `.envrc.local` to source some values dynamically, you may as well just track whatever you need there instead of spreading it across different places.
-
-3. **Create `.env.example`** with documented variable templates:
-
-   ```bash
-   # =====================================================================
-   # DEVENV DOTENV LIMITATIONS WARNING
-   # =====================================================================
-   # This .env file only supports simple key=value pairs.
-   # Variable expansion (${VAR}) and command expansion ($(cmd)) do NOT work.
-   #
-   # If you need dynamic values, use .envrc.local instead:
-   # - Dynamic secrets: export API_KEY=$(op read "op://vault/api/key")
-   # - Variable expansion: export DATABASE_URL="postgres://user:${PASSWORD}@localhost/db"
-   # =====================================================================
-
-   # Copy this file to .env and customize for your local development
-   # DATABASE_URL=postgresql://username:hardcoded_password@localhost:5432/dbname
-   # API_ENDPOINT=https://api.example.com/v1/users
-   # NODE_ENV=development
-   ```
-
-4. **Create `.envrc.local.example`** with dynamic secret templates:
+3. **Create `.envrc.local.example`** for local environment configuration:
 
    ```bash
    # =====================================================================
@@ -295,47 +268,21 @@ Use the **direnv → devenv → dotenv** trifecta for comprehensive environment 
    # export API_BASE_URL="https://api.example.com"
    ```
 
-5. **Optional: Create `.envrc.local`** for your actual secrets (gitignored):
-   Copy `.envrc.local.example` to `.envrc.local` and customize with your actual secret management commands.
+4. **Create `.envrc.local`** for your actual configuration (gitignored):
+   Copy `.envrc.local.example` to `.envrc.local` and customize with your actual values.
 
-**Choose Your Approach** (Keep it Simple):
+**Environment Variable Precedence:**
 
-> [!TIP]
-> Pick ONE approach for your project to keep environment setup easy to reason about. If you can't use 1 approach, at least actively try to reduce the number of approaches used. Having an env var set over devenv's `env` attribute, a few more through `.env` and some dynamically sourced values in a `.envrc` fragments your config in a way that makes it dificult to debug when things start failing.
-
-**Option A: .envrc.local approach** (Recommended for dynamic secrets):
-
-- Use `.envrc.local` for all local environment variables
-- Supports command expansion: `$(op read "...")`, `$(aws ssm get-parameter ...)`
-- Supports variable expansion: `${VAR}`
-- More flexible for enterprise secret management
-
-**Option B: .env approach** (Recommended for simple static values):
-
-- Use `.env` for all local environment variables
-- Simple `key=value` pairs only
-- Easier for developers familiar with standard dotenv
-- No command or variable expansion support
-
-**Variable Precedence Order:**
-
-1. **`.envrc.local`** OR **`.env`** (your chosen local config approach)
+1. **`.envrc.local`** (local overrides and secrets)
 2. **`devenv.nix` env block** (shared team configuration)
 
 **Key Guidelines:**
 
-- **Shared, non-sensitive config**: Always use `devenv.nix` env block
-- **Local config**: Choose either `.envrc.local` OR `.env` (not both)
-- **Documentation**: Maintain example files for your chosen approach
-- **Team consistency**: Document which approach your project uses in README
-- **Security**: Add ALL working environment files to `.gitignore` (`.envrc`, `.envrc.local`, `.env`)
-- **Examples committed**: Only `.example` files should be committed for team reference
-
-**When to Choose Which:**
-
-- **Choose .envrc.local if**: You need dynamic secrets (1Password, AWS SSM, GCP Secret Manager) or variable expansion
-- **Choose .env if**: You have simple static values and want standard dotenv behavior
-- **Avoid mixing**: Don't use both `.envrc.local` AND `.env` in the same project
+- **Shared, non-sensitive config**: Use `devenv.nix` env block
+- **Local config and secrets**: Use `.envrc.local` with full bash support
+- **Security**: Add `.envrc` and `.envrc.local` to `.gitignore`
+- **Documentation**: Commit `.envrc.example` and `.envrc.local.example` for team reference
+- **Simplicity**: Single approach reduces complexity and debugging overhead
 
 This pattern ensures consistent shared configuration while allowing secure local customization.
 

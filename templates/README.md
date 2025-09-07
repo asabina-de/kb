@@ -63,7 +63,7 @@ This project uses **devenv** and **direnv** to manage development environments, 
 
 ### Environment Setup
 
-This project uses the **direnv → devenv → dotenv pattern** for environment management. Once you have devenv and direnv installed:
+This project uses the **direnv -> devenv pattern** for environment management. Once you have devenv and direnv installed:
 
 1. **Set up your local environment** by copying the provided template:
 
@@ -78,20 +78,11 @@ This project uses the **direnv → devenv → dotenv pattern** for environment m
    - Auto-watch functionality for `.envrc.local` changes (secrets reload automatically)
    - Seamless integration with devenv for reproducible development environment
 
-2. **Configure environment variables** (choose the approach this project uses):
-
-   **If this project uses .envrc.local approach**:
+2. **Configure local environment variables**:
 
    ```bash
    cp .envrc.local.example .envrc.local
-   # Edit .envrc.local with your actual secrets/dynamic values
-   ```
-
-   **If this project uses .env approach**:
-
-   ```bash
-   cp .env.example .env
-   # Edit .env with your actual static values
+   # Edit .envrc.local with your actual secrets and local configuration
    ```
 
 3. **Environment activation**:
@@ -99,7 +90,7 @@ This project uses the **direnv → devenv → dotenv pattern** for environment m
    - **Manual**: If needed, run `devenv shell`
 
 > [!NOTE]
-> This project uses [**specify: .envrc.local OR .env approach**] for local environment variables. All working environment files (`.envrc`, `.envrc.local`, or `.env`) contain your personal configuration and are gitignored. Only the `.example` files are committed to help teammates understand what variables are needed.
+> This project uses **.envrc.local** for local environment variables. All working environment files (`.envrc` and `.envrc.local`) contain your personal configuration and are gitignored. Only the `.example` files are committed to help teammates understand what variables are needed.
 
 For complete environment management documentation, see [knowledge-base environment setup guide](./knowledge-base/README.md#environment-variable-management-pattern).
 

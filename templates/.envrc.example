@@ -1,7 +1,7 @@
 # .envrc.example - Development environment template
 #
 # Copy this file to .envrc to set up your development environment.
-# This file uses the direnv → devenv → dotenv loading order for env management.
+# This file uses the direnv -> devenv pattern for env management.
 #
 # See knowledge-base/README.md "Environment Variable Management Pattern" for details.
 
