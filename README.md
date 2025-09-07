@@ -75,7 +75,7 @@ Use Linear for work tracking and planning.
 - Needs version control with code changes
 - Agents/automation need access
 
-**Key test:** _"Does this decision affect how code is written, deployed, or maintained?"_ → GitHub. _"Is this about what to build or how to operate as a team?"_ → Linear.
+**Key test:** _"Does this decision affect how code is written, deployed, or maintained?"_ -> GitHub. _"Is this about what to build or how to operate as a team?"_ -> Linear.
 
 **Default rule:** When in doubt, use in-repo since it's more accessible to agents and developers.
 

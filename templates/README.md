@@ -63,7 +63,7 @@ This project uses **devenv** and **direnv** to manage development environments, 
 
 ### Environment Setup
 
-This project uses the **direnv → devenv pattern** for environment management:
+This project uses the **direnv -> devenv pattern** for environment management:
 
 > [!WARNING]
 > Avoid devenv's `dotenv.enable = true` option: It only supports basic `key=value` pairs without variable expansion (`${VAR}`) or command execution (`$(cmd)`). This differs from standard dotenv libraries and will frustrate developers. Use `.envrc.local` instead for full bash support.

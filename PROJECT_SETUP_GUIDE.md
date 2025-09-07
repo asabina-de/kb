@@ -55,14 +55,14 @@ See [knowledge-base/README.md#environment-variable-management-pattern](./README.
 
 **Common Progression (by developer workflow relevance):**
 
-1. **README.md** → Project foundation, setup, basic guidelines (include linting for small projects)
-2. **GUIDELINES.md** → When README outgrows itself or team needs formal engineering standards
-3. **TODO.md** → When you need a scratchpad for repo-specific gotchas/tasks
-4. **DESIGN_NOTES.md** → When exploring complex designs (iteration scratchpad)
-5. **DECISIONS.md** → When graduating mature designs from DESIGN_NOTES.md exploration
-6. **LINTING_FORMATTING.md** → Only when team size or complexity demands separate file
-7. **AI Guidance** → When using AI development tools (AGENTS.md + CLAUDE.md)
-8. **Visual diagrams** → When system relationships become complex
+1. **README.md** -> Project foundation, setup, basic guidelines (include linting for small projects)
+2. **GUIDELINES.md** -> When README outgrows itself or team needs formal engineering standards
+3. **TODO.md** -> When you need a scratchpad for repo-specific gotchas/tasks
+4. **DESIGN_NOTES.md** -> When exploring complex designs (iteration scratchpad)
+5. **DECISIONS.md** -> When graduating mature designs from DESIGN_NOTES.md exploration
+6. **LINTING_FORMATTING.md** -> Only when team size or complexity demands separate file
+7. **AI Guidance** -> When using AI development tools (AGENTS.md + CLAUDE.md)
+8. **Visual diagrams** -> When system relationships become complex
 
 ## When to Create Each Document
 

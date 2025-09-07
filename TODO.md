@@ -19,4 +19,4 @@
 
 ## Never
 
-- [ ] ~~Separate .mmd diagram files~~ → GitHub doesn't support file references (Reason: Platform limitation, Date: 2025-07-14)
+- [ ] ~~Separate .mmd diagram files~~ -> GitHub doesn't support file references (Reason: Platform limitation, Date: 2025-07-14)

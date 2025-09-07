@@ -43,7 +43,7 @@
 
 - `src/api/users.ts: N+1 query causing slow dashboard loads (Impact: Performance, Effort: M)`
 - `README.md: Missing Redis setup steps (Impact: DevEx, Effort: S)`
-- `~~Real-time chat~~ → Polling sufficient for now (Reason: Complexity vs value, Date: 2024-01-15)`
+- `~~Real-time chat~~ -> Polling sufficient for now (Reason: Complexity vs value, Date: 2024-01-15)`
 
 **Workflow:**
 

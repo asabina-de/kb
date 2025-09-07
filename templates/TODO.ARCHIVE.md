@@ -16,7 +16,7 @@ This file contains items moved from `TODOs.md` to prevent endless growth while p
 
 ### 2024-Q1
 
-- [ ] ~~Example rejected idea~~ → Reason for rejection (2024-01-10)
+- [ ] ~~Example rejected idea~~ -> Reason for rejection (2024-01-10)
 
 ### 2024-Q4
 
