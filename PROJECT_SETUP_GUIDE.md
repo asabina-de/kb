@@ -58,7 +58,14 @@ This command loads the environment and integrates with `devenv` as configured in
 - **Shared Variables:** Edit `devenv.nix` to include non-sensitive, team-wide environment variables.
 - **Local Secrets:** Edit `.envrc.local.example` to document the required secrets and local overrides for your project. Developers will use this to populate their own `.envrc.local`.
 
-### 2. Setup Verification
+### 2. Git Configuration
+
+Ensure every contributor's commits are properly attributed and signed. For each new repository, configure your local Git settings using `git config edit --local`.
+
+- **User Email:** Set your work email address via the `user.email` property.
+- **Commit Signing:** We recommend using 1Password to manage SSH keys for signing commits. For the complete setup, follow the official [1Password guide on Git commit signing](https://developer.1password.com/docs/ssh/git-commit-signing/).
+
+### 3. Setup Verification
 
 Include setup verification instructions in your project's `README.md` to ensure developers properly configure their environment. Key verification points:
 
@@ -68,7 +75,7 @@ Include setup verification instructions in your project's `README.md` to ensure 
 
 See the [README template](./templates/README.md#setup-verification) for complete setup verification examples that you can customize for your project.
 
-### 3. Initial Documentation Setup
+### 4. Initial Documentation Setup
 
 Copy the core documentation templates into your project.
 
