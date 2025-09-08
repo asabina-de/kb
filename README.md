@@ -4,6 +4,9 @@ This repo is our go to reference for engineering instructions. With agentic
 tools, you should be able to locally navigate through the relevant details
 using this tool.
 
+> [!IMPORTANT]
+> This README is the authoritative source for engineering standards and knowledge base usage. It contains comprehensive guidance for development workflow, tooling, and documentation standards that all projects should follow.
+
 ## Tooling
 
 ### Knowledge Base
@@ -17,7 +20,16 @@ repo-specific details.
   where you need to scribble
 
 > [!TIP]
-> In your project repos, symlink the `knowledge-base` directory to this repo, just to provide your AI tooling quick-access to this handbook. See our recommendation for [AGENTS.md](./templates/AGENTS.md) and [CLAUDE.md](./templates/CLAUDE.md) which does include references to the knowledge-base trick.
+> In your project repos, symlink the `knowledge-base` directory to this repo, just to provide your AI tooling quick-access to this handbook. See our recommendation for [AGENTS.md](./templates/AGENTS.md) (with CLAUDE.md as a symlink) which includes references to the knowledge-base pattern.
+
+#### Setting Up New Projects
+
+**For new project documentation setup:** Follow the [PROJECT_SETUP_GUIDE.md](./PROJECT_SETUP_GUIDE.md) for step-by-step instructions on implementing our documentation standards in new repositories or retrofitting existing ones. This guide is essential for:
+
+- Environment template setup (devenv/direnv pattern)
+- Documentation structure implementation
+- Template customization and maintenance
+- Quality standards establishment
 
 ### Git
 

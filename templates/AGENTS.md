@@ -2,7 +2,8 @@
 
 This file provides AI agents with guidance for working within this project. It follows the [agents.md](https://agents.md/) specification for AI coding agents.
 
-Follow the tooling and design guidance outlined in the README.
+> [!IMPORTANT]
+> This is a concise summary for AI agents - the README.md is the authoritative source of truth. For detailed setup instructions, troubleshooting, and comprehensive development guidance, always reference the README.md. This file provides high-level verification checklists and AI-specific workflow guidance.
 
 ## Project Overview
 
@@ -11,9 +12,38 @@ Follow the tooling and design guidance outlined in the README.
 ## Setup Commands
 
 - Install dependencies: [Add project-specific commands]
-- Start development server: [Add start command] 
+- Start development server: [Add start command]
 - Run tests: [Add test command]
 - Build: [Add build command]
+
+## Environment Verification
+
+**CRITICAL: Verify the development environment before starting any work**
+
+### Pre-Flight Checklist
+
+Run these verification commands (detailed instructions in README.md):
+
+```bash
+# 1. Git Configuration Check
+git config --list --local | grep -E "(user\.|commit\.|gpg\.)"
+# Expected: user.email, user.signingkey, commit.gpgsign=true
+
+# 2. Development Environment Check
+echo $DIRENV_WARN_TIMEOUT  # Should return: 20s
+which [your-main-tool] && [your-main-tool] --version
+
+# 3. Project Commands Check
+[Add your project-specific commands, examples:]
+npm run lint --help && npm run test --help && npm run build --help
+```
+
+**If any verification fails:**
+
+- **STOP and refer user to README.md setup section**
+- Do not proceed with code changes until environment is properly configured
+- For git config issues: Direct to README.md git configuration section
+- For environment issues: Direct to README.md environment setup section
 
 ## Development Environment
 
@@ -53,6 +83,30 @@ Follow the tooling and design guidance outlined in the README.
 </details>
 ```
 
+## Code Quality Requirements
+
+**MANDATORY: Run these commands before committing any changes**
+
+### Pre-Commit Quality Checklist
+
+Execute these commands (detailed explanations in README.md):
+
+```bash
+# Quality pipeline - ALL must pass:
+[Add your project-specific commands, examples:]
+npm run format && npm run lint && npm run type-check && npm run test && npm run build
+
+# Or if pre-commit hooks are configured:
+pre-commit run --all-files
+```
+
+**Critical Rules:**
+
+- **NEVER commit code that fails these checks**
+- If any command fails: fix issues before proceeding
+- If stuck: ask user for help with specific error messages
+- Reference README.md "Development Quality Standards" section for detailed troubleshooting
+
 ## Commit Strategy
 
 - Use conventional commit format
@@ -61,6 +115,15 @@ Follow the tooling and design guidance outlined in the README.
 - Break work into focused, single-concern commits
 - Stick to short commit titles that are less than 80 characters long
 - Add a "Co-authored by:" line in suggested commit messages
+
+### Pre-Commit Workflow
+
+1. **Complete your changes**
+2. **Run all quality checks** (formatting, linting, type checking, tests, build)
+3. **Fix any issues** that arise from quality checks
+4. **Stage your changes**: `git add .`
+5. **Commit with proper message format**
+6. **Verify commit was signed**: `git log --show-signature -1`
 
 ## Communication
 
