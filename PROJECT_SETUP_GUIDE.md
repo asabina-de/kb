@@ -14,37 +14,31 @@ Before diving into documentation, set up environment templates for your project:
 
    ```bash
    cp knowledge-base/templates/.envrc.example .envrc.example
-   ```
-
-2. **Choose your local environment approach** (pick ONE to keep it simple):
-
-   **Option A: Dynamic secrets (.envrc.local approach)**:
-
-   ```bash
    cp knowledge-base/templates/.envrc.local.example .envrc.local.example
    ```
 
-   **Option B: Static values (.env approach)**:
-
-   ```bash
-   cp knowledge-base/templates/.env.example .env.example
-   ```
-
-3. **Set up .gitignore** to ignore all working environment files:
+2. **Set up .gitignore** to ignore working environment files:
 
    ```bash
    echo ".envrc" >> .gitignore
    echo ".envrc.local" >> .gitignore
-   echo ".env" >> .gitignore
    ```
 
-4. **Document your choice**: Update your project README to specify which approach your team uses
+3. **Customize examples**: Edit the `.example` files to document your project's specific environment variables
 
-5. **Customize examples**: Edit the `.example` files to document your project's specific environment variables
-
-**For contributors**: Individual developers will later copy these `.example` files to create their working environment files during project setup.
+**For contributors**: Individual developers will copy these `.example` files to create their working environment files during project setup following the **direnv -> devenv pattern**.
 
 See [knowledge-base/README.md#environment-variable-management-pattern](./README.md#environment-variable-management-pattern) for complete environment management documentation.
+
+### Setup Verification
+
+Include setup verification instructions in your project README to ensure developers properly configure their environment. Key verification points:
+
+1. **Git configuration** - Verify commits are properly signed and attributed
+2. **Development environment** - Verify devenv/direnv is active and tools are available
+3. **Quality tools** - Verify linting, testing, and build commands work
+
+See the [README template](./templates/README.md#setup-verification) for complete setup verification examples that you can customize for your project.
 
 ### Pragmatic Approach: Create What You Need
 
@@ -61,12 +55,19 @@ See [knowledge-base/README.md#environment-variable-management-pattern](./README.
 4. **DESIGN_NOTES.md** -> When exploring complex designs (iteration scratchpad)
 5. **DECISIONS.md** -> When graduating mature designs from DESIGN_NOTES.md exploration
 6. **LINTING_FORMATTING.md** -> Only when team size or complexity demands separate file
-7. **AI Guidance** -> When using AI development tools (AGENTS.md + CLAUDE.md)
+7. **AI Guidance** -> When using AI development tools (AGENTS.md with CLAUDE.md symlink)
 8. **Visual diagrams** -> When system relationships become complex
 
 ## When to Create Each Document
 
 ### Start Every Project With:
+
+**README.md** - The authoritative source of truth
+
+- Include comprehensive setup instructions with verification steps
+- Document environment management (direnv -> devenv pattern)
+- Include development quality standards and pre-commit requirements
+- Reference other documentation files but remain self-contained for basic setup
 
 **GUIDELINES.md** - Immediately
 
@@ -117,18 +118,20 @@ See [knowledge-base/README.md#environment-variable-management-pattern](./README.
 
 ### Add When Using AI Development Tools:
 
-**AGENTS.md** - General AI agent guidelines
+**AGENTS.md** - AI agent guidelines (single source of truth)
 
 - Development workflow and commit strategy
+- Environment verification and setup commands
+- Pre-commit quality requirements
 - Documentation update patterns
 - Communication guidelines
-- Project-specific environment setup
+- Project-specific context for AI agents
 
-**CLAUDE.md** - Claude-specific instructions
+**CLAUDE.md** - Symlink to AGENTS.md
 
-- References AGENTS.md for core guidelines
-- Claude-specific behaviors and tool usage
-- Should be minimal, pointing to AGENTS.md for most guidance
+- Create symlink: `ln -s AGENTS.md CLAUDE.md`
+- Maintains backward compatibility with Claude-specific tooling
+- Single file to maintain (AGENTS.md is the canonical source)
 
 ## Template Customization Guide
 
@@ -228,11 +231,15 @@ docs/
 
 ```
 project-root/
+├── .envrc.example         # Environment template
+├── .envrc.local.example   # Local environment template
+├── .eslintrc.json         # From LINTING_FORMATTING.md (if applicable)
+├── .prettierrc            # From LINTING_FORMATTING.md (if applicable)
+├── AGENTS.md              # AI agent guidelines (when using AI development tools)
+├── CLAUDE.md -> AGENTS.md # Symlink for backward compatibility
+├── README.md              # Project overview, setup, and development guide
 ├── docs/                  # All documentation
-├── .eslintrc.json        # From LINTING_FORMATTING.md
-├── .prettierrc           # From LINTING_FORMATTING.md
-├── README.md             # Project overview + link to docs/
-└── [source code]         # Your application code
+└── [source code]          # Your application code
 ```
 
 ## Maintenance Guidelines
@@ -290,6 +297,7 @@ project-root/
 - [ ] Updated DECISIONS.md (if architectural change)
 - [ ] Updated DESIGN_NOTES.md (if data model change)
 - [ ] Updated TODOs.md (task completion/new tasks)
+- [ ] Updated AGENTS.md (if AI workflow changes)
 - [ ] Updated diagrams (if system change)
 ```
 
