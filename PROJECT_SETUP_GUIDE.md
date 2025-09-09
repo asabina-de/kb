@@ -1,134 +1,96 @@
 # Project Setup & Documentation Process
 
-This guide provides a step-by-step process for setting up documentation in new projects using our standardized 6-document structure.
+This guide provides a step-by-step process for setting up a new project using our standardized documentation and environment patterns.
 
 ## Quick Start Checklist
 
-For every new project, copy the appropriate [templates](./templates/) and customize them:
+For every new project, follow these steps to ensure consistency.
 
-### Environment Setup (Recommended First Step)
+### 1. Environment Setup (Recommended First Step)
 
-Before diving into documentation, set up environment templates for your project:
+We use a **direnv -> devenv** pattern for environment management. This provides a consistent, reproducible development environment while keeping secrets secure and local.
 
-1. **Copy environment example files**:
+> [!WARNING]
+> Avoid devenv's `dotenv.enable = true` option. It only supports basic `key=value` pairs and will cause frustration. Use `.envrc.local` for full bash support, including variable expansion (`${VAR}`) and command execution (`$(cmd)`).
 
-   ```bash
-   cp knowledge-base/templates/.envrc.example .envrc.example
-   ```
+**A. Copy Environment Templates**
 
-2. **Choose your local environment approach** (pick ONE to keep it simple):
+Copy the example files from the knowledge base into your new project's root.
 
-   **Option A: Dynamic secrets (.envrc.local approach)**:
+```bash
+# Example assumes knowledge-base is cloned next to your project
+cp ../kb/templates/.envrc.example .envrc.example
+cp ../kb/templates/.envrc.local.example .envrc.local.example
+```
 
-   ```bash
-   cp knowledge-base/templates/.envrc.local.example .envrc.local.example
-   ```
+**B. Create Working Environment Files**
 
-   **Option B: Static values (.env approach)**:
+Instruct developers to create their own working files from the examples.
 
-   ```bash
-   cp knowledge-base/templates/.env.example .env.example
-   ```
+```bash
+cp .envrc.example .envrc
+cp .envrc.local.example .envrc.local
+```
 
-3. **Set up .gitignore** to ignore all working environment files:
+**C. Configure `.gitignore`**
 
-   ```bash
-   echo ".envrc" >> .gitignore
-   echo ".envrc.local" >> .gitignore
-   echo ".env" >> .gitignore
-   ```
+Ensure local environment files are never committed. Add them to your project's `.gitignore`.
 
-4. **Document your choice**: Update your project README to specify which approach your team uses
+```bash
+echo "" >> .gitignore
+echo "# Local environment files" >> .gitignore
+echo ".envrc" >> .gitignore
+echo ".envrc.local" >> .gitignore
+```
 
-5. **Customize examples**: Edit the `.example` files to document your project's specific environment variables
+**D. Allow Direnv**
 
-**For contributors**: Individual developers will later copy these `.example` files to create their working environment files during project setup.
+Once `.envrc` is present, `direnv` will prompt for permission on first entry into the directory.
 
-See [knowledge-base/README.md#environment-variable-management-pattern](./README.md#environment-variable-management-pattern) for complete environment management documentation.
+```bash
+direnv allow
+```
 
-### Pragmatic Approach: Create What You Need
+This command loads the environment and integrates with `devenv` as configured in the template.
 
-**Start Simple:**
+**E. Customize for Your Project**
 
-- Use your **README.md** for basic setup instructions and initial guidelines
-- Create docs only when you actually need them
+- **Shared Variables:** Edit `devenv.nix` to include non-sensitive, team-wide environment variables.
+- **Local Secrets:** Edit `.envrc.local.example` to document the required secrets and local overrides for your project. Developers will use this to populate their own `.envrc.local`.
 
-**Common Progression (by developer workflow relevance):**
+### 2. Git Configuration
 
-1. **README.md** → Project foundation, setup, basic guidelines (include linting for small projects)
-2. **GUIDELINES.md** → When README outgrows itself or team needs formal engineering standards
-3. **TODO.md** → When you need a scratchpad for repo-specific gotchas/tasks
-4. **DESIGN_NOTES.md** → When exploring complex designs (iteration scratchpad)
-5. **DECISIONS.md** → When graduating mature designs from DESIGN_NOTES.md exploration
-6. **LINTING_FORMATTING.md** → Only when team size or complexity demands separate file
-7. **AI Guidance** → When using AI development tools (AGENTS.md + CLAUDE.md)
-8. **Visual diagrams** → When system relationships become complex
+Ensure every contributor's commits are properly attributed and signed. For each new repository, configure your local Git settings using `git config edit --local`.
 
-## When to Create Each Document
+- **User Email:** Set your work email address via the `user.email` property.
+- **Commit Signing:** We recommend using 1Password to manage SSH keys for signing commits. For the complete setup, follow the official [1Password guide on Git commit signing](https://developer.1password.com/docs/ssh/git-commit-signing/).
 
-### Start Every Project With:
+### 3. Setup Verification
 
-**GUIDELINES.md** - Immediately
+Include setup verification instructions in your project's `README.md` to ensure developers properly configure their environment. Key verification points:
 
-- Essential for code consistency from day one
-- Customize the tech stack sections (React/Vue/etc.)
-- Remove irrelevant sections
-- Add project-specific standards
+1.  **Git configuration** - Verify commits are properly signed and attributed.
+2.  **Development environment** - Verify `devenv` and `direnv` are active and tools are available.
+3.  **Quality tools** - Verify linting, testing, and build commands work.
 
-**TODOs.md** - Immediately
+See the [README template](./templates/README.md#setup-verification) for complete setup verification examples that you can customize for your project.
 
-- Capture initial project scope and requirements
-- Track setup tasks (CI/CD, deployments, etc.)
-- Plan feature development roadmap
+### 4. Initial Documentation Setup
 
-### Add When Making Major Decisions:
+Copy the core documentation templates into your project.
 
-**DECISIONS.md** - When you make your first architectural choice
+```bash
+# Create a docs directory
+mkdir -p docs
 
-- Framework selection (React vs Vue vs Svelte)
-- State management approach (Context vs Redux vs Zustand)
-- Database choice and schema design
-- Authentication strategy
-- Deployment architecture
+# Copy templates
+cp ../kb/templates/GUIDELINES.md ./docs/
+cp ../kb/templates/TODO.md ./docs/
+cp -r ../kb/templates/decisions ./docs/
+cp -r ../kb/templates/design-notes ./docs/
+```
 
-### Add When System Complexity Grows:
-
-**DESIGN_NOTES.md** - When exploring complex designs
-
-- **Use as iteration scratchpad** for evolving ideas and alternatives
-- Core data models and schemas (draft versions)
-- API design patterns exploration
-- **Graduate mature designs to DECISIONS.md** with full rationale
-
-**Visual Diagrams** - When relationships become complex
-
-- Entity relationship diagrams (embed Mermaid syntax in markdown files)
-- System architecture diagrams (embed Mermaid syntax in markdown files)
-- Flow charts for complex processes (embed Mermaid syntax in markdown files)
-- Use inline Mermaid blocks for GitHub integration
-
-### Add When Team Grows:
-
-**LINTING_FORMATTING.md** - Only when team size or complexity demands it
-
-- **For small projects**: Embed basic linting setup in README.md or GUIDELINES.md
-- **For larger teams**: Create separate file to prevent GUIDELINES.md bloat
-- Prevents style inconsistencies and automates code quality checks
-
-### Add When Using AI Development Tools:
-
-**AGENTS.md** - General AI agent guidelines
-
-- Development workflow and commit strategy
-- Documentation update patterns
-- Communication guidelines
-- Project-specific environment setup
-
-**CLAUDE.md** - Claude-specific instructions
-
-- References AGENTS.md for core guidelines
-- Claude-specific behaviors and tool usage
-- Should be minimal, pointing to AGENTS.md for most guidance
+Refer to the main [Engineering Handbook (README.md)](./README.md) for the philosophy on when and how to use each of these documents.
 
 ## Template Customization Guide
 
@@ -148,13 +110,6 @@ See [knowledge-base/README.md#environment-variable-management-pattern](./README.
 # Keep: Error handling, logging, security sections
 # Remove: Frontend-specific content
 # Add: API design patterns, database patterns
-```
-
-**For Full-Stack Projects:**
-
-```bash
-# Keep: All sections
-# Customize: Each section for your specific stack
 ```
 
 ### 2. TODO.md Initial Setup
@@ -178,19 +133,11 @@ Replace template tasks with your project needs:
 - [ ] Set up health check endpoints
 - [ ] Implement security headers
 - [ ] Configure backup strategy
-
-## Later (Future Consideration)
-
-- [ ] Profit!
-
-## Never (Decided Against)
-
-- [ ] Collect tech debt... just kidding... no winning without a couple of bruises
 ```
 
 ### 3. DECISIONS.md First Entry
 
-Document your first major decision:
+Document your first major decision in the `docs/decisions` directory, using the template.
 
 ```markdown
 ### 2024-01-15 - Framework Selection
@@ -205,142 +152,13 @@ Document your first major decision:
 - Excellent TypeScript support
 - Large ecosystem and community
 - Team familiarity
-
-[Continue with Benefits, Trade-offs, etc.]
 ```
 
-## Project Structure Recommendations
+## Maintenance & Integration
 
-### Docs Directory Layout
-
-```
-docs/
-├── DECISIONS.md           # Architecture decisions
-├── DESIGN_NOTES.md        # System design
-├── GUIDELINES.md          # Development standards
-├── LINTING_FORMATTING.md  # Code quality rules
-├── TODOs.md               # Task tracking
-# Note: Mermaid diagrams should be embedded inline in relevant .md files
-# GitHub doesn't support including separate .mmd files
-```
-
-### Root Level Files
-
-```
-project-root/
-├── docs/                  # All documentation
-├── .eslintrc.json        # From LINTING_FORMATTING.md
-├── .prettierrc           # From LINTING_FORMATTING.md
-├── README.md             # Project overview + link to docs/
-└── [source code]         # Your application code
-```
-
-## Maintenance Guidelines
-
-### Keep Documentation Current
-
-**Weekly Review:**
-
-- Update TODOs.md with completed tasks and new items
-- Move completed items to the ✅ section
-- Reprioritize pending tasks
-
-**After Major Changes:**
-
-- Update DECISIONS.md with new architectural choices
-- Revise DESIGN_NOTES.md if data models change
-- Update diagrams if system architecture evolves
-
-**Monthly Review:**
-
-- Review GUIDELINES.md for outdated practices
-- Update LINTING_FORMATTING.md with new tools
-- Archive old TODOs that are no longer relevant
-
-### Documentation Quality Checks
-
-**Before Each Release:**
-
-- [ ] All documents are current and accurate
-- [ ] TODOs reflect actual project status
-- [ ] Decision rationales are still valid
-- [ ] Design notes match current implementation
-- [ ] Visual diagrams reflect current architecture
-
-## Integration with Development Workflow
-
-### Git Workflow Integration
-
-**Branch Naming:**
-
-- `docs/update-architecture-decisions` for documentation updates
-- `feat/user-auth-docs/implementation` for feature + docs
-
-**Pull Request Template:**
-
-```markdown
-## Changes
-
-- [ ] Code changes
-- [ ] Documentation updates
-- [ ] Tests added/updated
-
-## Documentation Impact
-
-- [ ] Updated DECISIONS.md (if architectural change)
-- [ ] Updated DESIGN_NOTES.md (if data model change)
-- [ ] Updated TODOs.md (task completion/new tasks)
-- [ ] Updated diagrams (if system change)
-```
-
-### CI/CD Integration
-
-**Documentation Checks:**
-
-```yaml
-# Add to GitHub Actions
-- name: Check Documentation
-  run: |
-    # Ensure all decision entries have required sections
-    # Validate Mermaid diagrams syntax
-    # Check for broken internal links
-```
-
-## Examples from Real Projects
-
-### Successful Implementation: notumo-react-app
-
-- **Started with:** GUIDELINES.md, TODOs.md
-- **Added early:** DECISIONS.md for state management choice
-- **Evolved to:** Full 6-document structure as system complexity grew
-- **Key success:** Each document had clear, distinct purpose
-
-### Common Pitfalls to Avoid
-
-**Don't:**
-
-- Create all documents at once (overwhelming)
-- Copy templates without customization
-- Let documents become stale/outdated
-- Duplicate information across documents
-
-**Do:**
-
-- Start small with essential documents
-- Customize templates for your specific context
-- Update documents as part of development workflow
-- Keep each document focused on its specific purpose
+For guidelines on maintaining documentation, integrating with Git, and CI/CD checks, please refer to the main [Engineering Handbook (README.md)](./README.md).
 
 ## Related Resources
 
-- [Documentation Standards in README.md](./README.md#documentation-standards)
+- [Engineering Handbook (README.md)](./README.md)
 - [Template Directory](./templates/) - All template files
-- [notumo Example](../notumo/notumo-react-app/worktree-00/docs/) - Real-world implementation
-
-## Questions & Support
-
-For questions about documentation standards or template usage:
-
-1. Review existing examples in notumo project
-2. Check this guide for specific scenarios
-3. Create documentation following templates and iterate based on team feedback

@@ -44,9 +44,9 @@ This directory contains **individual design exploration files** to avoid git wor
 
 ## Status Lifecycle
 
-- **Draft** → **Active** → **Implemented** → **Stable** (Path B)
-- **Draft** → **Active** → **Completed** → **Archived** (Path A)
-- **Draft** → **Deprecated** → **Archived** (abandoned approaches)
+- **Draft** -> **Active** -> **Implemented** -> **Stable** (Path B)
+- **Draft** -> **Active** -> **Completed** -> **Archived** (Path A)
+- **Draft** -> **Deprecated** -> **Archived** (abandoned approaches)
 
 ## Examples
 
