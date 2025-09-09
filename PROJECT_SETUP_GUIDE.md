@@ -135,7 +135,7 @@ Replace template tasks with your project needs:
 - [ ] Configure backup strategy
 ```
 
-### 3. DECISIONS.md First Entry
+### DECISIONS.md First Entry
 
 Document your first major decision in the `docs/decisions` directory, using the template.
 

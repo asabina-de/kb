@@ -182,13 +182,19 @@ Every project should maintain consistent documentation using our **structured an
 
 _Ordered by developer workflow relevance_
 
-1.  **README.md** (`./README.md`) - Project Foundation
-2.  **GUIDELINES.md** (`./docs/GUIDELINES.md`) - Development Standards and Best Practices
-3.  **TODO.md** (`./docs/TODO.md`) - Task Management using Now/Next/Later/Never Framework
-4.  **design-notes/** (`./docs/design-notes/`) - Design Iteration and System Models
-5.  **decisions/** (`./docs/decisions/`) - Architecture Decision Records (ADR)
-6.  **LINTING_FORMATTING.md** (`./docs/LINTING_FORMATTING.md`) - Code Quality Standards _(conditional)_
-7.  **AGENTS.md** (`./AGENTS.md`) - AI agent guidelines _(conditional)_
+- **README.md** (`./README.md`) - Project Foundation
+- **GUIDELINES.md** (`./docs/GUIDELINES.md`) - Development Standards and Best Practices
+- **TODO.md** (`./docs/TODO.md`) - Task Management using Now/Next/Later/Never Framework
+- **design-notes/** (`./docs/design-notes/`) - Design Iteration and System Models
+  - **Filename Convention**: `YYYY-MM-DD.STATE.description.md` (e.g. `2025-09-08.WIP.api-design.md`)
+  - **Front Matter**: Each file includes a `title` and a list of `tags` to aid discovery for cross-cutting concerns.
+  - Used as a scratchpad for evolving ideas. The `STATE` in the filename (`TODO`, `WIP`, `DONE`) tracks its lifecycle.
+- **decisions/** (`./docs/decisions/`) - Architecture Decision Records (ADR)
+  - **Filename Convention**: `YYYY-MM-DD.STATE.description.md`
+  - **Front Matter**: Includes `title` and `tags`.
+  - Immutable snapshots of final decisions, often graduated from a `DONE` design note.
+- **LINTING_FORMATTING.md** (`./docs/LINTING_FORMATTING.md`) - Code Quality Standards _(conditional)_
+- **AGENTS.md** (`./AGENTS.md`) - AI agent guidelines _(conditional)_
 
 ### When to Create Each Document
 
