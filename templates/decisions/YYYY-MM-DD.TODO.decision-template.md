@@ -1,77 +1,25 @@
-# Decision: [Title]
+---
+title: "Human-Readable Title of the Decision"
+tags: [tag1, tag2]
+---
 
-**Date**: YYYY-MM-DD  
-**Status**: Proposed | Accepted | Superseded
+# Decision: [TITLE]
 
-## Status History
+**Date:** YYYY-MM-DD
+**Status:** TODO
 
-| Date       | Status   | Changed By | Notes            |
-| ---------- | -------- | ---------- | ---------------- |
-| YYYY-MM-DD | Proposed | @username  | Initial proposal |
+## Context
 
-<!-- Delete this template content and replace with your actual decision -->
-
-## Problem
-
-What problem are we trying to solve? What is wrong? Why do we need to decide?
-
-## Implications
-
-What happens if we don't make this decision?
-
-## Options Considered
-
-### Option A: [Approach Name]
-
-**Pros:**
-
-- **Cons:**
-
--
-
-### Option B: [Alternative]
-
-**Pros:**
-
-- **Cons:**
-
--
+_What is the context for this decision? What problem is being solved? Link to relevant design notes._
 
 ## Decision
 
-Brief statement of what was decided.
+_What is the specific, final decision that was made?_
 
 ## Rationale
 
-Why did we choose this approach? What optimization objectives guided us?
+_Why was this decision made? What was the reasoning and justification?_
 
-## Implementation
+## Consequences
 
-How will this decision be implemented? Include key implementation details.
-
-## Benefits
-
-What do we gain from this decision?
-
--
-
-## Trade-offs
-
-What did we give up or compromise on?
-
--
-
-## Future Considerations
-
-What should future developers know about this decision?
-
--
-
-## Supersedes
-
-Reference to any superseded decisions (e.g., ARCHIVE/2024-01-10.initial-approach.md)
-
-## Related Documentation
-
-- [design-notes/](../design-notes/) - Related design explorations
-- [GUIDELINES.md](../GUIDELINES.md) - Implementation guidelines
+_What are the positive and negative consequences of this decision? What are the trade-offs?_
