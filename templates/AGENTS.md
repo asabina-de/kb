@@ -57,6 +57,11 @@ npm run lint --help && npm run test --help && npm run build --help
 - [Commit strategy and branching]
 - [Code review process]
 
+- Reference existing documentation before creating new patterns
+- Update relevant docs when making significant changes
+- **ALWAYS use `git rm` for file removals and `git mv` for file renames** - never use plain `rm` or `mv` for tracked files
+- Don't automatically make commits yourselfunless instructed to do so. Always default to prioritizing to check with a human operator before work is locked into the record.
+
 ## Documentation Workflow
 
 > [!TIP]
