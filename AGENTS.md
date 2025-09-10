@@ -2,6 +2,9 @@
 
 This file provides AI agents with guidance for working within this knowledge base repository. It follows the [agents.md](https://agents.md/) specification for AI coding agents.
 
+> [!IMPORTANT]
+> This is a concise summary for AI agents - the README.md is the authoritative source of truth. For detailed setup instructions, troubleshooting, and comprehensive development guidance, always reference the README.md. This file provides high-level verification checklists and AI-specific workflow guidance.
+
 ## Project Overview
 
 This is the **engineering knowledge base** for Asabina. It centralizes documentation standards, templates, and engineering practices across all projects.
@@ -12,11 +15,56 @@ This is the **engineering knowledge base** for Asabina. It centralizes documenta
 - Install dependencies: Follow project-specific README.md instructions
 - Development workflow: Reference Linear + GitHub integration in README.md
 
+## Environment Verification
+
+**CRITICAL: Verify the development environment before starting any work**
+
+### Pre-Flight Checklist
+
+Run these verification commands (detailed instructions in README.md):
+
+```bash
+# 1. Git Configuration Check
+git config --list --local | grep -E "(user\.|commit\.|gpg\.)"
+# Expected: user.email, user.signingkey, commit.gpgsign=true
+
+# 2. Development Environment Check
+echo $DIRENV_WARN_TIMEOUT  # Should return: 20s
+which direnv && direnv --version
+which nix && nix --version
+
+# 3. Project Commands Check
+# This project is primarily documentation-based and does not have typical build/test commands.
+# Refer to README.md for any specific tooling or setup.
+```
+
+**If any verification fails:**
+
+- **STOP and refer user to README.md setup section**
+- Do not proceed with code changes until environment is properly configured
+- For git config issues: Direct to README.md git configuration section
+- For environment issues: Direct to README.md environment setup section
+
+## Development Environment
+
+This repository is a knowledge base primarily consisting of Markdown files.
+
+- **Environment setup:** Managed via `devenv.nix` and `direnv`.
+- **Package manager and build commands:** Not applicable for a pure documentation repository.
+- **Testing framework details:** Not applicable.
+
 ## Key Files to Understand
 
 - **[README.md](./README.md)** - Documentation standards, tooling overview (Linear, GitHub, Sonar, etc.)
 - **[PROJECT_SETUP_GUIDE.md](./PROJECT_SETUP_GUIDE.md)** - Step-by-step guide for implementing documentation in new projects
 - **[templates/](./templates/)** - Template files for copying into new projects
+
+## Development Workflow
+
+- Reference existing documentation before creating new patterns
+- Update relevant docs when making significant changes
+- **ALWAYS use `git rm` for file removals and `git mv` for file renames** - never use plain `rm` or `mv` for tracked files
+- Don't automatically make commits yourself unless instructed to do so. Always default to prioritizing to check with a human operator before work is locked into the record.
 
 ## Documentation Workflow
 
@@ -59,22 +107,49 @@ Follow the pragmatic approach from PROJECT_SETUP_GUIDE.md:
 5. **Graduate to DECISIONS.md** when designs mature with full rationale
 6. **Create other docs** only when actually needed
 
-## Development Practices
+## Code Quality Requirements
 
-### Commit Strategy
+**MANDATORY: Run these commands before committing any changes**
+
+### Pre-Commit Quality Checklist
+
+Execute these commands (detailed explanations in README.md):
+
+```bash
+# Quality pipeline - ALL must pass:
+# For this documentation-focused project, ensure Markdown linting and formatting.
+# Add your project-specific commands here if any are introduced for linting/formatting Markdown.
+# Example (if markdownlint-cli is installed):
+# markdownlint --config .markdownlint.json .
+
+# Or if pre-commit hooks are configured:
+# pre-commit run --all-files
+```
+
+**Critical Rules:**
+
+- **NEVER commit code that fails these checks**
+- If any command fails: fix issues before proceeding
+- If stuck: ask user for help with specific error messages
+- Reference README.md "Development Quality Standards" section for detailed troubleshooting
+
+## Commit Strategy
 
 - Use conventional commit format
 - Add `[ai:${AI_NAME}]` tag at end of commit titles
 - Example: `feat: add user auth [ai:claude]`
 - Break work into focused, single-concern commits
-- Keep commit titles short and try hard to not exceed 80 chars (including the ai tag)
+- Stick to short commit titles that are less than 80 characters long
+- Add a "Co-authored by:" line in suggested commit messages
 
-### Tool Integration
+### Pre-Commit Workflow
 
-- Follow Linear + GitHub workflow as documented in README.md
-- Reference existing documentation before creating new patterns
-- Update relevant docs when making significant changes
-- **ALWAYS use `git rm` for file removals and `git mv` for file renames** - never use plain `rm` or `mv` for tracked files
+1. **Complete your changes**
+2. **Run all quality checks** (formatting, linting, type checking, tests, build)
+3. **Fix any issues** that arise from quality checks
+4. **Stage your changes**: `git add .`
+5. **Commit with proper message format**
+6. **Verify commit was signed**: `git log --show-signature -1`
 
 ## Communication
 
