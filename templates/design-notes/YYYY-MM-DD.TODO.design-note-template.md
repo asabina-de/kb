@@ -3,6 +3,8 @@ title: "Human-Readable Title of the Design Note"
 tags: [tag1, tag2]
 ---
 
+_For instructions on how to search for tags, see the [documentation discovery and tagging strategy.](../../docs/design-notes/2025-09-08.DONE.documentation-discovery-and-tagging-strategy.md)_
+
 # Design Note: [TITLE]
 
 **Date:** YYYY-MM-DD
