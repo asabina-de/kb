@@ -11,6 +11,8 @@
 
   packages = with pkgs; [
     git
+    husky
+    lint-staged
     nixfmt-rfc-style
     nodePackages.markdown-link-check
     nodePackages.prettier
