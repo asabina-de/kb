@@ -17,5 +17,6 @@
     nodePackages.markdown-link-check
     nodePackages.prettier
     pre-commit
+    python3
   ];
 }
