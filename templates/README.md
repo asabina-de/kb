@@ -86,7 +86,6 @@ Once you have devenv and direnv installed:
    ```
 
    The included `.envrc.example` template provides:
-
    - Timeout configuration to prevent direnv hangs during long operations
    - Auto-watch functionality for `.envrc.local` changes (secrets reload automatically)
    - Seamless integration with devenv for reproducible development environment

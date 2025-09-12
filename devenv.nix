@@ -14,6 +14,6 @@
     nixfmt-rfc-style
     nodePackages.prettier
     pre-commit
-    python3
+    python3 # Required by pre-commit for installing and running Python-based hooks
   ];
 }
