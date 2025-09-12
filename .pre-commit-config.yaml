@@ -6,9 +6,18 @@ repos:
       - id: end-of-file-fixer
       - id: trailing-whitespace
   - repo: local
+    # https://github.com/NixOS/nixfmt/blob/master/.pre-commit-hooks.yaml
     hooks:
       - id: nixfmt
         name: nixfmt
         entry: nixfmt
         language: system
         files: \.nix$
+  - repo: local
+    # https://github.com/tcort/markdown-link-check/blob/master/.pre-commit-hooks.yaml
+    hooks:
+      - id: markdown-link-check
+        name: markdown-link-check
+        entry: markdown-link-check
+        language: system
+        files: \.md$
