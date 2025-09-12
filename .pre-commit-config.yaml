@@ -17,3 +17,14 @@ repos:
         entry: nixfmt
         language: system
         files: \.nix$
+  - repo: local
+    # NOTE: Prettier officially pushes the use of lefthook and husky but that
+    # adds a bunch of complexity to the setup, so we're managing this locally
+    # and expecting the developer to ensure that prettier is installed on their
+    # system.
+    hooks:
+      - id: prettier
+        name: prettier
+        entry: prettier --write
+        language: system
+        files: \.(md|json|yaml|yml|js|ts|jsx|tsx)$
