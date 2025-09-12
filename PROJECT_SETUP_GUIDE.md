@@ -75,7 +75,86 @@ Include setup verification instructions in your project's `README.md` to ensure 
 
 See the [README template](./templates/README.md#setup-verification) for complete setup verification examples that you can customize for your project.
 
-### 4. Initial Documentation Setup
+### 4. Pre-commit Hooks Setup (Optional but Recommended)
+
+Set up automated code quality checks that run before commits:
+
+**A. Copy Pre-commit Configuration**
+
+```bash
+cp knowledge-base/.pre-commit-config.yaml .pre-commit-config.yaml
+```
+
+**B. Install Pre-commit Hooks**
+
+```bash
+pre-commit install  # Sets up git hooks
+```
+
+**C. Pre-commit Strategy Recommendations**
+
+Use a **hybrid approach** balancing accessibility and reliability:
+
+**Auto-installing hooks** (recommended for most tools):
+
+- Python-based tools (YAML validation, file formatters)
+- Tools with reliable cross-platform packages
+- Hooks that don't require complex build processes
+
+```yaml
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v4.4.0
+  hooks:
+    - id: trailing-whitespace
+    - id: end-of-file-fixer
+```
+
+**Local hooks** (use when auto-install is problematic):
+
+- Tools that have version lag in pre-commit mirrors
+- Tools with complex build requirements (like Haskell/Cabal dependencies)
+- Tools you want to version-control precisely via devenv
+
+```yaml
+- repo: local
+  hooks:
+    - id: your-tool
+      name: your-tool
+      entry: your-tool
+      language: system # Uses PATH, requires manual install
+      files: \.ext$
+```
+
+**D. devenv Integration**
+
+If using devenv, include pre-commit dependencies in your `devenv.nix`:
+
+```nix
+{
+  packages = with pkgs; [
+    pre-commit
+    python3           # Required by pre-commit for Python-based hooks
+    your-local-tools  # Tools for local hooks (nixfmt, prettier, etc.)
+  ];
+}
+```
+
+**E. Documentation Requirements**
+
+Make hook requirements clear in your README:
+
+- List which tools require manual installation
+- Provide install commands for both devenv and manual approaches
+- Warn about "command not found" errors for local hooks
+
+**Common Patterns:**
+
+- **nixfmt**: Use local hook (remote requires cabal/ghc, often fails)
+- **prettier**: Use local hook (mirrors lag behind official releases)
+- **eslint**: Use local hook (project-specific config dependencies)
+- **Python tools**: Use auto-installing hooks (reliable, fast to install)
+
+### 5. Initial Documentation Setup
 
 Copy the core documentation templates into your project.
 

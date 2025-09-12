@@ -86,7 +86,6 @@ Once you have devenv and direnv installed:
    ```
 
    The included `.envrc.example` template provides:
-
    - Timeout configuration to prevent direnv hangs during long operations
    - Auto-watch functionality for `.envrc.local` changes (secrets reload automatically)
    - Seamless integration with devenv for reproducible development environment
@@ -130,7 +129,7 @@ git reset HEAD~1 && git rm .git-test  # Clean up test
 
 **If configuration is missing:**
 
-- Set up your local git config following the [knowledge-base git setup guide](./knowledge-base/README.md#setup)
+- Set up your local git config following the [knowledge-base git setup guide](https://github.com/asabina-de/kb?tab=readme-ov-file#setup)
 - Configure commit signing with your SSH key from [1Password](https://developer.1password.com/docs/ssh/git-commit-signing/#step-1-configure-git-commit-signing-with-ssh) or your preferred key manager
 
 #### 2. Development Environment Verification
@@ -161,7 +160,7 @@ npm run build --help   # Verify build tools are available
 > [!NOTE]
 > This project uses **.envrc.local** for local environment variables. All working environment files (`.envrc` and `.envrc.local`) contain your personal configuration and are gitignored. Only the `*.example` files (`.envrc.example`, `.envrc.local.example`) are committed to help teammates understand what configuration is needed.
 
-For complete environment management documentation, see [knowledge-base environment setup guide](./knowledge-base/README.md#environment-variable-management-pattern).
+For complete environment management documentation, see [knowledge-base environment setup guide](https://github.com/asabina-de/kb?tab=readme-ov-file#environment-variable-management-pattern).
 
 ### Alternative Dependency Management
 

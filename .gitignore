@@ -1,12 +1,13 @@
+# Symlinks to self
+kb
+knowledge-base
+
 # Devenv
 .devenv*
 devenv.local.nix
 
 # direnv
 .direnv
-
-# pre-commit
-.pre-commit-config.yaml
 
 # Direnv
 .envrc

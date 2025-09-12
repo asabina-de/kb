@@ -1,7 +1,7 @@
 # Project TODOs
 
-> [!NOTE]  
-> **For AI agents:** When uncertain about TODO context fit, use collapsible details blocks: `<details><summary>AI-generated TODOs to be reviewed</summary>- [ ] items</details>`
+> [!NOTE]
+> For AI agents: When uncertain about TODO context fit, use collapsible details blocks: `<details><summary>AI-generated TODOs to be reviewed</summary>- [ ] items</details>`
 
 ## Now
 

@@ -10,5 +10,5 @@
 
 # Keep example files committed for team reference:
 # .envrc.example (committed)
-# .envrc.local.example (committed)  
+# .envrc.local.example (committed)
 # .env.example (committed)
