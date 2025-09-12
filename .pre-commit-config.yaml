@@ -5,6 +5,10 @@ repos:
       - id: check-yaml
       - id: end-of-file-fixer
       - id: trailing-whitespace
+  - repo: https://github.com/tcort/markdown-link-check
+    rev: v3.13.7
+    hooks:
+      - id: markdown-link-check
   - repo: local
     # https://github.com/NixOS/nixfmt/blob/master/.pre-commit-hooks.yaml
     hooks:
@@ -13,11 +17,3 @@ repos:
         entry: nixfmt
         language: system
         files: \.nix$
-  - repo: local
-    # https://github.com/tcort/markdown-link-check/blob/master/.pre-commit-hooks.yaml
-    hooks:
-      - id: markdown-link-check
-        name: markdown-link-check
-        entry: markdown-link-check
-        language: system
-        files: \.md$
