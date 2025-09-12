@@ -11,6 +11,8 @@
 
   packages = with pkgs; [
     git
+    # haskellPackages.cabal-install
+    # haskellPackages.ghc_9_12_1
     husky
     lint-staged
     nixfmt-rfc-style
