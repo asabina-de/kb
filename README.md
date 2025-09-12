@@ -166,7 +166,55 @@ For a complete, step-by-step guide to setting this up in a new project, see the 
 
 #### Development Tools & Pre-commit Hooks
 
-This repository includes automated code quality tools that run via git hooks. See the [Project Setup Guide](./PROJECT_SETUP_GUIDE.md) for instructions on including these in your project.
+This repository includes automated code quality tools that run via git hooks:
+
+**Formatting & Linting:**
+
+- **nixfmt-rfc-style**: Formats Nix code according to RFC standards
+- **prettier**: Formats JavaScript, TypeScript, JSON, and Markdown files
+- **markdown-link-check**: Validates all markdown links are working
+
+**Pre-commit Commands:**
+
+```bash
+# Run all hooks on all files (recommended before pushing)
+pre-commit run --all-files
+
+# Run specific hook on all files
+pre-commit run prettier --all-files
+pre-commit run nixfmt --all-files
+pre-commit run markdown-link-check --all-files
+
+# Hooks run automatically on commit, but you can skip with --no-verify
+git commit --no-verify  # Skip hooks (not recommended)
+```
+
+**Manual Commands:**
+
+```bash
+# Format specific files
+prettier --write file.md
+nixfmt devenv.nix
+markdown-link-check README.md
+```
+
+**Setup Architecture:**
+
+Our pre-commit setup uses a **hybrid approach** balancing accessibility and reliability:
+
+- **Auto-installing hooks** (YAML check, markdown link validation) - work for everyone out-of-the-box
+- **Local hooks** (nixfmt, prettier) - require tools to be available in PATH:
+  - **devenv users**: Tools provided automatically by `devenv.nix`
+  - **non-devenv users**: Must install tools manually
+
+**For non-devenv users:** Install required tools:
+
+- `nixfmt`: `nix-env -iA nixpkgs.nixfmt-rfc-style` (or `brew install nixfmt` if available)
+- `prettier`: `npm install -g prettier`
+
+**Without these tools installed, the local hooks will fail** with "command not found" errors.
+
+See the [Project Setup Guide](./PROJECT_SETUP_GUIDE.md) for instructions on including these in your project.
 
 ### GCP, Vercel, Sonar
 

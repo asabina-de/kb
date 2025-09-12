@@ -1,28 +1,36 @@
 repos:
+  # Standard pre-commit hooks - auto-install for all users
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v2.3.0
     hooks:
-      - id: check-yaml
-      - id: end-of-file-fixer
-      - id: trailing-whitespace
+      - id: check-yaml # Validate YAML syntax
+      - id: end-of-file-fixer # Ensure files end with newline
+      - id: trailing-whitespace # Remove trailing whitespace
+
+  # Markdown link validation - auto-installs for all users
   - repo: https://github.com/tcort/markdown-link-check
     rev: v3.13.7
     hooks:
-      - id: markdown-link-check
+      - id: markdown-link-check # Validate all markdown links work
+
+  # Local hooks - require tools to be manually installed (devenv provides these automatically)
+  # Non-devenv users must install: nixfmt and prettier
   - repo: local
-    # https://github.com/NixOS/nixfmt/blob/master/.pre-commit-hooks.yaml
     hooks:
+      # nixfmt: Requires nixfmt in PATH
+      # - devenv users: automatically provided by devenv.nix
+      # - manual install: nix-env -iA nixpkgs.nixfmt-rfc-style
+      # Alternative: https://github.com/NixOS/nixfmt (but requires cabal/ghc, often fails)
       - id: nixfmt
         name: nixfmt
         entry: nixfmt
         language: system
         files: \.nix$
-  - repo: local
-    # NOTE: Prettier officially pushes the use of lefthook and husky but that
-    # adds a bunch of complexity to the setup, so we're managing this locally
-    # and expecting the developer to ensure that prettier is installed on their
-    # system.
-    hooks:
+
+      # prettier: Requires prettier in PATH
+      # - devenv users: automatically provided by devenv.nix (nodePackages.prettier)
+      # - manual install: npm install -g prettier
+      # Alternative: https://github.com/pre-commit/mirrors-prettier (but lags versions)
       - id: prettier
         name: prettier
         entry: prettier --write
