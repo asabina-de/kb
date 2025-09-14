@@ -236,7 +236,8 @@ _Ordered by developer workflow relevance_
 - **design-notes/** (`./docs/design-notes/`) - Design Iteration and System Models
   - **Filename Convention**: `YYYY-MM-DD.STATE.description.md` (e.g. `2025-09-08.WIP.api-design.md`)
   - **Front Matter**: Each file includes a `title` and a list of `tags` to aid discovery for cross-cutting concerns.
-  - Used as a scratchpad for evolving ideas. The `STATE` in the filename (`TODO`, `WIP`, `DONE`) tracks its lifecycle.
+  - **Status Log**: Table-based tracking of status changes with date, author, tickets, and notes
+  - Used as a scratchpad for evolving ideas. The `STATE` in the filename and Status Log table track lifecycle changes.
 - **decisions/** (`./docs/decisions/`) - Architecture Decision Records (ADR)
   - **Filename Convention**: `YYYY-MM-DD.STATE.description.md`
   - **Front Matter**: Includes `title` and `tags`.
