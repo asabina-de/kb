@@ -4,11 +4,32 @@ This directory contains **individual design exploration files** to avoid git wor
 
 ## Getting Started
 
-1. **Copy template**: Use `YYYY-MM-DD.design-note-template.md` as your starting point
-2. **Name your file**: Use format `YYYY-MM-DD.specific-topic-name.md`
-3. **Iterate**: Develop ideas within individual files (no merge conflicts!)
-4. **Complete**: Choose appropriate completion path based on your needs
-5. **Archive**: Move old explorations to `ARCHIVE/` when no longer relevant
+1. **Copy template**: Use `YYYY-MM-DD.TODO.design-note-template.md` as your starting point
+2. **Name your file**: Use format `YYYY-MM-DD.STATE.specific-topic-name.md` (e.g., `2025-09-12.WIP.api-authentication.md`)
+3. **Update status log**: Add new rows to track progress and decisions over time
+4. **Iterate**: Develop ideas within individual files (no merge conflicts!)
+5. **Complete**: Choose appropriate completion path based on your needs
+6. **Archive**: Move old explorations to `ARCHIVE/` when no longer relevant
+
+## Status Log Format
+
+Each design note includes a **Status Log** table that tracks changes over time:
+
+```markdown
+| Status | Date       | Author | Related Tickets                                 | Notes                                 |
+| :----- | :--------- | :----- | :---------------------------------------------- | :------------------------------------ |
+| TODO   | 2025-09-12 | Alice  | [Z-322](https://linear.app/asabina/issue/Z-322) | Initial exploration                   |
+| WIP    | 2025-09-15 | Alice  | [Z-322](https://linear.app/asabina/issue/Z-322) | Started prototyping auth flow         |
+| REVIEW | 2025-09-18 | Bob    | [Z-322](https://linear.app/asabina/issue/Z-322) | Ready for team review                 |
+| DONE   | 2025-09-20 | Alice  | [Z-322](https://linear.app/asabina/issue/Z-322) | Decision finalized, graduating to ADR |
+```
+
+**Table Benefits:**
+
+- ✅ **GitHub-friendly**: Renders properly in GitHub's markdown (unlike line-break format)
+- ✅ **Change history**: Complete log of status transitions and reasoning
+- ✅ **Context tracking**: Links to tickets and brief notes about changes
+- ✅ **Multi-author support**: Track who made changes (important for team projects)
 
 ## Completion Paths
 
