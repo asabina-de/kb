@@ -11,6 +11,7 @@
 
   packages = with pkgs; [
     git
+    mermaid-cli
     nixfmt-rfc-style
     nodePackages.prettier
     pre-commit
