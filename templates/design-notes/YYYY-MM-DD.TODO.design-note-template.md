@@ -7,8 +7,11 @@ _For instructions on how to search for tags, see the [documentation discovery an
 
 # Design Note: [TITLE]
 
-**Date:** YYYY-MM-DD
-**Status:** TODO
+## Status Log
+
+| Status | Date       | Author        | Related Tickets                | Notes            |
+| :----- | :--------- | :------------ | :----------------------------- | :--------------- |
+| TODO   | YYYY-MM-DD | [Author Name] | [Link to ticket if applicable] | Initial creation |
 
 ## Context
 

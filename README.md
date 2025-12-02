@@ -173,6 +173,7 @@ This repository includes automated code quality tools that run via git hooks:
 - **nixfmt-rfc-style**: Formats Nix code according to RFC standards
 - **prettier**: Formats JavaScript, TypeScript, JSON, and Markdown files
 - **markdown-link-check**: Validates all markdown links are working
+- **pre-commit-hooks**: Checks YAML, fixes end-of-file and removes trailing whitespace
 
 **Pre-commit Commands:**
 
@@ -184,6 +185,7 @@ pre-commit run --all-files
 pre-commit run prettier --all-files
 pre-commit run nixfmt --all-files
 pre-commit run markdown-link-check --all-files
+pre-commit run pre-commit-hooks --all-files
 
 # Hooks run automatically on commit, but you can skip with --no-verify
 git commit --no-verify  # Skip hooks (not recommended)
@@ -195,8 +197,10 @@ git commit --no-verify  # Skip hooks (not recommended)
 # Format specific files
 prettier --write file.md
 nixfmt devenv.nix
-markdown-link-check README.md
 ```
+
+> [!NOTE]
+> Since we don't manage markdown-link-check through our devenv, you have to install markdown-link-check yourself to use its CLI tool. Using `pre-commit run markdown-link-check` would be the recommended way without having to think about installing it yourself.
 
 **Setup Architecture:**
 
@@ -236,7 +240,8 @@ _Ordered by developer workflow relevance_
 - **design-notes/** (`./docs/design-notes/`) - Design Iteration and System Models
   - **Filename Convention**: `YYYY-MM-DD.STATE.description.md` (e.g. `2025-09-08.WIP.api-design.md`)
   - **Front Matter**: Each file includes a `title` and a list of `tags` to aid discovery for cross-cutting concerns.
-  - Used as a scratchpad for evolving ideas. The `STATE` in the filename (`TODO`, `WIP`, `DONE`) tracks its lifecycle.
+  - **Status Log**: Table-based tracking of status changes with date, author, tickets, and notes
+  - Used as a scratchpad for evolving ideas. The `STATE` in the filename and Status Log table track lifecycle changes.
 - **decisions/** (`./docs/decisions/`) - Architecture Decision Records (ADR)
   - **Filename Convention**: `YYYY-MM-DD.STATE.description.md`
   - **Front Matter**: Includes `title` and `tags`.
