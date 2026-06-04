@@ -1,5 +1,8 @@
 # Agent Development Guidelines
 
+> **Canonical source.** `CLAUDE.md` and `GEMINI.md` are symlinks to this file.
+> Edit `AGENTS.md` — the others follow automatically.
+
 This file provides AI agents with guidance for working within this project. It follows the [agents.md](https://agents.md/) specification for AI coding agents.
 
 > [!IMPORTANT]
@@ -60,7 +63,7 @@ npm run lint --help && npm run test --help && npm run build --help
 - Reference existing documentation before creating new patterns
 - Update relevant docs when making significant changes
 - **ALWAYS use `git rm` for file removals and `git mv` for file renames** - never use plain `rm` or `mv` for tracked files
-- Don't automatically make commits yourselfunless instructed to do so. Always default to prioritizing to check with a human operator before work is locked into the record.
+- **HITL — Git is human-in-the-loop.** Never create commits, push branches, or open/merge PRs unless the user has explicitly asked you to do so. Default to checking with a human operator before work is locked into the record.
 
 ## Documentation Workflow
 
@@ -114,21 +117,34 @@ pre-commit run --all-files
 
 ## Commit Strategy
 
-- Use conventional commit format
-- Add `[ai:${AI_NAME}]` tag at end of commit titles
-- Example: `feat: add user auth [ai:claude]`
+> **Read `CONTRIBUTING.md` before drafting or making any commit.** It is the canonical source of truth for the commit format, the full scope list, prohibited scope patterns, and the subject line self-check protocol.
+
+Summary:
+
+- Conventional commit format: `<type>(<scope>): <subject> [ai:<agent>]`
+- Subject lines ≤80 characters — run the self-check in CONTRIBUTING.md
 - Break work into focused, single-concern commits
-- Stick to short commit titles that are less than 80 characters long
-- Add a "Co-authored by:" line in suggested commit messages
+- Add a `Co-Authored-By:` line when an AI agent co-authored the commit
 
 ### Pre-Commit Workflow
+
+See CONTRIBUTING.md for the full workflow. Quick reference:
 
 1. **Complete your changes**
 2. **Run all quality checks** (formatting, linting, type checking, tests, build)
 3. **Fix any issues** that arise from quality checks
-4. **Stage your changes**: `git add .`
-5. **Commit with proper message format**
-6. **Verify commit was signed**: `git log --show-signature -1`
+4. **Stage specific files**: `git add <file1> <file2>` — never `git add .` or `git add -A`
+5. **Run subject line self-check** (see CONTRIBUTING.md)
+6. **Commit with proper message format**
+7. **Verify commit was signed**: `git log --show-signature -1`
+
+## AI Provenance
+
+All AI contributions must be clearly identifiable:
+
+- **Commits:** append `[ai:<agent>]` to the subject line (e.g. `[ai:claude]`, `[ai:gemini]`)
+- **GitHub/Linear comments:** open every AI-posted comment with `*[ai:<agent>]*` on its own line so reviewers can instantly distinguish AI-authored content from human-authored content
+- **Co-authorship:** add a `Co-Authored-By:` trailer when an AI agent co-authored a commit
 
 ## Communication
 

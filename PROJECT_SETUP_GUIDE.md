@@ -163,11 +163,15 @@ Copy the core documentation templates into your project.
 mkdir -p docs
 
 # Copy templates
+cp ../kb/templates/CONTRIBUTING.md ./
 cp ../kb/templates/GUIDELINES.md ./docs/
 cp ../kb/templates/TODO.md ./docs/
 cp -r ../kb/templates/decisions ./docs/
 cp -r ../kb/templates/design-notes ./docs/
 ```
+
+> **Note:** `CONTRIBUTING.md` lives at the repo root (GitHub convention), not in `docs/`.
+> It owns commit conventions, scope discipline, and merge strategy — see the template for details.
 
 Refer to the main [Engineering Handbook (README.md)](./README.md) for the philosophy on when and how to use each of these documents.
 
