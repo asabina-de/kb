@@ -11,9 +11,16 @@
 # For simple static values, use .env instead (see .env.example)
 # Note: .envrc.local is automatically loaded by direnv and gitignored for security
 
-# Example: 1Password CLI
+# Example: 1Password CLI (single account)
 # export GITHUB_PAT=$(op read "op://Employee/GitHub/personal-access-token")
 # export DATABASE_PASSWORD=$(op read "op://Employee/Database/password")
+
+# Example: 1Password CLI (multiple accounts — personal + work)
+# If you have more than one 1Password account, set OP_ACCOUNT so all op read
+# calls resolve against the right account without needing --account per call.
+# Find your account shorthand with: op account list
+# export OP_ACCOUNT="mycompany.1password.com"
+# export GITHUB_PAT=$(op read "op://Work/GitHub/personal-access-token")
 
 # Example: AWS SSM Parameter Store
 # export API_KEY=$(aws ssm get-parameter --name "/myapp/api-key" --with-decryption --query "Parameter.Value" --output text)
