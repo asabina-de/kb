@@ -1,5 +1,8 @@
 # Agent Development Guidelines
 
+> **Canonical source.** `CLAUDE.md` and `GEMINI.md` are symlinks to this file.
+> Edit `AGENTS.md` — the others follow automatically.
+
 This file provides AI agents with guidance for working within this project. It follows the [agents.md](https://agents.md/) specification for AI coding agents.
 
 > [!IMPORTANT]
