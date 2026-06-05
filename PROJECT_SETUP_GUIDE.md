@@ -13,45 +13,46 @@ We use a **direnv -> devenv** pattern for environment management. This provides 
 > [!WARNING]
 > Avoid devenv's `dotenv.enable = true` option. It only supports basic `key=value` pairs and will cause frustration. Use `.envrc.local` for full bash support, including variable expansion (`${VAR}`) and command execution (`$(cmd)`).
 
-**A. Copy Environment Templates**
+**A. Copy Environment Files**
 
-Copy the example files from the knowledge base into your new project's root.
+Copy the environment files from the knowledge base into your new project's root.
 
 ```bash
 # Example assumes knowledge-base is cloned next to your project
-cp ../kb/templates/.envrc.example .envrc.example
+cp ../kb/templates/.envrc .envrc
 cp ../kb/templates/.envrc.local.example .envrc.local.example
 ```
 
-**B. Create Working Environment Files**
+`.envrc` is committed directly — it contains only direnv/devenv boilerplate, no secrets. Secrets go in `.envrc.local` (gitignored).
 
-Instruct developers to create their own working files from the examples.
+**B. Configure `.gitignore`**
 
-```bash
-cp .envrc.example .envrc
-cp .envrc.local.example .envrc.local
-```
-
-**C. Configure `.gitignore`**
-
-Ensure local environment files are never committed. Add them to your project's `.gitignore`.
+Ensure secret files are never committed. Add them to your project's `.gitignore`.
 
 ```bash
 echo "" >> .gitignore
-echo "# Local environment files" >> .gitignore
-echo ".envrc" >> .gitignore
+echo "# Local secrets and overrides" >> .gitignore
 echo ".envrc.local" >> .gitignore
 ```
 
-**D. Allow Direnv**
+> **Note:** Do NOT gitignore `.envrc` — it is committed. Only `.envrc.local` (which holds secrets) is gitignored.
 
-Once `.envrc` is present, `direnv` will prompt for permission on first entry into the directory.
+**C. Allow Direnv**
+
+On first clone (or after `.envrc` changes), `direnv` will prompt for permission.
 
 ```bash
 direnv allow
 ```
 
-This command loads the environment and integrates with `devenv` as configured in the template.
+**D. Set Up Local Secrets**
+
+Each developer creates their own `.envrc.local` from the example:
+
+```bash
+cp .envrc.local.example .envrc.local
+# Edit .envrc.local with your secrets (1Password refs, API keys, etc.)
+```
 
 **E. Customize for Your Project**
 

@@ -12,6 +12,22 @@ Format follows [Keep a Changelog](https://keepachangelog.com/), with an added **
 
 ## [2026-06-05]
 
+### Changed
+- **`.envrc` template** — renamed from `.envrc.example` to `.envrc`. The file is now committed directly to repos (no copy step). It contains only direnv/devenv boilerplate — no secrets. Secrets remain in `.envrc.local` (gitignored).
+- **`.gitignore` template** — `.envrc` removed from gitignore entries. Only `.envrc.local` and `.env*` secret files are gitignored.
+- **PROJECT_SETUP_GUIDE.md** — environment setup simplified: one fewer copy step, explicit note that `.envrc` is committed.
+
+### Migration
+
+**If your project gitignores `.envrc`:**
+
+1. Remove `.envrc` from your `.gitignore`
+2. Commit your existing `.envrc` file: `git add .envrc && git commit -m "chore: track .envrc (no secrets, devenv boilerplate only)"`
+3. Verify `.envrc.local` is still gitignored (it holds secrets)
+4. Remove `.envrc.example` if present — it is no longer needed: `git rm .envrc.example`
+
+## [2026-06-05]
+
 ### Added
 - **CHANGELOG.md template** — new file at `templates/CHANGELOG.md`. Rolling dated entries, stateless migration instructions, per-logical-change granularity. Adapted for continuous delivery repos without versioned releases.
 
