@@ -73,10 +73,10 @@ npm run lint --help && npm run test --help && npm run build --help
 
 **When making significant changes:**
 
-1. **Check existing decisions** in DECISIONS.md if modifying core architecture
+1. **Check existing decisions** in `docs/decisions/` — grep frontmatter: `grep -E "^(status|decision):" docs/decisions/*.md`
 2. **Follow established patterns** in GUIDELINES.md if implementing features
 3. **Update TODO.md** when completing tasks or discovering new ones
-4. **Document new decisions** in DECISIONS.md with rationale and trade-offs
+4. **Document new decisions** in `docs/decisions/` using the `nnnn-slug.md` template
 
 **For TODO.md updates:**
 
