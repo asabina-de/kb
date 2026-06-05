@@ -160,7 +160,7 @@ Optionally, use [devenv](https://devenv.sh) to manage your dev environments.
 We use a **direnv -> devenv** pattern to manage environment variables. This provides a consistent, reproducible development environment while keeping secrets secure and local.
 
 - **`devenv.nix`** defines shared, non-sensitive variables for the team.
-- **`.envrc` and `.envrc.local`** (loaded by direnv) manage local configuration and secrets, with support for dynamic values from tools like 1Password.
+- **`.envrc`** (committed to repo) contains direnv/devenv boilerplate — no secrets. **`.envrc.local`** (gitignored) holds secrets and local overrides, with support for dynamic values from tools like 1Password.
 
 For a complete, step-by-step guide to setting this up in a new project, see the **[Project Setup Guide](./PROJECT_SETUP_GUIDE.md#1-environment-setup-recommended-first-step)**.
 

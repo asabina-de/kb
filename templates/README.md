@@ -73,19 +73,18 @@ This project uses the **direnv -> devenv loading chain** for environment managem
 
 **File Roles:**
 
-- **`.envrc`**: Base configuration template (copied from `.envrc.example`, gitignored)
+- **`.envrc`**: Base configuration (committed to repo — no secrets, pure direnv/devenv boilerplate)
 - **`.envrc.local`**: Personal secrets and local overrides (copied from `.envrc.local.example`, gitignored)
 
 Once you have devenv and direnv installed:
 
-1. **Set up your local environment** by copying the provided template:
+1. **Allow direnv** to load the committed `.envrc`:
 
    ```bash
-   cp .envrc.example .envrc  # Copy the template to create your working environment file
    direnv allow              # Grant direnv permission to load the environment
    ```
 
-   The included `.envrc.example` template provides:
+   The committed `.envrc` provides:
    - Timeout configuration to prevent direnv hangs during long operations
    - Auto-watch functionality for `.envrc.local` changes (secrets reload automatically)
    - Seamless integration with devenv for reproducible development environment
@@ -158,7 +157,7 @@ npm run build --help   # Verify build tools are available
 - Check devenv logs: `devenv info`
 
 > [!NOTE]
-> This project uses **.envrc.local** for local environment variables. All working environment files (`.envrc` and `.envrc.local`) contain your personal configuration and are gitignored. Only the `*.example` files (`.envrc.example`, `.envrc.local.example`) are committed to help teammates understand what configuration is needed.
+> `.envrc` is committed to the repo — it contains only direnv/devenv boilerplate, no secrets. Secrets go in `.envrc.local` (gitignored). The `.envrc.local.example` file documents what secrets are needed.
 
 For complete environment management documentation, see [knowledge-base environment setup guide](https://github.com/asabina-de/kb?tab=readme-ov-file#environment-variable-management-pattern).
 

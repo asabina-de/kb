@@ -1,14 +1,13 @@
-# Environment files - developers create these from .example files
+# Environment files
 # See knowledge-base/README.md#environment-variable-management-pattern
 
-# All working environment files (created by developers from examples)
-.envrc
+# Local secrets and overrides (never committed)
 .envrc.local
 .env
 .env.local
 .env.*.local
 
-# Keep example files committed for team reference:
-# .envrc.example (committed)
-# .envrc.local.example (committed)
-# .env.example (committed)
+# Committed files (do NOT gitignore):
+# .envrc              — direnv/devenv boilerplate, no secrets
+# .envrc.local.example — documents required secrets for the project
+# .env.example         — documents required env vars for the project
