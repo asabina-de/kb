@@ -167,7 +167,6 @@ cp ../kb/templates/CONTRIBUTING.md ./
 cp ../kb/templates/GUIDELINES.md ./docs/
 cp ../kb/templates/TODO.md ./docs/
 cp -r ../kb/templates/decisions ./docs/
-cp -r ../kb/templates/design-notes ./docs/
 ```
 
 > **Note:** `CONTRIBUTING.md` lives at the repo root (GitHub convention), not in `docs/`.
