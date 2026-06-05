@@ -1,11 +1,10 @@
-# Architecture Decision Records Archive
+# Decisions Archive
 
-Move superseded or deprecated decisions here when:
+Move superseded or deprecated records here when:
 
-- **Superseded**: Decision replaced by newer approach
-- **Deprecated**: Decision no longer relevant to current architecture
-- **Consolidated**: Multiple decisions merged into single new decision
+- **Superseded**: replaced by a newer record (set `status: superseded` in frontmatter, `supersedes:` in the new record)
+- **Deprecated**: no longer relevant (set `status: deprecated` in frontmatter)
 
-Maintain the same naming convention: `YYYY-MM-DD.decision-title.md`
+Maintain the same naming convention: `nnnn-slug.md`
 
-Always reference superseded decisions in new decisions for context.
+Always set `supersedes:` in the new record's frontmatter to link back.
