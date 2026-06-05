@@ -12,6 +12,16 @@ Format follows [Keep a Changelog](https://keepachangelog.com/), with an added **
 
 ## [2026-06-05]
 
+### Added
+- **`skills/` directory** — engineering skills (commenting, commitmsg, designnote, linearissue, pairprog, pr) migrated from dotfiles to KB repo. Skills that read/write KB-defined artifacts now co-evolve with those artifacts.
+- **Slug generation protocol** — documented in the designnote skill. Deterministic heuristic for generating decision record filenames.
+
+### Changed
+- **designnote skill** — now targets `docs/decisions/` with MADR-style serial numbering (`nnnn-slug.md`), new frontmatter schema (`status`, `decision`, `review_date`, `related_to`, `supersedes`), and unified sections (Context, Exploration, Decision, Consequences, Confirmation).
+- **linearissue skill** — filing mode now reads `docs/decisions/` records. Verification uses frontmatter `status: exploring` instead of filename state tokens.
+
+## [2026-06-05]
+
 ### Changed
 - **`.envrc` template** — renamed from `.envrc.example` to `.envrc`. The file is now committed directly to repos (no copy step). It contains only direnv/devenv boilerplate — no secrets. Secrets remain in `.envrc.local` (gitignored).
 - **`.gitignore` template** — `.envrc` removed from gitignore entries. Only `.envrc.local` and `.env*` secret files are gitignored.
