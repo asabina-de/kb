@@ -4,7 +4,7 @@ tags: [decisions, adr, templates, documentation]
 status: decided
 decision: "Consolidate into a single decisions/ directory using MADR-style serial numbering (nnnn-slug.md), enriched YAML frontmatter with a decision: TL;DR field, and a unified template with Context / Exploration / Decision / Consequences / Confirmation sections."
 review_date: 2026-09-05
-related_to: ["KB-1", "KB-2", "KB-3", "VID-670"]
+related_to: ["0001", "KB-1", "KB-2", "KB-3", "VID-670"]
 supersedes: ""
 ---
 
@@ -131,9 +131,9 @@ Rationale for choosing serial numbers over dates:
 - Revisiting the same topic gets a new serial: `0003-select-apm.md` → `0019-select-apm.md` with `supersedes: "0003"` linking them
 - Branch collision on the counter is rare at our scale and resolves like any merge conflict. Convention: check `ls docs/decisions/ | sort -n | tail -1` before creating.
 
-The **slug generation protocol** (how to arrive at deterministic, reproducible slugs) is a skill-level concern tracked in [Z-601](https://linear.app/asabina/issue/Z-601).
+The **slug generation protocol** (how to arrive at deterministic, reproducible slugs) is a skill-level concern tracked in [KB-1](https://linear.app/asabina/issue/KB-1).
 
-> **Note:** This supersedes the filename convention in [2025-09-08.DONE.documentation-discovery-and-tagging-strategy.md](./2025-09-08.DONE.documentation-discovery-and-tagging-strategy.md) which established the `YYYY-MM-DD.[STATE].description.md` pattern. The tagging strategy (frontmatter tags, grep-based discovery) remains fully valid.
+> **Note:** This supersedes the filename convention in [0001-documentation-discovery-and-tagging-strategy.md](./0001-documentation-discovery-and-tagging-strategy.md) which established the `YYYY-MM-DD.[STATE].description.md` pattern. The tagging strategy (frontmatter tags, grep-based discovery) remains fully valid.
 
 ### Frontmatter schema
 
@@ -191,7 +191,7 @@ Skills that write to `docs/decisions/` must maintain the status log table — tr
 
 ### Migration path
 
-Stateless instructions via the KB CHANGELOG ([Z-600](https://linear.app/asabina/issue/Z-600)). Format: "If you see X artifacts, you are on a previous version and should migrate by doing Y." No need for version tracking — the presence of specific artifacts (e.g. a `docs/design-notes/` directory) is the signal.
+Stateless instructions via the KB CHANGELOG ([KB-2](https://linear.app/asabina/issue/KB-2)). Format: "If you see X artifacts, you are on a previous version and should migrate by doing Y." No need for version tracking — the presence of specific artifacts (e.g. a `docs/design-notes/` directory) is the signal.
 
 ## Resolved Questions
 
@@ -210,12 +210,12 @@ _These were open during exploration and resolved via sparring on 2026-06-05._
 - [ ] Remove `templates/design-notes/` (or convert to a redirect/migration note)
 - [ ] Update `PROJECT_SETUP_GUIDE.md` to reflect single-directory convention
 - [ ] Update `templates/AGENTS.md` to reference `decisions/` instead of the current dual-directory guidance
-- [ ] Migrate engineering skills from dotfiles to KB repo (Linear: [Z-601](https://linear.app/asabina/issue/Z-601))
+- [ ] Migrate engineering skills from dotfiles to KB repo (Linear: [KB-1](https://linear.app/asabina/issue/KB-1))
 - [ ] Update the designnote skill to target `docs/decisions/` instead of `docs/design-notes/` (blocked by Z-601)
-- [ ] Add migration instructions to KB CHANGELOG (Linear: [Z-600](https://linear.app/asabina/issue/Z-600))
+- [ ] Add migration instructions to KB CHANGELOG (Linear: [KB-2](https://linear.app/asabina/issue/KB-2))
 - [ ] Ensure skills maintain status log table on writes (Linear: [VID-670](https://linear.app/asabina/issue/VID-670))
-- [ ] Supersede parts of `2025-09-08.DONE.documentation-discovery-and-tagging-strategy.md` (filename convention change; tagging strategy itself remains valid)
+- [ ] Supersede parts of `0001-documentation-discovery-and-tagging-strategy.md` (filename convention change; tagging strategy itself remains valid)
 
 ## Related Design Notes
 
-- [2025-09-08.DONE.documentation-discovery-and-tagging-strategy.md](./2025-09-08.DONE.documentation-discovery-and-tagging-strategy.md) — established the frontmatter tagging convention and `YYYY-MM-DD.[STATE].description.md` filename pattern. This note supersedes the filename convention while preserving the tagging strategy.
+- [0001-documentation-discovery-and-tagging-strategy.md](./0001-documentation-discovery-and-tagging-strategy.md) — established the frontmatter tagging convention and `YYYY-MM-DD.[STATE].description.md` filename pattern. This note supersedes the filename convention while preserving the tagging strategy.

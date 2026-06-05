@@ -1,20 +1,30 @@
 ---
 title: "Documentation Discovery and Tagging Strategy"
 tags: [documentation, discovery, meta, tagging]
+status: decided
+decision: "Use YAML frontmatter tags with grep-based discovery in a flat file structure."
+review_date: 2026-09-08
+related_to: ["0002"]
+supersedes: ""
 ---
 
-# Design Note: Documentation Discovery and Tagging Strategy
+# Documentation Discovery and Tagging Strategy
 
-**Date:** 2025-09-08
-**Status:** DONE
+## Status Log
 
-## 1. Context
+| Status | Date       | Author | Related Tickets | Notes                                                     |
+| :----- | :--------- | :----- | :-------------- | :-------------------------------------------------------- |
+| TODO   | 2025-09-08 | human  |                 | Initial creation                                          |
+| DONE   | 2025-09-08 | human  |                 | Decision finalized                                        |
+| AMEND  | 2026-06-05 | claude | [KB-8](https://linear.app/asabina/issue/KB-8) | Filename convention superseded by 0002; migrated to docs/decisions/ |
+
+## Context
 
 This knowledge base relies on a set of markdown files for documentation, including `design-notes/` and `decisions/`. A key challenge is the discovery of related documents, especially for topics that are cross-cutting concerns (e.g., a design that impacts both API design and authentication).
 
 The goal is to establish a system that allows both human developers and automated agents to easily find contextually related documents with minimal friction for content creators.
 
-## 2. Exploration
+## Exploration
 
 Several strategies were considered to solve the discovery problem:
 
@@ -40,9 +50,11 @@ Several strategies were considered to solve the discovery problem:
   - **Agent & Tooling Friendly:** The metadata is structured and can be reliably parsed by scripts or tools like `grep`.
 - **Cons:** Requires tools to parse the metadata for discovery (though `grep` is a very simple and ubiquitous tool).
 
-## Recommendation
+## Decision
 
-We will adopt **Strategy 3: In-File Metadata (Front Matter)** combined with a descriptive filename convention.
+Use YAML frontmatter tags with grep-based discovery in a flat file structure.
+
+We adopt **Strategy 3: In-File Metadata (Front Matter)** combined with a descriptive filename convention.
 
 ### A. Filename Convention
 
@@ -90,7 +102,7 @@ To ensure high-quality content, the templates for design notes and decisions sho
 A simple `grep` can be used for single-tag searches, but a more robust `git grep` command is recommended for searching multiple tags, especially when they are on different lines.
 
 ```bash
-git grep -l -z --all-match -e 'tags:' -e 'authentication' -e 'api-design' -- ':(glob)**/design-notes/*.md' | xargs -0 -n 1
+git grep -l -z --all-match -e 'tags:' -e 'authentication' -e 'api-design' -- ':(glob)**/decisions/*.md' | xargs -0 -n 1
 ```
 
 - `-l`: Only print the filenames of matching files.
@@ -104,10 +116,22 @@ To make this easier, you can create a Git alias. Add the following to your `~/.g
 ```ini
 [alias]
     greptags = "!f() { \
-        git grep -l -z --all-match -e 'tags:' -- $(for tag in \"$@\"; do echo \"-e '$tag'\"; done) -- ':(glob)**/design-notes/*.md' | xargs -0 -n 1; \
+        git grep -l -z --all-match -e 'tags:' -- $(for tag in \"$@\"; do echo \"-e '$tag'\"; done) -- ':(glob)**/decisions/*.md' | xargs -0 -n 1; \
     }; f"
 ```
 
 You can then run `git greptags authentication api-design` to get a clean, newline-separated list of matching files.
 
 This approach provides a robust, flexible, and low-friction system for creating and discovering knowledge base documents.
+
+## Consequences
+
+- All records carry structured metadata that agents and humans can query without opening each file
+- Cross-cutting concerns are handled naturally via multi-tag assignment
+- Discovery depends on grep (ubiquitous, no special tooling required)
+- Tag vocabulary must be managed by convention to avoid drift (see `templates/decisions/README.md`)
+
+## Confirmation
+
+- The decision template (`templates/decisions/0000-decision-template.md`) includes frontmatter with tags as a required field
+- Grep patterns are documented in `templates/decisions/README.md`
