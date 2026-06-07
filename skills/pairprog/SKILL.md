@@ -294,9 +294,10 @@ For each step:
 1. **Announce** what you're about to do. "Starting Step 1 — adding the OAuth callback route."
 2. **Branch fit check.** Before touching any files, verify this step's files fit the branch purpose. Apply the Category A / Category B protocols from the Phase 0 branch fit check if a mismatch is detected.
 3. **Implement** the change. Use `Edit` / `Write` for code changes.
-4. **Run quality checks** if the repo has them (lint, typecheck, test). Use `Bash` for this. If a check fails, fix it before presenting.
-5. **Present the change.** Print a concise summary of what changed and why. Don't dump the full diff — describe the intent and highlight non-obvious decisions.
-6. **Checkpoint.**
+4. **Decision record maintenance.** If the step touches a file in `docs/decisions/`, append a Status Log row: today's date, `claude` as author, the ticket ID in Related Tickets, and a concise note (e.g. "Updated via pairprog KB-9"). This keeps the record's audit trail intact.
+5. **Run quality checks** if the repo has them (lint, typecheck, test). Use `Bash` for this. If a check fails, fix it before presenting.
+6. **Present the change.** Print a concise summary of what changed and why. Don't dump the full diff — describe the intent and highlight non-obvious decisions.
+7. **Checkpoint.**
    - **Checkpoint mode:** Pause for the navigator's steering input. This is about design direction — does this approach hold up? Should we change course? If the navigator says "looks good," they commit. If they want changes, iterate. Don't ask the navigator to review code line-by-line in chat — that's what the PR is for.
    - **Yolo mode:** Invoke the `commitmsg` skill's methodology (read repo convention, draft message) and auto-commit. Print the commit hash and message. Continue to the next step.
 
@@ -416,3 +417,4 @@ Skill("commenting", "Reply to anchor {plan-comment-id} on {ticket-id} titled \"�
 - **Don't post "starting spike" comments.** Wait for the spike to complete, then post findings. One comment per spike, not a running log.
 - **Don't interleave parallel step comments.** When subagents work concurrently, post one combined comment after both complete.
 - **Don't create PRs without pitching first.** Always show the proposed PR content in chat and get explicit approval before running `gh pr create`.
+- **Don't skip Status Log maintenance on decision records.** If a step touches `docs/decisions/*.md`, append a Status Log row. The record's audit trail must reflect every mutation.
