@@ -24,6 +24,7 @@ Run in parallel:
 - **Commits on branch:** `git log --oneline main..HEAD` (or `git log --oneline HEAD ^origin/main` if on remote)
 - **Push state:** `git status -sb` — is the branch already pushed to origin?
 - **Remote default branch:** use `mcp__github__get_file_contents` or `mcp__github__list_branches` to determine the default branch — don't hardcode `main`
+- **Repo merge conventions:** Read `AGENTS.md` and `CONTRIBUTING.md` at the repo root (if they exist) for merge strategy guidance — e.g. squash vs merge commit, stack handling, branch cleanup. Store any findings for use in Phase 6.
 
 Extract a ticket ID from the branch name if present (e.g. `vidbina/vid-123-some-slug` → `VID-123`). If found, fetch the Linear issue (`get_issue`) for title and description.
 
@@ -169,8 +170,8 @@ The subagent should:
 1. **Poll CI checks** using `mcp__github__pull_request_read` periodically or `Bash` with `gh pr checks <pr-number> --watch` until all checks complete or a timeout (10 minutes) is reached.
 2. **On all checks green:**
    - Report to the user: "CI passed on PR #N. Ready to merge."
-   - Check the repo's merge strategy via `mcp__github__search_repositories` or `mcp__github__get_file_contents`.
-   - Offer to merge using `mcp__github__merge_pull_request`. Wait for explicit approval.
+   - Determine the merge strategy (see **Merge strategy** below).
+   - Surface the strategy to the operator before executing. Never merge silently.
    - **After merge:** run `git checkout main && git pull --ff-only` (i.e. `git ready`) to return to a clean, up-to-date main. This is the ready position for starting new work. Transition linked tickets to Done.
 3. **On any check red:**
    - Report the failure: which check failed, link to the logs.
@@ -186,6 +187,65 @@ The subagent should:
 - The subagent runs in the background so the user can continue other work.
 - If the user explicitly asks to merge before CI completes, warn them that checks haven't finished and confirm they want to proceed.
 
+### Merge strategy
+
+The skill must determine *how* to merge before offering the merge action. The decision tree:
+
+```
+1. Did Phase 1 find merge strategy guidance in AGENTS.md or CONTRIBUTING.md?
+   YES → follow it (squash, merge commit, or rebase as documented)
+   NO  → continue to step 2
+
+2. Can the repo's merge method be detected from GitHub settings?
+   (e.g. via mcp__github__search_repositories → allowed merge types)
+   YES → use it as the default, but still surface to operator
+   NO  → ask the operator: "No merge strategy documented. Squash, merge commit, or rebase?"
+```
+
+**When repo convention conflicts with best-practices** (e.g. convention says squash but the PR is part of a stack that would lose traceability), surface the conflict to the operator via `AskUserQuestion`. Never silently override the repo convention — and never silently follow it when it would cause harm. Present the trade-off and let the operator decide.
+
+### Stack-aware merging
+
+When the PR is part of a stack (base branch is another feature branch, not the default branch), the merge method determines the strategy:
+
+**Squash-merge repos:**
+
+Merge each PR in the stack individually, bottom-up. This is required because squash produces a new SHA — GitHub cannot detect that intermediate PRs' commits landed on the default branch via the tip's squash commit. Each PR must be squashed separately to preserve:
+- Individual commit identity on the default branch (one squash commit per PR)
+- Ticket ID traceability (each commit carries its own `TEAM-123: Title (#N)`)
+- Linear issue auto-transition (each merged PR triggers its own `Closes TEAM-N`)
+
+Flow for a stack `A → B → C → main`:
+1. Squash-merge A into main. Wait for CI if required.
+2. GitHub auto-retargets B to main (or manually retarget). Rebase B onto main if needed.
+3. Squash-merge B into main. Wait for CI if required.
+4. Repeat for C.
+
+**Merge-commit repos:**
+
+Merging the tip is a valid optimization — since merge commits preserve ancestry, all intermediate commits appear in `git log` naturally. However, offer both options:
+
+```
+This PR is part of a stack (A → B → C → main).
+Merge method: merge commit
+
+Options:
+  (a) Merge tip only (C) — one merge commit, A and B are ancestors ✓
+  (b) Merge individually (A, then B, then C) — three merge commits
+  (c) Cancel
+
+Recommend: (a) — all commits land on main via ancestry.
+```
+
+**Closing keywords for cross-platform traceability:**
+
+When merging (especially in stacks), ensure the PR body includes closing keywords for both platforms:
+
+- **GitHub PRs:** `Closes #41, #42` — closes other PRs in the stack (critical for squash merges where GitHub can't detect commit ancestry)
+- **Linear issues:** `Closes KB-7, KB-8` — transitions linked Linear issues
+
+Group by platform on separate lines for readability. GitHub parses `#N` (numeric only); Linear parses `TEAM-N` (prefixed). No collision risk — each platform ignores the other's syntax.
+
 ## Anti-patterns
 
 - **Don't hardcode `main` as base.** Always detect the default branch and check for stacking.
@@ -194,3 +254,5 @@ The subagent should:
 - **Don't push without noting it.** If a push is needed, say so before running it.
 - **Don't ask more than one round of questions.** All clarification happens in the pitch → edit loop, not via separate `AskUserQuestion` calls before Phase 4.
 - **Don't suggest merging before CI is green.** A freshly created PR has no check data. Wait for the CI monitor subagent to report results before offering merge options.
+- **Don't merge a stack tip with squash.** Squash-merging only the tip of a linear stack collapses N PRs into 1 commit — intermediate ticket IDs, PR boundaries, and review context are lost. For squash repos, always merge each PR individually, bottom-up.
+- **Don't merge without surfacing the strategy.** Always tell the operator what merge method and stack handling you're about to use, and wait for confirmation. Never silently default.
