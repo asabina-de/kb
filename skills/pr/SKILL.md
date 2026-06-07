@@ -63,7 +63,8 @@ The branch with the **fewest commits between its tip and HEAD** is the most like
 **Title:**
 1. Use the Linear ticket title if available.
 2. Otherwise, derive from the branch name slug (strip the owner prefix and ticket ID, humanize the remainder).
-3. Run the title through the **title quality gate** below.
+3. **Prepend the ticket ID** when one was detected from the branch name in Phase 1 (e.g. `KB-10: <title>`). This is required for traceability — squash-merge commits produce `KB-10: Title (#N)`, preserving the Linear issue link in `git log`. Do not prepend if no ticket ID was detected (e.g. ad-hoc branches without a ticket).
+4. Run the title through the **title quality gate** below.
 
 ### Title quality gate
 
@@ -72,7 +73,7 @@ Evaluate the drafted title against these criteria. The gate is **advisory** — 
 **Principles:**
 1. **Value over mechanism** — frame what the PR delivers, not how it's implemented. "Stable room link for live AV" not "Implement re-entrancy for Daily transport".
 2. **Distinguishing phrase first** — the most identifiable words lead, so truncated branch names (`~25 chars` after the ticket prefix) stay meaningful.
-3. **Brevity** — keep titles under 60 characters. Warn above 60.
+3. **Brevity** — keep titles under 60 characters (excluding the ticket ID prefix, e.g. `KB-10: `). Warn above 60. The prefix is non-negotiable for traceability and should not count against the limit.
 4. **No metadata in the title** — priority, work type (spike, research), and category belong in labels, not bracket tags or prefixes.
 
 **Anti-patterns to detect:**
