@@ -380,7 +380,7 @@ If there are uncommitted changes (checkpoint mode only):
 
 If the branch looks complete relative to the ticket scope, **delegate to the `/pr` skill.** Do not duplicate PR creation logic here — invoke it via the `Skill` tool with `skill: "pr"`.
 
-The `/pr` skill handles: base branch detection (including stacked PRs), drafting the title and body from commits and the Linear ticket, pitching in chat for approval, pushing, creating via `gh`, transitioning the ticket to In Review, and launching a background CI monitor.
+The `/pr` skill handles: base branch detection (including stacked PRs), drafting the title and body from commits and the Linear ticket, pitching in chat for approval, pushing, creating via `gh`, transitioning the ticket to In Review, launching a background CI monitor, and **merge strategy** (convention reading, stack-aware merging, closing keyword bookkeeping). Do not duplicate merge logic here.
 
 If the navigator says "not yet" or "more work needed," skip. The navigator will create it when ready.
 
