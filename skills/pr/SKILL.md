@@ -1,7 +1,7 @@
 ---
 name: pr
 description: "Use this skill when the user wants to create a pull request for the current branch. Trigger for prompts like 'create a PR', 'open a PR', 'make a pull request', 'pr this', 'ship it', or when the user invokes `/pr`. Also invoked by other skills (/pairprog, /troubleshoot) at wrap-up. The skill detects the correct base branch automatically — if the current branch is stacked on another feature branch rather than main, it uses that branch as the base. It reads the Linear ticket (if any) and recent commits to draft a title and body, pitches the draft in chat for the operator to review, and creates the PR via the GitHub MCP on approval. DX-first: fast, good defaults, minimal ceremony. Do NOT trigger for reviewing existing PRs, for merging, or for anything other than creating a new PR."
-allowed-tools: Bash Glob Grep Read Agent AskUserQuestion mcp__claude_ai_Linear__get_issue mcp__claude_ai_Linear__save_issue mcp__claude_ai_Linear__list_comments mcp__github__create_pull_request mcp__github__list_pull_requests mcp__github__pull_request_read mcp__github__merge_pull_request mcp__github__update_pull_request mcp__github__search_repositories mcp__github__get_file_contents mcp__github__list_branches
+allowed-tools: Bash Glob Grep Read Agent AskUserQuestion mcp__claude_ai_Linear__get_issue mcp__claude_ai_Linear__save_issue mcp__claude_ai_Linear__list_comments mcp__github__list_pull_requests mcp__github__pull_request_read mcp__github__merge_pull_request mcp__github__update_pull_request mcp__github__search_repositories mcp__github__get_file_contents mcp__github__list_branches
 ---
 
 # pr
@@ -157,8 +157,15 @@ Use `AskUserQuestion` to get the response. Options:
 ## Phase 5 — Create
 
 1. **Push if needed:** if the branch isn't on origin yet, run `git push -u origin <branch>`. Print the push result.
-2. **Create:** use `mcp__github__create_pull_request` with the owner, repo, title, body, base, and head branch.
-3. **Print the PR URL** from the response.
+2. **Create:** use `gh pr create` via Bash with a heredoc body to preserve newline formatting:
+   ```bash
+   gh pr create --title "<title>" --base "<base>" --body "$(cat <<'EOF'
+   <body content with real newlines>
+   EOF
+   )"
+   ```
+   **Do NOT use `mcp__github__create_pull_request` for PR creation.** The MCP tool escapes newlines as literal `\n` in the body parameter, producing a single-line wall of text on GitHub. This was observed on multiple PRs (yo-convo-bot#50, ivos-trades#4) and is a known limitation of how the MCP tool serializes multi-line strings. The `gh` CLI with heredocs preserves actual newlines. Other GitHub MCP tools (read, update, merge) are fine — the issue is specific to the `body` field on `create_pull_request`.
+3. **Print the PR URL** from the `gh` output.
 4. **Transition the ticket:** if a ticket ID was extracted from the branch name in Phase 1, call `save_issue` with `id: {ticket-id}` and `state: "In Review"`. This is unconditional — a PR being open means the work is ready for review.
 
 ## Phase 6 — Monitor CI
