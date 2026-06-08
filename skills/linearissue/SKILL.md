@@ -389,6 +389,8 @@ Print:
 
 Every title — whether derived from a design note action item, drafted in freeform mode, or proposed as an iteration refinement — must pass through this gate. The gate is **advisory**: warn and suggest, never block.
 
+> **Sync note:** This gate is mirrored in `/pr` (`skills/pr/SKILL.md`). If you change principles, anti-patterns, or examples here, check the other copy and keep them at parity. Some differences are intentional (brevity threshold, branch-name-friendliness is linearissue-specific) but the core principles and examples should match.
+
 ### Principles
 
 1. **Value over mechanism** — frame what the issue delivers, not how it's implemented. "Stable room link for live AV" not "Implement re-entrancy for Daily transport". The title should answer "what changes for the user/system?" not "what code do we write?".
@@ -396,6 +398,7 @@ Every title — whether derived from a design note action item, drafted in freef
 3. **Brevity** — keep titles under 72 characters. Warn above 72. Shorter is almost always better.
 4. **No metadata in the title** — priority, work type (spike, research), and category belong in labels, not bracket tags or prefixes.
 5. **Branch-name-friendly** — avoid special characters, deep nesting, or parenthetical lists that produce ugly slugs.
+6. **Out-of-context readability** — would someone scanning this title weeks later — or a newcomer — understand the value without the conversation that produced it? Titles are read far more often than they're written, and almost never by the person who wrote them. If the title only makes sense to someone who was in the room, it fails.
 
 ### Anti-patterns to detect
 
@@ -407,6 +410,18 @@ Every title — whether derived from a design note action item, drafted in freef
 - **Kitchen-sink titles** — "Improve X — reduce Y and explore Z" tries to do too much in one title.
 - **Technical-identifier-first** — "bioguide_id mapping for member identity" buries the value. Prefer "Member identity resolver" or "Resolve member identity from bioguide".
 - **Redundant context** — "linearissue skill: value-oriented titles + freeform creation mode" — the project/component prefix is redundant when the ticket already has a project and labels.
+- **Context-dependent titles** — titles that only make sense if you were in the conversation that produced them. "Own protocol types at pipecat boundary" means nothing to a cold reader. "Codename alignment across codebase" sounds important but conveys no real value.
+
+### Out-of-context failures (from audit)
+
+These titles all passed other checks (brevity, no brackets, no mechanism verbs) but fail the out-of-context test:
+
+- "Own protocol types at pipecat boundary" — mechanism, no value visible to a cold reader
+- "Daily chat frames for operator channel" — misleading, sounds like delivery but was actually a feasibility spike
+- "Decouple frame routing from pipecat" — no reason to care without knowing the codebase
+- "Codename alignment across codebase" — vanity, no real value delivered
+- "Market data provider comparison for backtesting" — describes the artifact, not the outcome
+- "Worklog cron silent during active flow" — mechanism-oriented, not value-oriented
 
 ### When the gate fires
 
@@ -427,6 +442,8 @@ Warning:   <what triggered — e.g. "mechanism verb 'Implement' leading", "78 ch
 - "Wire up Logfire for APM and distributed tracing" → "Logfire APM and tracing"
 - "Explore service-level hooks for production frame-level observability" → "Production frame-level o11y hooks"
 - "Architectural spike: bot-as-participant in external video calls (Meet, Zoom, WhatsApp)" → "Bot joins Meet/Zoom/WhatsApp calls"
+- "Market data provider comparison for backtesting" → "Viable market data providers"
+- "Worklog cron silent during active flow" → "Distraction-free worklog tracking"
 
 ### Titles that pass (no rewrite needed)
 
@@ -435,6 +452,7 @@ Warning:   <what triggered — e.g. "mechanism verb 'Implement' leading", "78 ch
 - "Allow bot to interrupt" — user-facing behavior, 4 words
 - "Uncensor STT input" — brief, clear what it delivers
 - "Graceful LLM fallback on provider outage" — value-first, concise
+- "Viable market data providers" — outcome-oriented, cold-reader friendly
 
 ## Anti-patterns
 

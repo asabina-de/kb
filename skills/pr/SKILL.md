@@ -71,11 +71,14 @@ The branch with the **fewest commits between its tip and HEAD** is the most like
 
 Evaluate the drafted title against these criteria. The gate is **advisory** — warn and suggest, never block.
 
+> **Sync note:** This gate is mirrored in `/linearissue` (`skills/linearissue/SKILL.md`). If you change principles, anti-patterns, or examples here, check the other copy and keep them at parity. Some differences are intentional (brevity threshold, branch-name-friendliness) but the core principles and examples should match.
+
 **Principles:**
 1. **Value over mechanism** — frame what the PR delivers, not how it's implemented. "Stable room link for live AV" not "Implement re-entrancy for Daily transport".
 2. **Distinguishing phrase first** — the most identifiable words lead, so truncated branch names (`~25 chars` after the ticket prefix) stay meaningful.
 3. **Brevity** — keep titles under 60 characters (excluding the ticket ID prefix, e.g. `KB-10: `). Warn above 60. The prefix is non-negotiable for traceability and should not count against the limit.
 4. **No metadata in the title** — priority, work type (spike, research), and category belong in labels, not bracket tags or prefixes.
+5. **Out-of-context readability** — would someone scanning this title weeks later — or a newcomer — understand the value without the conversation that produced it? Titles are read far more often than they're written, and almost never by the person who wrote them. If the title only makes sense to someone who was in the room, it fails.
 
 **Anti-patterns to detect:**
 - **Mechanism verbs leading** — "Wire up", "Implement", "Add", "Decouple", "Compose", "Inject", "Conduct", "Redesign" as the first word describe implementation, not value. Exception: action verbs that describe user-facing behavior are fine ("Allow bot to interrupt").
@@ -86,6 +89,18 @@ Evaluate the drafted title against these criteria. The gate is **advisory** — 
 - **Parenthetical lists** — "(Meet, Zoom, WhatsApp)" or "(Cartesia disconnect, room leave)" add precision but kill branch readability.
 - **Question-format titles** — "Does X expose Y?" belongs in the description.
 - **Kitchen-sink titles** — "Improve X — reduce Y and explore Z" tries to do too much in one title.
+- **Context-dependent titles** — titles that only make sense if you were in the conversation that produced them. "Own protocol types at pipecat boundary" means nothing to a cold reader. "Codename alignment across codebase" sounds important but conveys no real value.
+
+**Out-of-context failures (from audit):**
+
+These titles all passed other checks (brevity, no brackets, no mechanism verbs) but fail the out-of-context test:
+
+- "Own protocol types at pipecat boundary" — mechanism, no value visible to a cold reader
+- "Daily chat frames for operator channel" — misleading, sounds like delivery but was actually a feasibility spike
+- "Decouple frame routing from pipecat" — no reason to care without knowing the codebase
+- "Codename alignment across codebase" — vanity, no real value delivered
+- "Market data provider comparison for backtesting" — describes the artifact, not the outcome
+- "Worklog cron silent during active flow" — mechanism-oriented, not value-oriented
 
 **When the gate fires:**
 
@@ -104,12 +119,15 @@ Warning:   <what triggered the gate — e.g. "mechanism verb 'Implement' leading
 - "Decouple FilterSink frame-type routing from pipecat string class names" → "Decouple frame routing from pipecat"
 - "Architectural spike: bot-as-participant in external video calls (Meet, Zoom, WhatsApp)" → "Bot joins Meet/Zoom/WhatsApp calls"
 - "Graceful LLM provider fallback when primary flakes" → "LLM fallback on provider outage"
+- "Market data provider comparison for backtesting" → "Viable market data providers"
+- "Worklog cron silent during active flow" → "Distraction-free worklog tracking"
 
 **Titles that pass (no rewrite needed):**
 - "Select auth provider" — short, clear, distinguishing
 - "Optimise for showtime" — punchy, value obvious
 - "Allow bot to interrupt" — user-facing behavior, 4 words
 - "Uncensor STT input" — brief, clear what it delivers
+- "Viable market data providers" — outcome-oriented, cold-reader friendly
 
 **Body:**
 ```markdown
