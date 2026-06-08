@@ -206,15 +206,18 @@ Print a structured summary in chat. This is the reasoning trace — not a file, 
 
 ```
 Proposed tickets from: docs/decisions/{filename}
-Target: {team-key} / {project-name}
 
  1. [NEW]    {Title}                          Priority: Normal
+             Target: {team-key} / {project-name}
  2. [NEW]    {Title}                          Priority: High
+             Target: {team-key} / {project-name}
              ↳ depends on #1
  3. [NEW]    {Title}                          Priority: Normal
+             Target: {other-team} / {other-project}  ⚠ routed away from ambient
              Suggested: {Rewritten title}  ← title gate fired
              Warning: mechanism verb 'Implement' leading
  4. [UPDATE] {Title} (LIN-123)               Priority: Normal
+             Target: {team-key} / {project-name}
              ↳ description changed
 
 Skipped:
@@ -357,11 +360,12 @@ Print a structured proposal, similar to filing mode:
 
 ```
 Proposed issues (freeform)
-Target: {team-key} / {project-name}
 
  1. [NEW]  {Title}                          Priority: Normal
+           Target: {team-key} / {project-name}
            {2-line description preview}
  2. [NEW]  {Title}                          Priority: High
+           Target: {other-team} / {other-project}  ⚠ routed away from ambient
            {2-line description preview}
 
 {N} new issues
