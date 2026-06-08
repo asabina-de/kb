@@ -168,6 +168,17 @@ For each candidate:
 - **Priority hints.** Look for `URGENT`, `P0`/`P1`, `Now/Next/Later/Never` framing, "blocker", "asap". Translate to Linear priority (1=Urgent, 2=High, 3=Normal, 4=Low). Default Normal.
 - **Estimate hints.** Look for `(Effort: S/M/L)` markers from the kb's TODO.md convention. Translate to a numeric estimate if your team uses one. Otherwise leave unset.
 
+### Work breakdown: sub-issues vs blocking relations
+
+When items imply parent/child or gating relationships, apply this rule before modeling them in Linear:
+
+- **Sub-issues = decomposition.** One goal broken into parts. The parent is a pure container with no deliverable work of its own — all work lives in children. The completion counter is honest because every child is a piece of the parent's single goal.
+- **Blocking relations = dependency.** Different goals where one gates the other. Model as flat peers with `blocks`/`blockedBy` relations. No misleading progress counter.
+- **Litmus test:** if the candidate item would be assigned to a different person doing different work, it's a blocking relation, not a decomposition. Different person + different work = peer dependency.
+- **Implementation sub-issues are especially risky.** Each sub-issue gets its own git branch, creating merge chain hell: sub-issue branches must merge into the parent branch before mainline, serializing work and compounding merge conflicts. Non-implementation work (research, admin, design) is safer for sub-issues because no git branches are involved.
+
+When in doubt, default to flat peers with blocking relations — they're cheaper to restructure later than sub-issues that have already spawned branches.
+
 **Routing — team and project:**
 
 - If the note's Status Log "Related Tickets" column already references Linear tickets, use the same team/project as those (most recent wins).
