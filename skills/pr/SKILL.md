@@ -212,6 +212,24 @@ The subagent should:
 - The subagent runs in the background so the user can continue other work.
 - If the user explicitly asks to merge before CI completes, warn them that checks haven't finished and confirm they want to proceed.
 
+### Branch deletion safety
+
+Before using `--delete-branch` on any merge, check whether the branch is the base of another open PR:
+
+```bash
+gh pr list --base <branch-being-merged> --state open --json number,title
+```
+
+- **If child PRs exist:** merge **without** `--delete-branch`. After the merge completes, retarget each child PR to the new base (typically `main` or the default branch), then delete the old branch manually:
+  ```bash
+  gh pr merge <pr-number> --squash  # or --merge, no --delete-branch
+  gh pr edit <child-pr> --base main
+  git push origin --delete <old-branch>
+  ```
+- **If no child PRs exist:** proceed with `--delete-branch` as normal.
+
+**Never use `--delete-branch` when the branch is another PR's base.** GitHub auto-closes child PRs when their base branch is deleted, requiring a rebase and new PR to recover.
+
 ### Merge strategy
 
 The skill must determine *how* to merge before offering the merge action. The decision tree:
@@ -241,10 +259,13 @@ Merge each PR in the stack individually, bottom-up. This is required because squ
 - Linear issue auto-transition (each merged PR triggers its own `Closes TEAM-N`)
 
 Flow for a stack `A → B → C → main`:
-1. Squash-merge A into main. Wait for CI if required.
-2. GitHub auto-retargets B to main (or manually retarget). Rebase B onto main if needed.
-3. Squash-merge B into main. Wait for CI if required.
-4. Repeat for C.
+1. Squash-merge A **without** `--delete-branch` (B still uses A as its base).
+2. Retarget B to main: `gh pr edit <B> --base main`. Rebase B onto main if needed.
+3. Delete the old A branch: `git push origin --delete <A-branch>`.
+4. Wait for CI on B if required. Squash-merge B without `--delete-branch` (C still uses B as its base).
+5. Retarget C to main, delete old B branch, wait for CI, merge C **with** `--delete-branch` (no children left).
+
+The key invariant: never delete a branch until all child PRs have been retargeted away from it.
 
 **Merge-commit repos:**
 
@@ -256,7 +277,10 @@ Merge method: merge commit
 
 Options:
   (a) Merge tip only (C) — one merge commit, A and B are ancestors ✓
+      Retarget A and B to main first, then merge C with --delete-branch.
+      Clean up A and B branches after.
   (b) Merge individually (A, then B, then C) — three merge commits
+      Same retarget-before-delete discipline as squash flow.
   (c) Cancel
 
 Recommend: (a) — all commits land on main via ancestry.
@@ -281,3 +305,4 @@ Group by platform on separate lines for readability. GitHub parses `#N` (numeric
 - **Don't suggest merging before CI is green.** A freshly created PR has no check data. Wait for the CI monitor subagent to report results before offering merge options.
 - **Don't merge a stack tip with squash.** Squash-merging only the tip of a linear stack collapses N PRs into 1 commit — intermediate ticket IDs, PR boundaries, and review context are lost. For squash repos, always merge each PR individually, bottom-up.
 - **Don't merge without surfacing the strategy.** Always tell the operator what merge method and stack handling you're about to use, and wait for confirmation. Never silently default.
+- **Don't `--delete-branch` when child PRs exist.** Always check `gh pr list --base <branch> --state open` before deleting. Retarget children first, then delete. Violating this auto-closes child PRs on GitHub.
