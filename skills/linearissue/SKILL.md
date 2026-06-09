@@ -78,6 +78,18 @@ If a tool or command is available to rename the session programmatically, use it
 
 Before creating any new issue — whether from a design note or freeform — run a tiered check to avoid duplicates, scope overlap, and contradictions in the backlog. This applies in both filing mode and when other skills (pairprog, freeform conversation) route through `save_issue` to create a ticket.
 
+**Tier 0 — Project fit (always run, before anything else):**
+
+Check whether each proposed ticket belongs in the ambient project or should route elsewhere. Don't default to the current project without questioning it.
+
+Heuristics:
+- **References skill files, agent infrastructure, `CLAUDE.md`/`AGENTS.md`, or cross-project tooling** → suggest the KB (Knowledge Base) project.
+- **References product code, features, domain concepts, or user-facing behavior** → keep in the current project.
+- **References CI/CD, deployment, or repo-specific infrastructure** → keep in the repo's own project.
+- **Ambiguous** → surface it: "This looks like it might belong in {other-project} — route there, or keep in {current-project}?"
+
+When filing a batch, run the check per ticket — different items may route to different projects. If any ticket routes differently from the ambient project, flag it explicitly in the confirmation output (Phase 3).
+
 **Tier 1 — Current work (always run, lightweight):**
 - Check the current branch and the last 2 branches worked on (`git branch --sort=-committerdate | head -3`).
 - Cross-reference with GitHub (`mcp__github__list_pull_requests`, `mcp__github__pull_request_read`) to confirm merge state — local state may be stale.
@@ -194,15 +206,18 @@ Print a structured summary in chat. This is the reasoning trace — not a file, 
 
 ```
 Proposed tickets from: docs/decisions/{filename}
-Target: {team-key} / {project-name}
 
  1. [NEW]    {Title}                          Priority: Normal
+             Target: {team-key} / {project-name}
  2. [NEW]    {Title}                          Priority: High
+             Target: {team-key} / {project-name}
              ↳ depends on #1
  3. [NEW]    {Title}                          Priority: Normal
+             Target: {other-team} / {other-project}  ⚠ routed away from ambient
              Suggested: {Rewritten title}  ← title gate fired
              Warning: mechanism verb 'Implement' leading
  4. [UPDATE] {Title} (LIN-123)               Priority: Normal
+             Target: {team-key} / {project-name}
              ↳ description changed
 
 Skipped:
@@ -345,11 +360,12 @@ Print a structured proposal, similar to filing mode:
 
 ```
 Proposed issues (freeform)
-Target: {team-key} / {project-name}
 
  1. [NEW]  {Title}                          Priority: Normal
+           Target: {team-key} / {project-name}
            {2-line description preview}
  2. [NEW]  {Title}                          Priority: High
+           Target: {other-team} / {other-project}  ⚠ routed away from ambient
            {2-line description preview}
 
 {N} new issues
