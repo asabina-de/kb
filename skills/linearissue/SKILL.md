@@ -168,6 +168,17 @@ For each candidate:
 - **Priority hints.** Look for `URGENT`, `P0`/`P1`, `Now/Next/Later/Never` framing, "blocker", "asap". Translate to Linear priority (1=Urgent, 2=High, 3=Normal, 4=Low). Default Normal.
 - **Estimate hints.** Look for `(Effort: S/M/L)` markers from the kb's TODO.md convention. Translate to a numeric estimate if your team uses one. Otherwise leave unset.
 
+### Work breakdown: sub-issues vs blocking relations
+
+When items imply parent/child or gating relationships, apply this rule before modeling them in Linear:
+
+- **Sub-issues = decomposition.** One goal broken into parts. The parent is a pure container with no deliverable work of its own — all work lives in children. The completion counter is honest because every child is a piece of the parent's single goal.
+- **Blocking relations = dependency.** Different goals where one gates the other. Model as flat peers with `blocks`/`blockedBy` relations. No misleading progress counter.
+- **Litmus test:** if the candidate item would be assigned to a different person doing different work, it's a blocking relation, not a decomposition. Different person + different work = peer dependency.
+- **Implementation sub-issues are especially risky.** Each sub-issue gets its own git branch, creating merge chain hell: sub-issue branches must merge into the parent branch before mainline, serializing work and compounding merge conflicts. Non-implementation work (research, admin, design) is safer for sub-issues because no git branches are involved.
+
+When in doubt, default to flat peers with blocking relations — they're cheaper to restructure later than sub-issues that have already spawned branches.
+
 **Routing — team and project:**
 
 - If the note's Status Log "Related Tickets" column already references Linear tickets, use the same team/project as those (most recent wins).
@@ -465,7 +476,7 @@ Warning:   <what triggered — e.g. "mechanism verb 'Implement' leading", "78 ch
 - **Don't create new files.** The note itself is the only file touched.
 - **Don't interpret non-canonical sections creatively.** Only known sections and explicit `→ ticket` markers count. If a note has work in a non-canonical section, ask in Phase 3.
 - **Don't infer parallel-safety from nothing.** If the note doesn't mention file scope or parallelism, leave parallel-safety unset. Don't fabricate predictions.
-- **Don't bundle unrelated action items into a single ticket.** One action item = one ticket. If items are tightly coupled, the note should reflect that and the skill can model them as parent/sub-tasks — but only if the note is structured that way.
+- **Don't bundle unrelated action items into a single ticket.** One action item = one ticket. If items are tightly coupled, the note should reflect that and the skill can model them as parent/sub-tasks — but only if the note is structured that way. Crucially, don't model items as sub-issues when they're actually dependencies: if two items would be assigned to different people doing different work, they're flat peers with a `blocks`/`blockedBy` relation, not a parent/child decomposition. See **Phase 2 → Work breakdown** for the full rule.
 - **Don't over-fill descriptions.** A description is a minimal anchor — 2–5 sentences max (what, why, DoD, backlink). Do not copy prose, reasoning, or context from the design note into it. The backlink to the note is the bridge; if extra context is needed, post it as a comment after creation. Stuffing descriptions creates maintenance debt and obscures the signal.
 - **Don't skip the DoD.** Every ticket needs a "Done when..." sentence in the description. It should be concrete and verifiable — not "done when implemented" but "done when X is observable/testable." If the source material doesn't imply a clear DoD, draft one from the action item's intent and surface it in the confirmation gate for the user to refine.
 - **Don't default to description updates in iteration mode.** The user's intent is almost always to add a comment. Only propose a title/description change when the prompt explicitly targets the anchor (e.g. "the title is wrong", "rewrite the description"). When in doubt, put it in a comment.

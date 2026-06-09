@@ -258,7 +258,7 @@ Two modes: **create new** or **extend existing**.
    ```
 
 4. **Populate** with findings from the research phase. Add custom sections as needed: `## Open Questions`, `## Trigger Points`, `## Upstream References`, `## Related Design Notes`. Match the richer style of existing records in the repo if they follow one.
-5. **Action items.** If the research surfaces concrete follow-up work, add a `## Action items` section with checklist items. These are the hooks the `linearissue` skill will find later.
+5. **Action items.** If the research surfaces concrete follow-up work, add a `## Action items` section with checklist items. These are the hooks the `linearissue` skill will find later. When structuring action items, be aware of the decomposition-vs-dependency distinction: items that represent parts of one goal (same person, same work stream) can be grouped under a parent item, but items that represent different goals gating each other (different person, different work) should be flat peers with explicit "blocked by" / "depends on" language — not nested sub-items. The `linearissue` skill uses this structure to decide between sub-issues and blocking relations. Getting it wrong here creates misleading progress counters and merge chain hell downstream.
 6. **Set `review_date`** to 3 months from today by default. Adjust if the topic is time-sensitive (shorter) or foundational (longer).
 
 ### Extend existing record
