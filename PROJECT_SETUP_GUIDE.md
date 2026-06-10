@@ -76,7 +76,24 @@ Include setup verification instructions in your project's `README.md` to ensure 
 
 See the [README template](./templates/README.md#setup-verification) for complete setup verification examples that you can customize for your project.
 
-### 4. Pre-commit Hooks Setup (Optional but Recommended)
+### 4. GitHub Repository Settings
+
+Configure these settings immediately after creating the repo. The defaults are footguns.
+
+**A. Squash-merge commit message format**
+
+Go to **Settings > Pull Requests > "Allow squash merging"** and change the dropdown from the default to **"Pull request title and description"** (or **"Pull request title and commit details"**).
+
+The factory default uses the commit message for single-commit PRs but the PR title for multi-commit PRs. This inconsistency silently breaks commit-message conventions (e.g., `KB-28: Title (#42)` becomes `fix: whatever [ai:claude] (#42)` when a PR has exactly one commit). There are [multiple GitHub Community threads](https://github.com/orgs/community/discussions/6102) complaining about this — GitHub shipped the setting as a fix but left the broken default in place.
+
+**B. Branch protection (recommended)**
+
+For `main` / the default branch:
+- Require pull request reviews before merging
+- Require status checks to pass (once CI is configured)
+- Do not allow bypassing the above settings
+
+### 5. Pre-commit Hooks Setup (Optional but Recommended)
 
 Set up automated code quality checks that run before commits:
 
@@ -155,7 +172,7 @@ Make hook requirements clear in your README:
 - **eslint**: Use local hook (project-specific config dependencies)
 - **Python tools**: Use auto-installing hooks (reliable, fast to install)
 
-### 5. Initial Documentation Setup
+### 6. Initial Documentation Setup
 
 Copy the core documentation templates into your project.
 
