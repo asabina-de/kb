@@ -197,7 +197,11 @@ The subagent should:
    - Report to the user: "CI passed on PR #N. Ready to merge."
    - Determine the merge strategy (see **Merge strategy** below).
    - Surface the strategy to the operator before executing. Never merge silently.
-   - **After merge:** run `git checkout main && git pull --ff-only` (i.e. `git ready`) to return to a clean, up-to-date main. This is the ready position for starting new work. Transition linked tickets to Done.
+   - **After merge:** clean up and return to ready position:
+     1. `git checkout main && git pull --ff-only`
+     2. `git fetch --prune` — remove stale remote tracking refs
+     3. `git branch -D <merged-branch>` — delete the local branch that was just merged. This is safe by construction (the skill just merged it). Use `-D` not `-d` because squash merges create new SHAs that git can't trace back to the original branch commits.
+     4. Transition linked tickets to Done.
 3. **On any check red:**
    - Report the failure: which check failed, link to the logs.
    - Fetch the failure details via `mcp__github__pull_request_read` and `Bash` with `gh run view <run-id> --log-failed` for actionable output.
