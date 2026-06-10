@@ -18,9 +18,9 @@ We use a **direnv -> devenv** pattern for environment management. This provides 
 Copy the environment files from the knowledge base into your new project's root.
 
 ```bash
-# Example assumes knowledge-base is cloned next to your project
-cp ../kb/templates/.envrc .envrc
-cp ../kb/templates/.envrc.local.example .envrc.local.example
+# Replace <path-to-kb> with the actual path to your kb checkout
+cp <path-to-kb>/templates/.envrc .envrc
+cp <path-to-kb>/templates/.envrc.local.example .envrc.local.example
 ```
 
 `.envrc` is committed directly — it contains only direnv/devenv boilerplate, no secrets. Secrets go in `.envrc.local` (gitignored).
@@ -83,7 +83,7 @@ Set up automated code quality checks that run before commits:
 **A. Copy Pre-commit Configuration**
 
 ```bash
-cp knowledge-base/.pre-commit-config.yaml .pre-commit-config.yaml
+cp <path-to-kb>/.pre-commit-config.yaml .pre-commit-config.yaml
 ```
 
 **B. Install Pre-commit Hooks**
@@ -164,15 +164,18 @@ Copy the core documentation templates into your project.
 mkdir -p docs
 
 # Copy templates
-cp ../kb/templates/CHANGELOG.md ./
-cp ../kb/templates/CONTRIBUTING.md ./
-cp ../kb/templates/GUIDELINES.md ./docs/
-cp ../kb/templates/TODO.md ./docs/
-cp -r ../kb/templates/decisions ./docs/
+cp <path-to-kb>/templates/CHANGELOG.md ./
+cp <path-to-kb>/templates/CONTRIBUTING.md ./
+cp <path-to-kb>/templates/AGENTS.md ./
+ln -s AGENTS.md CLAUDE.md       # Claude Code reads CLAUDE.md
+ln -s AGENTS.md GEMINI.md       # Gemini reads GEMINI.md
+cp <path-to-kb>/templates/GUIDELINES.md ./docs/
+cp <path-to-kb>/templates/TODO.md ./docs/
+cp -r <path-to-kb>/templates/decisions ./docs/
 ```
 
-> **Note:** `CHANGELOG.md` and `CONTRIBUTING.md` live at the repo root (GitHub convention), not in `docs/`.
-> It owns commit conventions, scope discipline, and merge strategy — see the template for details.
+> **Note:** `CHANGELOG.md`, `CONTRIBUTING.md`, and `AGENTS.md` live at the repo root (GitHub convention / agent discovery), not in `docs/`.
+> `CLAUDE.md` and `GEMINI.md` are symlinks to `AGENTS.md` — edit `AGENTS.md` and the others follow.
 
 Refer to the main [Engineering Handbook (README.md)](./README.md) for the philosophy on when and how to use each of these documents.
 
@@ -219,24 +222,15 @@ Replace template tasks with your project needs:
 - [ ] Configure backup strategy
 ```
 
-### DECISIONS.md First Entry
+### First Decision Record
 
-Document your first major decision in the `docs/decisions` directory, using the template.
+Copy the template and create your first decision record in `docs/decisions/`:
 
-```markdown
-### 2024-01-15 - Framework Selection
-
-**Decision**: Use Next.js with TypeScript for the web application.
-
-**Context**: Need to build a full-stack web application with both static and dynamic content...
-
-**Rationale**:
-
-- Built-in SSR/SSG capabilities
-- Excellent TypeScript support
-- Large ecosystem and community
-- Team familiarity
+```bash
+cp docs/decisions/0000-decision-template.md docs/decisions/0001-framework-selection.md
 ```
+
+Edit the frontmatter and fill in the sections (Context, Exploration, Decision, Consequences, Confirmation). See [templates/decisions/README.md](./templates/decisions/README.md) for the full format reference and status vocabulary.
 
 ## Maintenance & Integration
 

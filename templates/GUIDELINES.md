@@ -327,7 +327,6 @@ const { data, isLoading, error } = useQuery({
 
 ## Related Documentation
 
-- [decisions/](./decisions/) - Architectural decisions behind these guidelines
-- [design-notes/](./design-notes/) - System design patterns
+- [decisions/](./decisions/) - Decision records (exploration through to decided)
 - [LINTING_FORMATTING.md](./LINTING_FORMATTING.md) - Code formatting standards
 - [TODO.md](./TODO.md) - Planned guideline improvements

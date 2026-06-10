@@ -235,29 +235,25 @@ Every project should maintain consistent documentation using our **structured an
 _Ordered by developer workflow relevance_
 
 - **README.md** (`./README.md`) - Project Foundation
+- **CONTRIBUTING.md** (`./CONTRIBUTING.md`) - Commit conventions, scope discipline, merge strategy
 - **GUIDELINES.md** (`./docs/GUIDELINES.md`) - Development Standards and Best Practices
 - **TODO.md** (`./docs/TODO.md`) - Task Management using Now/Next/Later/Never Framework
-- **design-notes/** (`./docs/design-notes/`) - Design Iteration and System Models
-  - **Filename Convention**: `YYYY-MM-DD.STATE.description.md` (e.g. `2025-09-08.WIP.api-design.md`)
-  - **Front Matter**: Each file includes a `title` and a list of `tags` to aid discovery for cross-cutting concerns.
-  - **Status Log**: Table-based tracking of status changes with date, author, tickets, and notes
-  - Used as a scratchpad for evolving ideas. The `STATE` in the filename and Status Log table track lifecycle changes.
-- **decisions/** (`./docs/decisions/`) - Architecture Decision Records (ADR)
-  - **Filename Convention**: `YYYY-MM-DD.STATE.description.md`
-  - **Front Matter**: Includes `title` and `tags`.
-  - Immutable snapshots of final decisions, often graduated from a `DONE` design note.
+- **decisions/** (`./docs/decisions/`) - Decision records (exploration through to decided)
+  - MADR-style serial numbering (`nnnn-slug.md`), enriched frontmatter, status log
+  - See [templates/decisions/README.md](./templates/decisions/README.md) for format details, naming conventions, and status vocabulary
 - **LINTING_FORMATTING.md** (`./docs/LINTING_FORMATTING.md`) - Code Quality Standards _(conditional)_
 - **AGENTS.md** (`./AGENTS.md`) - AI agent guidelines _(conditional)_
+  - `CLAUDE.md` and `GEMINI.md` are symlinks to `AGENTS.md`
 
 ### When to Create Each Document
 
 - **Start with essentials**:
   - **README.md**: Every project foundation.
+  - **CONTRIBUTING.md**: When multiple contributors need aligned commit/merge practices.
   - **GUIDELINES.md**: When README outgrows itself or team needs coding standards.
 - **Add as workflow demands**:
   - **TODO.md**: When you need a repo-specific scratchpad.
-  - **design-notes/**: When exploring complex designs.
-  - **decisions/**: When graduating mature designs from `design-notes/`.
+  - **decisions/**: When exploring designs or recording architectural choices.
   - **LINTING_FORMATTING.md**: Only when team size or complexity demands a separate file.
   - **AI Guidance**: When using AI development tools (`AGENTS.md`).
 
@@ -296,7 +292,7 @@ See [templates/](./templates/) directory for starter templates of each document 
 
 ## Contributing
 
-See [GUIDELINES.md](./templates/GUIDELINES.md) for detailed contribution standards.
+See [CONTRIBUTING.md](./templates/CONTRIBUTING.md) for contribution standards.
 
 ---
 
