@@ -10,6 +10,19 @@ Format follows [Keep a Changelog](https://keepachangelog.com/), with an added **
 
 ---
 
+## [2026-06-10]
+
+### Changed
+- **GUIDELINES.md template** — removed stale `design-notes/` link from "Related Documentation" footer. Updated `decisions/` description to reflect unified format.
+- **PROJECT_SETUP_GUIDE.md** — added AGENTS.md (with CLAUDE.md/GEMINI.md symlinks) to documentation copy commands. Decision record example updated to MADR serial-numbered format. All `cp` paths now use `<path-to-kb>` placeholder instead of hardcoded relative paths.
+
+### Migration
+
+**If your `docs/GUIDELINES.md` references `design-notes/`:**
+
+1. Remove the `design-notes/` line from the "Related Documentation" section at the bottom of the file
+2. Optionally update the `decisions/` description to: `Decision records (exploration through to decided)`
+
 ## [2026-06-05]
 
 ### Added
