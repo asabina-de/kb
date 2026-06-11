@@ -38,35 +38,30 @@ This document is the canonical source of truth for commit conventions, scope dis
 
 ### Scopes
 
-<!-- PROJECT-SPECIFIC: populate this table with your project's canonical scopes -->
-
 | Scope | Covers |
 |---|---|
-| _example: `api`_ | _API routes and controllers_ |
-| _example: `db`_ | _Database migrations and queries_ |
-| _example: `ui`_ | _Frontend components and styles_ |
-| _example: `auth`_ | _Authentication and authorization_ |
-| _example: `o11y`_ | _Observability: logging, metrics, tracing_ |
-| _example: `ci`_ | _CI/CD pipeline configuration_ |
-| _example: `deps`_ | _Dependency updates_ |
+| `templates` | Template files in `templates/` |
+| `skills` | Skill definitions in `skills/` |
+| `decisions` | Decision records in `docs/decisions/` |
+| `ci` | CI/CD pipeline configuration |
+| `pr` | The `/pr` skill specifically |
+| `deps` | Dependency updates |
 
 > **Tip:** When no scope fits, omit it: `fix: handle null response from upstream`.
-> When a change genuinely spans multiple scopes, pick the primary one — do not concatenate (`providers+bot` is never valid).
+> When a change genuinely spans multiple scopes, pick the primary one — do not concatenate (`templates+skills` is never valid).
 
 ### Prohibited Scope Patterns
-
-<!-- PROJECT-SPECIFIC: add your project's known anti-patterns here -->
 
 These patterns are **never valid** as scopes. AI agents in particular tend to invent these — reject them in review.
 
 | Anti-pattern | Why it's wrong | Use instead |
 |---|---|---|
-| Ticket IDs (`Z-123`, `LIN-456`) | Scopes describe *what*, not *which task* | The correct canonical scope |
+| Ticket IDs (`KB-123`) | Scopes describe *what*, not *which task* | The correct canonical scope |
 | Pluralized duplicates (`tests`, `docs`) | Creates ambiguity with singular forms | `test`, `doc` |
-| Synonym drift (`telemetry` vs `o11y`) | Fragments the log — pick one canonical name | The canonical scope from the table above |
-| Concatenated scopes (`api+db`) | One commit, one scope — split the commit or pick the primary | The primary scope |
-| Tool names (`eslint`, `prettier`) | Too granular — group by concern | `style`, `chore`, or `ci` |
-| File names (`config.ts`) | Too specific, doesn't generalize | The area the file belongs to |
+| Synonym drift (`documentation` vs `doc`) | Fragments the log — pick one canonical name | The canonical scope from the table above |
+| Concatenated scopes (`templates+skills`) | One commit, one scope — split the commit or pick the primary | The primary scope |
+| Tool names (`markdownlint`) | Too granular — group by concern | `style`, `chore`, or `ci` |
+| File names (`CHANGELOG.md`) | Too specific, doesn't generalize | The area the file belongs to |
 
 ### Subject Line Rules
 
@@ -75,7 +70,7 @@ These patterns are **never valid** as scopes. AI agents in particular tend to in
 3. **No period** at the end
 4. **≤80 characters** (enforced — see self-check below)
 5. **No ticket IDs** in the subject line — the branch name already encodes the ticket
-6. **Describe the change**, not the task: "add OAuth callback route" not "work on Z-123"
+6. **Describe the change**, not the task: "add OAuth callback route" not "work on KB-123"
 
 #### Subject Line Self-Check Protocol
 
@@ -94,16 +89,16 @@ echo -n "<type>(<scope>): <your subject> [ai:<agent>]" | wc -c
 
 ```
 # BAD
-feat(bot): Z-528 add teardown events for session cleanup [ai:claude]   ← ticket ID in subject
-Fix: Added new provider support.                                        ← past tense, capital, period
-feat(providers+bot): add multi-provider routing [ai:claude]             ← concatenated scope
-refactor(telemetry): rename spans                                       ← synonym drift (use o11y)
+doc(templates): KB-31 add PR title convention section [ai:claude]      ← ticket ID in subject
+Fix: Added new template support.                                       ← past tense, capital, period
+doc(templates+skills): add PR title convention [ai:claude]             ← concatenated scope
+refactor(documentation): rename sections                               ← synonym drift (use doc)
 
 # GOOD
-feat(bot): add teardown events for session cleanup [ai:claude]
-fix: handle null response from upstream [ai:claude]
-refactor(o11y): rename spans for consistency [ai:claude]
-doc: add multi-account 1Password example to envrc template [ai:claude]
+doc(templates): add PR title convention section [ai:claude]
+fix: correct stale design-notes link in guidelines [ai:claude]
+chore(ci): add semantic PR title workflow [ai:claude]
+doc: update project setup guide with GitHub settings [ai:claude]
 ```
 
 ## Pre-Commit Workflow
@@ -156,9 +151,9 @@ PR titles follow the same conventional-commit format as individual commits, with
 ### Examples
 
 ```
-feat(auth): OAuth callback for Google login [KB-31]
-fix: null response from upstream handled [KB-45]
-doc: contributing guide updated with PR title convention [KB-31]
+feat(skills): convention sync for downstream repos [KB-33]
+fix(pr): HITL offers gh CLI commands for repo config [KB-31]
+doc(templates): PR title convention with commit/PR layering [KB-31]
 chore(ci): semantic PR title enforcement [KB-31]
 ```
 
@@ -169,60 +164,27 @@ Individual commits and merged PRs serve different audiences in `git log`:
 | Layer | Format | Ticket ID? | When visible |
 |---|---|---|---|
 | Individual commit | `type(scope): subject [ai:agent]` | No — branch encodes it | Always |
-| Merged PR (squash) | `type(scope): subject [TICKET-ID] (#N)` | Yes — for traceability | After squash-merge |
-| Merged PR (merge commit) | `type(scope): subject [TICKET-ID] (#N)` | Yes — on merge commit | After merge-commit |
+| Squash-merged PR | `type(scope): subject [TICKET-ID] (#N)` | Yes — for traceability | After squash-merge |
 
 The ticket ID suffix is the visual signal that distinguishes a squash-merged PR from an individual commit when scanning `git log`. It also makes every merged PR traceable back to its Linear ticket without opening GitHub.
 
 ### CI enforcement
 
-Repos using this convention should add the `amannn/action-semantic-pull-request` GitHub Action to validate PR titles on open/edit. See `templates/github-workflow-ci.yml` patterns and `.github/workflows/lint-pr.yaml` for a working example.
+PR titles are validated by `amannn/action-semantic-pull-request` in `.github/workflows/lint-pr.yaml`.
 
 ## PR Merge Strategy
 
-**Always use merge commits** — never squash unless explicitly requested by the reviewer.
+**Always use squash-merge** with "Pull request title" as the commit message source.
 
 **Rationale:**
 
-- Squash loses per-commit provenance — you can no longer see which commits were `[ai:claude]` vs human-authored
-- Squash collapses the atomic commit history that was carefully structured during development
-- Merge commits preserve the full trail for `git bisect`, `git blame`, and audit
+- Squash produces one clean commit per PR in `git log`, carrying the PR title format `type(scope): subject [TICKET-ID] (#N)`
+- Every merged PR is traceable to its Linear ticket via the `[TICKET-ID]` suffix
+- The PR title is the traceability surface — individual commits within a PR are development noise for this documentation-focused repo
+- GitHub must be configured to use "Pull request title" (not "Commit message") as the squash commit subject — see `.github-settings.yaml`
 
 When merging:
 
-- Use the default merge commit strategy (`git merge --no-ff` / GitHub's "Create a merge commit")
-- The PR title becomes the merge commit subject — keep it clean
+- Use squash-merge (GitHub's "Squash and merge")
+- The PR title becomes the squash commit subject — keep it clean
 - Delete the branch after merge
-
-<!-- OPTIONAL APPENDIX: Uncomment if your project uses milestone-based development
-
-## Appendix: Milestone Integration Branch Pattern
-
-For projects that organize work into milestones (epics, releases, phases), use an integration branch strategy:
-
-```
-feature-branch → milestone-branch → main
-```
-
-### How it works
-
-1. **Main** is always releasable
-2. **Milestone branches** (e.g. `milestone/m3-auth-overhaul`) collect related work
-3. **Feature branches** target the milestone branch, not main
-4. Sub-issues of a milestone issue branch from and PR into the milestone branch
-5. When the milestone is complete, the milestone branch PRs into main
-
-### Why use this
-
-- Keeps main stable while large multi-PR efforts are in flight
-- Sub-issues can be reviewed and merged independently without destabilizing main
-- The milestone PR into main serves as a final integration review
-
-### Branch naming
-
-```
-milestone/<slug>           ← integration branch
-vidbina/<ticket>-<slug>    ← feature branch targeting the milestone
-```
-
--->

@@ -1,0 +1,24 @@
+# Intended GitHub repo settings for asabina-de/kb.
+# Read by the /pr skill (Phase 1.1) to detect configuration drift.
+# Not consumed by CI or GitHub directly.
+
+merge:
+  allowed_methods:
+    - squash
+
+  # Squash-merge is the only allowed method for this repo.
+  # One clean commit per PR in git log, carrying the PR title format:
+  #   type(scope): subject [TICKET-ID] (#N)
+  default_method: squash
+
+  # CRITICAL: must be "pr_title" — GitHub's factory default uses the
+  # commit message for single-commit PRs, silently breaking conventions.
+  # Configure in GitHub Settings > Pull Requests > "Allow squash merging".
+  squash_title: pr_title
+
+  delete_branch_on_merge: true
+
+branch_protection:
+  default_branch: main
+  require_pr_reviews: true
+  require_status_checks: true
