@@ -92,7 +92,18 @@ Fields:
 - `branch_protection.require_pr_reviews` — require PR review before merge
 - `branch_protection.require_status_checks` — require CI to pass before merge
 
-**HITL guardrail:** The skill never modifies GitHub repo settings directly. All repo-level changes (merge mode, branch protection) are surfaced as instructions for the operator to apply manually in GitHub Settings. These affect all contributors and cannot be scoped to a single PR.
+**HITL guardrail:** Repo-level changes (merge mode, branch protection) affect all contributors and cannot be scoped to a single PR. The skill handles these in three tiers:
+
+1. **Default: suggest with `gh` CLI commands.** Present the drift finding and offer ready-to-run `gh` commands so the operator can copy-paste:
+   ```
+   ⚠️  Squash-merge title source is "commit_message" (GitHub default footgun).
+       Expected: "pr_title" per .github-settings.yaml
+
+   Fix:
+     gh api repos/{owner}/{repo} -X PATCH -f squash_merge_commit_title=PR_TITLE
+   ```
+2. **On operator request: run the commands directly.** If the operator says "go ahead" or "fix it", the skill executes the `gh` commands itself. Use `AskUserQuestion` to gate — never auto-fix drift without explicit approval.
+3. **Never silently modify.** Even in yolo mode, repo settings changes require an explicit gate. These are org-wide side effects, not branch-scoped changes.
 
 ## Phase 2 — Detect base branch
 
@@ -124,9 +135,9 @@ The branch with the **fewest commits between its tip and HEAD** is the most like
 **Title:**
 1. **Determine the type** from the nature of the change: `feat`, `fix`, `doc`, `refactor`, `chore`, `test`, `style`, or `perf` — same types as commit conventions in CONTRIBUTING.md.
 2. **Determine the scope** (optional) from the primary area of the codebase affected.
-3. **Draft the subject** — use the Linear ticket title if available, otherwise derive from the branch name slug (strip the owner prefix and ticket ID, humanize the remainder).
+3. **Draft the subject** — use the Linear ticket title as a starting point if available, otherwise derive from the branch name slug (strip the owner prefix and ticket ID, humanize the remainder). The ticket title is a starting point, not a passthrough — always run it through the quality gate (step 6) and rewrite if it doesn't meet PR title standards. *(Note: KB-32 will introduce a ticket title standard. Once that lands, ticket titles should already be closer to PR-ready, but the quality gate still applies.)*
 4. **Append the ticket ID** when one was detected from the branch name in Phase 1. Format: `[KB-10]` in square brackets at the end. This is required for traceability — merged commits produce `type(scope): subject [KB-10] (#N)`, preserving the Linear issue link in `git log`. Omit only for ad-hoc branches without a ticket.
-5. **Assemble the title:** `type(scope): subject [TICKET-ID]` — e.g. `feat(auth): OAuth callback for Google login [KB-31]`.
+5. **Assemble the title:** `type(scope): subject [TICKET-ID]`.
 6. Run the title through the **title quality gate** below.
 
 ### Title quality gate
