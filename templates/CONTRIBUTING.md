@@ -176,7 +176,7 @@ The ticket ID suffix is the visual signal that distinguishes a squash-merged PR 
 
 ### CI enforcement
 
-Repos using this convention should add the `amannn/action-semantic-pull-request` GitHub Action to validate PR titles on open/edit. See `templates/github-workflow-ci.yml` patterns and `.github/workflows/lint-pr.yml` for a working example.
+Repos using this convention should add the `amannn/action-semantic-pull-request` GitHub Action to validate PR titles on open/edit. See `templates/github-workflow-ci.yml` patterns and `.github/workflows/lint-pr.yaml` for a working example.
 
 ## PR Merge Strategy
 
