@@ -25,6 +25,7 @@ Run in parallel:
 - **Push state:** `git status -sb` — is the branch already pushed to origin?
 - **Remote default branch:** use `mcp__github__get_file_contents` or `mcp__github__list_branches` to determine the default branch — don't hardcode `main`
 - **Repo merge conventions:** Read `AGENTS.md` and `CONTRIBUTING.md` at the repo root (if they exist) for merge strategy guidance — e.g. squash vs merge commit, stack handling, branch cleanup. Store any findings for use in Phase 6.
+- **Repo config:** Check for `.github-settings.json` at the repo root (see Phase 1.1 below).
 
 Extract a ticket ID from the branch name if present (e.g. `vidbina/vid-123-some-slug` → `VID-123`). If found, fetch the Linear issue (`get_issue`) for title and description.
 
@@ -33,6 +34,68 @@ Extract a ticket ID from the branch name if present (e.g. `vidbina/vid-123-some-
 After context is gathered, rename the session so the user can identify it at a glance (e.g. in a terminal tab). A good name includes the ticket number and a 2–4 word summary — e.g. "VID-662 rename titles (pr)".
 
 If a tool or command is available to rename the session programmatically, use it. Otherwise, suggest the user rename it — but don't block on this. Move on to drafting either way.
+
+### Phase 1.1 — Repo config check
+
+Check for `.github-settings.json` at the repo root. This file declares the repo's intended GitHub settings so the skill can detect drift and guide first-time setup.
+
+**If `.github-settings.json` exists:**
+
+Read it and store the declared settings for use in Phase 6 (merge strategy). Compare against what's observable from the GitHub API (e.g. allowed merge methods via `mcp__github__search_repositories`). If a mismatch is detected, surface it as a warning in the Phase 4 pitch:
+
+```
+⚠️  Repo config drift detected:
+  .github-settings.json says: default_method = "squash", squash_title = "pr_title"
+  GitHub API says: squash merging is disabled
+  → Fix in GitHub Settings > Pull Requests, or update .github-settings.json
+```
+
+Do not block on drift — warn and continue. The operator decides whether to fix it now or later.
+
+**If `.github-settings.json` does not exist (first PR in an unconfigured repo):**
+
+Surface a one-time setup prompt after the PR is created (Phase 5), not before — don't gate PR creation on repo config:
+
+```
+📋 This repo has no .github-settings.json. Want to set one up?
+   This declares your merge mode, squash-merge title format, and branch protection
+   expectations so the /pr skill can detect drift.
+
+   (a) Generate from current GitHub settings — I'll read the API and draft it
+   (b) Copy the template — you'll customize manually
+   (c) Skip — not now
+```
+
+On (a): read the repo's current settings via the GitHub API, generate a `.github-settings.json` matching what's configured, and present it for approval. On (b): point to `templates/github-settings.json` in the kb repo. On (c): skip silently. Don't ask again in the same session.
+
+**Schema reference (`templates/github-settings.json`):**
+
+```json
+{
+  "merge": {
+    "allowed_methods": ["merge", "squash", "rebase"],
+    "default_method": "merge",
+    "squash_title": "pr_title",
+    "delete_branch_on_merge": true
+  },
+  "branch_protection": {
+    "default_branch": "main",
+    "require_pr_reviews": true,
+    "require_status_checks": true
+  }
+}
+```
+
+Fields:
+- `merge.allowed_methods` — which merge buttons are enabled on GitHub
+- `merge.default_method` — which method is selected by default
+- `merge.squash_title` — squash-merge commit title source: `"pr_title"` (recommended) or `"commit_message"` (GitHub's footgun default)
+- `merge.delete_branch_on_merge` — auto-delete head branch after merge
+- `branch_protection.default_branch` — the branch protection rules apply to
+- `branch_protection.require_pr_reviews` — require PR review before merge
+- `branch_protection.require_status_checks` — require CI to pass before merge
+
+**HITL guardrail:** The skill never modifies GitHub repo settings directly. All repo-level changes (merge mode, branch protection) are surfaced as instructions for the operator to apply manually in GitHub Settings. These affect all contributors and cannot be scoped to a single PR.
 
 ## Phase 2 — Detect base branch
 
@@ -62,10 +125,12 @@ The branch with the **fewest commits between its tip and HEAD** is the most like
 ## Phase 3 — Draft
 
 **Title:**
-1. Use the Linear ticket title if available.
-2. Otherwise, derive from the branch name slug (strip the owner prefix and ticket ID, humanize the remainder).
-3. **Prepend the ticket ID** when one was detected from the branch name in Phase 1 (e.g. `KB-10: <title>`). This is required for traceability — squash-merge commits produce `KB-10: Title (#N)`, preserving the Linear issue link in `git log`. Do not prepend if no ticket ID was detected (e.g. ad-hoc branches without a ticket).
-4. Run the title through the **title quality gate** below.
+1. **Determine the type** from the nature of the change: `feat`, `fix`, `doc`, `refactor`, `chore`, `test`, `style`, or `perf` — same types as commit conventions in CONTRIBUTING.md.
+2. **Determine the scope** (optional) from the primary area of the codebase affected.
+3. **Draft the subject** — use the Linear ticket title if available, otherwise derive from the branch name slug (strip the owner prefix and ticket ID, humanize the remainder).
+4. **Append the ticket ID** when one was detected from the branch name in Phase 1. Format: `[KB-10]` in square brackets at the end. This is required for traceability — merged commits produce `type(scope): subject [KB-10] (#N)`, preserving the Linear issue link in `git log`. Omit only for ad-hoc branches without a ticket.
+5. **Assemble the title:** `type(scope): subject [TICKET-ID]` — e.g. `feat(auth): OAuth callback for Google login [KB-31]`.
+6. Run the title through the **title quality gate** below.
 
 ### Title quality gate
 
@@ -76,7 +141,7 @@ Evaluate the drafted title against these criteria. The gate is **advisory** — 
 **Principles:**
 1. **Value over mechanism** — frame what the PR delivers, not how it's implemented. "Stable room link for live AV" not "Implement re-entrancy for Daily transport".
 2. **Distinguishing phrase first** — the most identifiable words lead, so truncated branch names (`~25 chars` after the ticket prefix) stay meaningful.
-3. **Brevity** — keep titles under 60 characters (excluding the ticket ID prefix, e.g. `KB-10: `). Warn above 60. The prefix is non-negotiable for traceability and should not count against the limit.
+3. **Brevity** — keep the **subject** (the part after `type(scope): ` and before ` [TICKET-ID]`) under 60 characters. Warn above 60. The type/scope prefix and ticket suffix are structural — they don't count against the limit.
 4. **No metadata in the title** — priority, work type (spike, research), and category belong in labels, not bracket tags or prefixes.
 5. **Out-of-context readability** — would someone scanning this title weeks later — or a newcomer — understand the value without the conversation that produced it? Titles are read far more often than they're written, and almost never by the person who wrote them. If the title only makes sense to someone who was in the room, it fails.
 
@@ -151,9 +216,9 @@ Print the full draft before doing anything:
 ```
 PR draft
 
-Title:  <title>
-Suggested: <rewritten title>              ← only if quality gate fired
-Warning:   <what triggered>               ← only if quality gate fired
+Title:  type(scope): subject [TICKET-ID]
+Suggested: type(scope): rewritten subject [TICKET-ID]  ← only if quality gate fired
+Warning:   <what triggered>                             ← only if quality gate fired
 Base:   <base-branch>  [stacked ⚠] or [default branch]
 Branch: <current-branch>
 

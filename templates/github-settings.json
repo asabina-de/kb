@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$comment": "Declares intended GitHub repo settings so the /pr skill can detect drift. See PROJECT_SETUP_GUIDE.md § GitHub Repository Settings.",
+  "merge": {
+    "allowed_methods": ["merge", "squash", "rebase"],
+    "default_method": "merge",
+    "squash_title": "pr_title",
+    "delete_branch_on_merge": true
+  },
+  "branch_protection": {
+    "default_branch": "main",
+    "require_pr_reviews": true,
+    "require_status_checks": true
+  }
+}
