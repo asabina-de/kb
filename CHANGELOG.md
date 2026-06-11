@@ -14,11 +14,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/), with an added **
 
 ### Added
 - **`.github/workflows/lint-pr.yml`** — CI enforcement of PR title format using `amannn/action-semantic-pull-request`. Validates `type(scope): subject [TICKET-ID]` against conventional commit types from CONTRIBUTING.md. Uses `pull_request` trigger (not `pull_request_target`) since this repo has no fork contributions.
-- **`templates/github-settings.json`** — declares intended GitHub repo settings (merge mode, squash-merge title source, branch protection) so the `/pr` skill can detect configuration drift.
+- **`templates/github-settings.yaml`** — declares intended GitHub repo settings (merge mode, squash-merge title source, branch protection) so the `/pr` skill can detect configuration drift.
 - **PR Title Convention section** in `templates/CONTRIBUTING.md` — documents the `type(scope): subject [TICKET-ID]` format, with a table showing how individual commits and merged PRs layer differently in `git log`.
 
 ### Changed
-- **`/pr` skill** — title assembly now generates `type(scope): subject [TICKET-ID]` instead of `TICKET-ID: title`. Quality gate brevity limit (60 chars) now applies to the subject only; type/scope prefix and ticket suffix are excluded as structural overhead. New Phase 1.1 checks for `.github-settings.json` and surfaces drift warnings or a guided first-time setup flow.
+- **`/pr` skill** — title assembly now generates `type(scope): subject [TICKET-ID]` instead of `TICKET-ID: title`. Quality gate brevity limit (60 chars) now applies to the subject only; type/scope prefix and ticket suffix are excluded as structural overhead. New Phase 1.1 checks for `.github-settings.yaml` and surfaces drift warnings or a guided first-time setup flow.
 
 ### Migration
 
@@ -30,7 +30,7 @@ PR titles will change from `KB-10: Title` to `type(scope): title [KB-10]`. No ac
 
 1. Copy `.github/workflows/lint-pr.yml` to your repo
 2. Customize the `types` list if your project uses different conventional commit types
-3. Optionally add a `.github-settings.json` at your repo root (copy from `templates/github-settings.json` and adjust)
+3. Optionally add a `.github-settings.yaml` at your repo root (copy from `templates/github-settings.yaml` and adjust)
 
 ## [2026-06-10]
 

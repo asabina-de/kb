@@ -25,7 +25,7 @@ Run in parallel:
 - **Push state:** `git status -sb` — is the branch already pushed to origin?
 - **Remote default branch:** use `mcp__github__get_file_contents` or `mcp__github__list_branches` to determine the default branch — don't hardcode `main`
 - **Repo merge conventions:** Read `AGENTS.md` and `CONTRIBUTING.md` at the repo root (if they exist) for merge strategy guidance — e.g. squash vs merge commit, stack handling, branch cleanup. Store any findings for use in Phase 6.
-- **Repo config:** Check for `.github-settings.json` at the repo root (see Phase 1.1 below).
+- **Repo config:** Check for `.github-settings.yaml` at the repo root (see Phase 1.1 below).
 
 Extract a ticket ID from the branch name if present (e.g. `vidbina/vid-123-some-slug` → `VID-123`). If found, fetch the Linear issue (`get_issue`) for title and description.
 
@@ -37,27 +37,27 @@ If a tool or command is available to rename the session programmatically, use it
 
 ### Phase 1.1 — Repo config check
 
-Check for `.github-settings.json` at the repo root. This file declares the repo's intended GitHub settings so the skill can detect drift and guide first-time setup.
+Check for `.github-settings.yaml` at the repo root. This file declares the repo's intended GitHub settings so the skill can detect drift and guide first-time setup.
 
-**If `.github-settings.json` exists:**
+**If `.github-settings.yaml` exists:**
 
 Read it and store the declared settings for use in Phase 6 (merge strategy). Compare against what's observable from the GitHub API (e.g. allowed merge methods via `mcp__github__search_repositories`). If a mismatch is detected, surface it as a warning in the Phase 4 pitch:
 
 ```
 ⚠️  Repo config drift detected:
-  .github-settings.json says: default_method = "squash", squash_title = "pr_title"
+  .github-settings.yaml says: default_method = "squash", squash_title = "pr_title"
   GitHub API says: squash merging is disabled
-  → Fix in GitHub Settings > Pull Requests, or update .github-settings.json
+  → Fix in GitHub Settings > Pull Requests, or update .github-settings.yaml
 ```
 
 Do not block on drift — warn and continue. The operator decides whether to fix it now or later.
 
-**If `.github-settings.json` does not exist (first PR in an unconfigured repo):**
+**If `.github-settings.yaml` does not exist (first PR in an unconfigured repo):**
 
 Surface a one-time setup prompt after the PR is created (Phase 5), not before — don't gate PR creation on repo config:
 
 ```
-📋 This repo has no .github-settings.json. Want to set one up?
+📋 This repo has no .github-settings.yaml. Want to set one up?
    This declares your merge mode, squash-merge title format, and branch protection
    expectations so the /pr skill can detect drift.
 
@@ -66,24 +66,21 @@ Surface a one-time setup prompt after the PR is created (Phase 5), not before �
    (c) Skip — not now
 ```
 
-On (a): read the repo's current settings via the GitHub API, generate a `.github-settings.json` matching what's configured, and present it for approval. On (b): point to `templates/github-settings.json` in the kb repo. On (c): skip silently. Don't ask again in the same session.
+On (a): read the repo's current settings via the GitHub API, generate a `.github-settings.yaml` matching what's configured, and present it for approval. On (b): point to `templates/github-settings.yaml` in the kb repo. On (c): skip silently. Don't ask again in the same session.
 
-**Schema reference (`templates/github-settings.json`):**
+**Schema reference (`templates/github-settings.yaml`):**
 
-```json
-{
-  "merge": {
-    "allowed_methods": ["merge", "squash", "rebase"],
-    "default_method": "merge",
-    "squash_title": "pr_title",
-    "delete_branch_on_merge": true
-  },
-  "branch_protection": {
-    "default_branch": "main",
-    "require_pr_reviews": true,
-    "require_status_checks": true
-  }
-}
+```yaml
+merge:
+  allowed_methods: [merge, squash, rebase]
+  default_method: merge
+  squash_title: pr_title
+  delete_branch_on_merge: true
+
+branch_protection:
+  default_branch: main
+  require_pr_reviews: true
+  require_status_checks: true
 ```
 
 Fields:
