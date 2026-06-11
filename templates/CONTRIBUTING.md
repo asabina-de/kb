@@ -141,6 +141,43 @@ Detected when a correction needs to be made to `AGENTS.md`, `CONTRIBUTING.md`, o
 
 **Why the distinction matters:** Category B corrections must take effect immediately — deferring them means working with broken instructions for the rest of the session. Category A has no such urgency and should always be routed properly.
 
+## PR Title Convention
+
+PR titles follow the same conventional-commit format as individual commits, with a ticket ID suffix for traceability:
+
+```
+<type>(<scope>): <subject> [TICKET-ID]
+```
+
+- **type** and **scope** — same rules as commits (see tables above)
+- **subject** — value-oriented, distinguishing phrase first (see quality gate below)
+- **`[TICKET-ID]`** — the Linear ticket ID in square brackets, e.g. `[KB-31]`. Auto-injected from the branch name by the `/pr` skill. Omit only for ad-hoc branches without a ticket.
+
+### Examples
+
+```
+feat(auth): OAuth callback for Google login [KB-31]
+fix: null response from upstream handled [KB-45]
+doc: contributing guide updated with PR title convention [KB-31]
+chore(ci): semantic PR title enforcement [KB-31]
+```
+
+### Why this format?
+
+Individual commits and merged PRs serve different audiences in `git log`:
+
+| Layer | Format | Ticket ID? | When visible |
+|---|---|---|---|
+| Individual commit | `type(scope): subject [ai:agent]` | No — branch encodes it | Always |
+| Merged PR (squash) | `type(scope): subject [TICKET-ID] (#N)` | Yes — for traceability | After squash-merge |
+| Merged PR (merge commit) | `type(scope): subject [TICKET-ID] (#N)` | Yes — on merge commit | After merge-commit |
+
+The ticket ID suffix is the visual signal that distinguishes a squash-merged PR from an individual commit when scanning `git log`. It also makes every merged PR traceable back to its Linear ticket without opening GitHub.
+
+### CI enforcement
+
+Repos using this convention should add the `amannn/action-semantic-pull-request` GitHub Action to validate PR titles on open/edit. See `templates/github-workflow-ci.yml` patterns and `.github/workflows/lint-pr.yml` for a working example.
+
 ## PR Merge Strategy
 
 **Always use merge commits** — never squash unless explicitly requested by the reviewer.
