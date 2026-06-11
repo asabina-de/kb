@@ -23,6 +23,19 @@ This document is the canonical source of truth for commit conventions, scope dis
 - **body** — explain *why*, not *what* (the diff shows what)
 - **footer** — `Co-Authored-By:`, `BREAKING CHANGE:`, references
 
+### AI Co-authorship
+
+Use `Co-authored-by: {Model Name} <noreply@{provider-domain}>` for AI co-authorship. The email is a provenance marker, not a contact address — it follows GitHub's `noreply@` convention for accounts without public emails.
+
+```
+Co-authored-by: Claude Code <noreply@anthropic.com>
+Co-authored-by: ChatGPT <noreply@openai.com>
+Co-authored-by: Gemini <noreply@google.com>
+Co-authored-by: Copilot <noreply@github.com>
+```
+
+This trailer is the canonical AI provenance signal. GitHub renders it as a secondary author avatar on the commit. It survives squash-merge in the commit body, so provenance is preserved even when individual commits are collapsed.
+
 ### Types
 
 | Type | Use when… |
@@ -150,16 +163,16 @@ PR titles follow the same conventional-commit format as individual commits, with
 ```
 
 - **type** and **scope** — same rules as commits (see tables above)
-- **subject** — value-oriented, distinguishing phrase first (see quality gate below)
+- **subject** — imperative mood, value-oriented, distinguishing phrase first. Same imperative voice convention as commits and ticket titles.
 - **`[TICKET-ID]`** — the Linear ticket ID in square brackets, e.g. `[KB-31]`. Auto-injected from the branch name by the `/pr` skill. Omit only for ad-hoc branches without a ticket.
 
 ### Examples
 
 ```
-feat(auth): OAuth callback for Google login [KB-31]
-fix: null response from upstream handled [KB-45]
-doc: contributing guide updated with PR title convention [KB-31]
-chore(ci): semantic PR title enforcement [KB-31]
+feat(auth): enable Google login [KB-31]
+fix: handle null response from upstream [KB-45]
+doc: update contributing guide with PR title convention [KB-31]
+chore(ci): enforce semantic PR titles [KB-31]
 ```
 
 ### Why this format?

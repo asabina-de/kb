@@ -23,6 +23,16 @@ This document is the canonical source of truth for commit conventions, scope dis
 - **body** — explain *why*, not *what* (the diff shows what)
 - **footer** — `Co-Authored-By:`, `BREAKING CHANGE:`, references
 
+### AI Co-authorship
+
+Use `Co-authored-by: {Model Name} <noreply@{provider-domain}>` for AI co-authorship. The email is a provenance marker, not a contact address — it follows GitHub's `noreply@` convention for accounts without public emails.
+
+```
+Co-authored-by: Claude Code <noreply@anthropic.com>
+```
+
+This trailer is the canonical AI provenance signal. GitHub renders it as a secondary author avatar on the commit. It survives squash-merge in the commit body, so provenance is preserved even when individual commits are collapsed.
+
 ### Types
 
 | Type | Use when… |
@@ -44,7 +54,6 @@ This document is the canonical source of truth for commit conventions, scope dis
 | `skills` | Skill definitions in `skills/` |
 | `decisions` | Decision records in `docs/decisions/` |
 | `ci` | CI/CD pipeline configuration |
-| `pr` | The `/pr` skill specifically |
 | `deps` | Dependency updates |
 
 > **Tip:** When no scope fits, omit it: `fix: handle null response from upstream`.
@@ -145,16 +154,16 @@ PR titles follow the same conventional-commit format as individual commits, with
 ```
 
 - **type** and **scope** — same rules as commits (see tables above)
-- **subject** — value-oriented, distinguishing phrase first (see quality gate below)
+- **subject** — imperative mood, value-oriented, distinguishing phrase first. Same imperative voice convention as commits and ticket titles.
 - **`[TICKET-ID]`** — the Linear ticket ID in square brackets, e.g. `[KB-31]`. Auto-injected from the branch name by the `/pr` skill. Omit only for ad-hoc branches without a ticket.
 
 ### Examples
 
 ```
-feat(skills): convention sync for downstream repos [KB-33]
-fix(pr): HITL offers gh CLI commands for repo config [KB-31]
-doc(templates): PR title convention with commit/PR layering [KB-31]
-chore(ci): semantic PR title enforcement [KB-31]
+feat(skills): align repo conventions to KB standards [KB-33]
+fix(skills): offer gh CLI commands for repo config drift [KB-31]
+doc(templates): document PR title convention with commit layering [KB-31]
+chore(ci): enforce semantic PR titles [KB-31]
 ```
 
 ### Why this format?
