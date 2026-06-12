@@ -10,6 +10,28 @@ Format follows [Keep a Changelog](https://keepachangelog.com/), with an added **
 
 ---
 
+## [2026-06-12]
+
+### Changed
+- **`/linearissue` and `/pr` skill quality gates** — unified imperative voice model: `[VERB] [DIFFERENTIATING NOUN] [CONTEXT]` as canonical title structure across tickets, PRs, and commits. Added 3-tier verb system (preferred scope-signaling / allowed task-framing / banned generic), statement-title anti-pattern, mechanism verb detection anywhere (not just leading position), and "Differentiator survives truncation" principle with inline truncation rendering.
+- **`/linearissue` confirmation output** — now includes a cold-reader interpretation line and truncated-at-30 rendering per ticket, plus batch overlap detection flagging sibling titles with shared prefixes.
+- **AI Co-authorship convention** in `templates/CONTRIBUTING.md` — dual-trailer convention: `Co-authored-by` (GitHub avatar rendering today) + `Assisted-by` (Linux kernel emerging standard, forward-compatible). Documents `noreply@{provider-domain}` email convention and `AGENT_NAME:MODEL_VERSION` format.
+- **`/pr` skill** — dropped `[ai:agent]` tag from PR title format. Provenance is carried by `Co-authored-by` and `Assisted-by` trailers in the commit body, which survive squash-merge.
+
+### Migration
+
+**If your project's CONTRIBUTING.md has an AI Co-authorship section:**
+
+Update to include both trailers:
+```
+Co-authored-by: Claude Code <noreply@anthropic.com>
+Assisted-by: Claude:claude-opus-4-6
+```
+
+**If your `/pr` skill generates titles with `[ai:agent]` suffix:**
+
+No action needed — the skill no longer adds this tag. Provenance is in the commit trailers.
+
 ## [2026-06-11]
 
 ### Added

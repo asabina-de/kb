@@ -138,6 +138,13 @@ See CONTRIBUTING.md for the full workflow. Quick reference:
 6. **Commit with proper message format**
 7. **Verify commit was signed**: `git log --show-signature -1`
 
+### Pre-PR Checklist
+
+Before opening a pull request, verify:
+
+1. **CHANGELOG.md** — if the branch changes templates, conventions, or anything downstream repos consume, add a dated entry to `CHANGELOG.md` with what changed and migration steps. The CHANGELOG is how downstream repos discover what to sync. Forgetting it means the change is invisible to other projects.
+2. **CONTRIBUTING.md** — if commit or PR conventions changed, verify `CONTRIBUTING.md` reflects the new rules.
+
 ## AI Provenance
 
 All AI contributions must be clearly identifiable:
