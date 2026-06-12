@@ -140,7 +140,7 @@ Execute these commands (detailed explanations in README.md):
 - Example: `feat: add user auth [ai:claude]`
 - Break work into focused, single-concern commits
 - Stick to short commit titles that are less than 80 characters long
-- Add a "Co-authored by:" line in suggested commit messages
+- Add `Co-authored-by:` and `Assisted-by:` trailers in commit messages (see CONTRIBUTING.md for format)
 
 ### Pre-Commit Workflow
 
@@ -150,6 +150,13 @@ Execute these commands (detailed explanations in README.md):
 4. **Stage your changes**: `git add .`
 5. **Commit with proper message format**
 6. **Verify commit was signed**: `git log --show-signature -1`
+
+### Pre-PR Checklist
+
+Before opening a pull request, verify:
+
+1. **CHANGELOG.md** — if the branch changes templates, skills, or conventions that downstream repos consume, add a dated entry to `CHANGELOG.md` with what changed and migration steps. The CHANGELOG is how downstream repos discover what to sync. Forgetting it means the change is invisible to other projects.
+2. **CONTRIBUTING.md** — if commit or PR conventions changed, verify the local `CONTRIBUTING.md` reflects the new rules.
 
 ## Communication
 
