@@ -156,7 +156,13 @@ Evaluate the drafted title against these criteria. The gate is **advisory** — 
 
 **Principles:**
 1. **Imperative voice with value framing** — the subject is a task phrased as an imperative verb + what it delivers. Choose verbs and nouns that communicate value, not implementation technique. "enable Google login" not "implement OAuth callback." The verb signals the kind of work; the noun names the value delivered.
-2. **Distinguishing phrase first** — the most identifiable words lead. PR titles appear in `git log --oneline` where they're truncated, and in GitHub's PR list where long titles are clipped. The differentiator must appear within the first ~25 characters of the subject so titles remain distinguishable in truncated views. When the same branch of work produces multiple PRs, compare subjects and flag overlap.
+2. **Differentiator survives truncation** — `git log --oneline`, GitHub's PR list, and notification previews truncate titles aggressively (~25-30 chars of the subject visible after the `type(scope):` prefix). If the distinguishing word sits past the truncation point, related PRs become indistinguishable. The canonical structure `[VERB] [NOUN] [CONTEXT]` naturally solves this — the verb and noun are both visible before truncation. When the same branch of work produces multiple PRs, render the first 30 characters of each subject side by side and verify they're distinguishable:
+   ```
+   ✗ "congressional disclosure da..."  ← identical at 30 chars
+   ✗ "congressional disclosure da..."
+   ✓ "trial QuiverQuant for cong..."   ← distinguishable at position 7
+   ✓ "trial Unusual Whales for c..."
+   ```
 3. **Brevity** — keep the **subject** (the part after `type(scope): ` and before ` [TICKET-ID]`) under 60 characters. Warn above 60. The type/scope prefix and ticket suffix are structural — they don't count against the limit.
 4. **No metadata in the title** — priority, work type (spike, research), and category belong in labels, not bracket tags or prefixes.
 5. **Out-of-context readability** — would someone scanning this title weeks later — or a newcomer — understand the value without the conversation that produced it? Self-check: "Is this a task someone does, or a fact someone reads?" If the latter, reframe as the task that produces that fact.
@@ -201,6 +207,7 @@ Warning:   <what triggered the gate — e.g. "banned verb 'Implement'", "67 char
 - "Architectural spike: bot-as-participant in external video calls (Meet, Zoom, WhatsApp)" → "trial bot in Meet/Zoom/WhatsApp calls"
 - "Market data provider comparison for backtesting" → "survey market data providers"
 - "Worklog cron silent during active flow" → "silence worklog during active flow"
+- "congressional disclosure data verified via QuiverQuant trial" → "trial QuiverQuant for congress disclosures" ← differentiator moves from position 47 to position 7; sibling PRs become distinguishable in `git log --oneline`
 
 **Titles that pass (no rewrite needed):**
 - "select auth provider" — imperative, clear scope (decision), distinguishing

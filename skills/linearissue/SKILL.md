@@ -462,7 +462,13 @@ This structure applies to ticket titles, PR subjects, and commit subjects — th
 ### Principles
 
 1. **Imperative voice with value framing** — every title is a task someone does, phrased as an imperative verb + what it delivers. Choose verbs and nouns that communicate value, not implementation technique. "Enable Google login" not "Implement OAuth callback." The verb should signal the kind of work; the noun should name the value delivered.
-2. **Distinguishing phrase first** — the most identifiable words lead. Linear branch names truncate after ~25 chars past the ticket prefix, so front-loaded meaning survives truncation. When filing related tickets, the differentiator must appear within the first ~25 characters so titles remain distinguishable in truncated views.
+2. **Differentiator survives truncation** — Linear branch names, board columns, and notification previews truncate titles aggressively (~25-30 chars visible). If the distinguishing word sits past the truncation point, related tickets become indistinguishable. The canonical structure `[VERB] [NOUN] [CONTEXT]` naturally solves this — the verb (position 1) and noun (position ~7) are both visible before truncation. When filing related tickets, render the first 30 characters side by side and verify they're distinguishable:
+   ```
+   ✗ "Congressional disclosure da..."  ← identical at 30 chars
+   ✗ "Congressional disclosure da..."
+   ✓ "Trial QuiverQuant for cong..."   ← distinguishable at position 7
+   ✓ "Trial Unusual Whales for c..."
+   ```
 3. **Brevity** — keep titles under 72 characters. Warn above 72. Shorter is almost always better.
 4. **No metadata in the title** — priority, work type (spike, research), and category belong in labels, not bracket tags or prefixes.
 5. **Branch-name-friendly** — avoid special characters, deep nesting, or parenthetical lists that produce ugly slugs.
@@ -514,7 +520,8 @@ Warning:   <what triggered — e.g. "mechanism verb 'Implement' leading", "78 ch
 - "Architectural spike: bot-as-participant in external video calls (Meet, Zoom, WhatsApp)" → "Trial bot in Meet/Zoom/WhatsApp calls"
 - "Market data provider comparison for backtesting" → "Survey market data providers"
 - "Worklog cron silent during active flow" → "Silence worklog during active flow"
-- "Congressional disclosure data verified via QuiverQuant trial" → "Trial QuiverQuant for congress disclosures"
+- "Congressional disclosure data verified via QuiverQuant trial" → "Trial QuiverQuant for congress disclosures" ← differentiator ("QuiverQuant") moves from position 47 to position 7; sibling "Trial Unusual Whales..." is instantly distinguishable
+- "Congressional disclosure data verified via Unusual Whales trial" → "Trial Unusual Whales for congress disclosures" ← without this fix, both siblings truncate to identical "Congressional disclosure da..."
 - "QuiverQuant as primary disclosure provider" → "Select disclosure data provider"
 
 ### Titles that pass (no rewrite needed)
