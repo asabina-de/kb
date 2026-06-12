@@ -32,6 +32,19 @@ Assisted-by: Claude:claude-opus-4-6
 
 No action needed — the skill no longer adds this tag. Provenance is in the commit trailers.
 
+**Audit existing tickets against the new title standard:**
+
+The imperative voice model applies to future tickets automatically (the `/linearissue` quality gate enforces it), but existing tickets in Backlog, Todo, and In Progress were written under the old standard. These are worth auditing because non-compliant titles often signal deeper problems: vague scope, missing DoD, or work that should be split.
+
+Run through open tickets and check for:
+- **Statement titles** (fact, not task) — "QuiverQuant as primary provider" → "Select disclosure data provider"
+- **Buried differentiators** — siblings that truncate identically on a board
+- **Banned verbs** — "Implement X", "Build Y", "Create Z" → replace with scope-signaling verbs
+- **Mechanism framing** — titles that describe implementation, not value
+- **Scope gaps** — tickets that are too broad or lack a concrete DoD
+
+This is a one-time cleanup per project. KB-33 will provide a `/kbsync` skill to automate this audit across repos.
+
 ## [2026-06-11]
 
 ### Added
