@@ -25,7 +25,7 @@ This document is the canonical source of truth for commit conventions, scope dis
 
 ### AI Co-authorship
 
-Use both trailers on every AI-assisted commit during the crossover period:
+Use both trailers on every AI-assisted commit. `Co-authored-by` works with GitHub today; `Assisted-by` is the emerging standard but forges don't render it yet. Using both ensures nothing is lost as tooling catches up:
 
 ```
 Co-authored-by: Claude Code <noreply@anthropic.com>
@@ -36,7 +36,7 @@ Assisted-by: Claude:claude-opus-4-6
 
 **`Assisted-by:`** is the emerging standard from the [Linux kernel guidelines](https://github.com/torvalds/linux/blob/master/Documentation/process/coding-assistants.rst#attribution). Format: `AGENT_NAME:MODEL_VERSION`. No email field — sidesteps the fake-email problem. Not yet widely supported by forges, but forward-compatible.
 
-Using both ensures GitHub avatar rendering today while building toward the `Assisted-by` standard. Once forges support `Assisted-by` natively, `Co-authored-by` can be dropped.
+Once forges render `Assisted-by` natively, `Co-authored-by` can be dropped.
 
 Both trailers survive squash-merge in the commit body, so provenance is preserved even when individual commits are collapsed.
 
