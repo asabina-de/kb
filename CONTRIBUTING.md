@@ -25,13 +25,20 @@ This document is the canonical source of truth for commit conventions, scope dis
 
 ### AI Co-authorship
 
-Use `Co-authored-by: {Model Name} <noreply@{provider-domain}>` for AI co-authorship. The email is a provenance marker, not a contact address — it follows GitHub's `noreply@` convention for accounts without public emails.
+Use both trailers on every AI-assisted commit during the crossover period:
 
 ```
 Co-authored-by: Claude Code <noreply@anthropic.com>
+Assisted-by: Claude:claude-opus-4-6
 ```
 
-This trailer is the canonical AI provenance signal. GitHub renders it as a secondary author avatar on the commit. It survives squash-merge in the commit body, so provenance is preserved even when individual commits are collapsed.
+**`Co-authored-by:`** is the established Git/GitHub convention. GitHub renders it as a secondary author avatar. The email (`noreply@anthropic.com`) is a provenance marker, not a contact address.
+
+**`Assisted-by:`** is the emerging standard from the [Linux kernel guidelines](https://github.com/torvalds/linux/blob/master/Documentation/process/coding-assistants.rst#attribution). Format: `AGENT_NAME:MODEL_VERSION`. No email field — sidesteps the fake-email problem.
+
+Using both ensures GitHub avatar rendering today while building toward the `Assisted-by` standard. Once forges support `Assisted-by` natively, `Co-authored-by` can be dropped.
+
+Both trailers survive squash-merge in the commit body.
 
 ### Types
 

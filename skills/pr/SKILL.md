@@ -156,7 +156,7 @@ Evaluate the drafted title against these criteria. The gate is **advisory** — 
 
 **Principles:**
 1. **Imperative voice with value framing** — the subject is a task phrased as an imperative verb + what it delivers. Choose verbs and nouns that communicate value, not implementation technique. "enable Google login" not "implement OAuth callback." The verb signals the kind of work; the noun names the value delivered.
-2. **Distinguishing phrase first** — the most identifiable words lead, so truncated views stay meaningful.
+2. **Distinguishing phrase first** — the most identifiable words lead. PR titles appear in `git log --oneline` where they're truncated, and in GitHub's PR list where long titles are clipped. The differentiator must appear within the first ~25 characters of the subject so titles remain distinguishable in truncated views. When the same branch of work produces multiple PRs, compare subjects and flag overlap.
 3. **Brevity** — keep the **subject** (the part after `type(scope): ` and before ` [TICKET-ID]`) under 60 characters. Warn above 60. The type/scope prefix and ticket suffix are structural — they don't count against the limit.
 4. **No metadata in the title** — priority, work type (spike, research), and category belong in labels, not bracket tags or prefixes.
 5. **Out-of-context readability** — would someone scanning this title weeks later — or a newcomer — understand the value without the conversation that produced it? Self-check: "Is this a task someone does, or a fact someone reads?" If the latter, reframe as the task that produces that fact.
