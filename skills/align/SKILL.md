@@ -165,6 +165,14 @@ Step 5: 🔧 EXTERNAL — Set squash-merge title to "PR title" (manual)
   This affects all contributors immediately.
 ```
 
+### File tracking ticket
+
+Before executing any migrations, file a tracking ticket via `/linearissue` scoped to the gaps found in Phase 2. Title format: `Align conventions to KB YYYY-MM-DD state` (or more specific if only a subset of entries apply). The ticket description should list the migration steps as a checklist.
+
+If the operator prefers not to file a ticket (e.g. the alignment is trivial), skip — but offer it. For non-trivial runs (3+ steps, destructive operations, ticket audits), strongly recommend it.
+
+Store the ticket ID — all Phase 3 progress comments thread on it via `/commenting`.
+
 ## Phase 3 — Execute migrations
 
 Present the full migration plan as a numbered checklist:
@@ -201,7 +209,8 @@ For each approved step:
    - **Ticket changes:** delegate to the `/linearissue` skill for title rewrites and scope fixes. Present proposed changes and get approval before applying.
    - **Manual steps:** print instructions clearly. Mark as done only when the operator confirms they've completed it.
 3. **Verify** the step succeeded — re-run the gap check for that specific item.
-4. **Mark complete** and move to the next step.
+4. **Comment progress** — if a tracking ticket was filed, post a progress comment via `/commenting` threaded on it. Include what was done, what resource type it affected, and any decisions made (e.g. "operator chose to keep original title for KB-14"). This builds the audit trail.
+5. **Mark complete** and move to the next step.
 
 ### Defensive measures
 
@@ -241,6 +250,12 @@ Suggested commit: doc: align repo conventions to KB standards [YYYY-MM-DD] [ai:c
 
 Do not commit — git is HITL. Present the suggested commit message using `commitmsg` methodology.
 
+### Close the tracking ticket
+
+If a tracking ticket was filed in Phase 2, post a resolution comment via `/commenting` with the full summary above (applied, manual, skipped, tickets audited). This is the audit record — anyone reviewing the alignment run later sees exactly what was checked, what was changed, and what decisions the operator made.
+
+Transition the ticket to Done if all steps are complete (including manual ones confirmed by the operator). If manual steps remain, leave it In Progress with the outstanding items listed in the comment.
+
 ## Anti-patterns
 
 - **Don't hardcode conventions.** Read them from the KB CHANGELOG. If the CHANGELOG doesn't mention it, the skill doesn't enforce it.
@@ -254,6 +269,3 @@ Do not commit — git is HITL. Present the suggested commit message using `commi
 - **Don't batch destructive steps.** Even if the operator chose "execute all auto steps", destructive steps are always presented individually.
 - **Don't ignore older CHANGELOG entries.** A repo that hasn't synced in months may need to apply multiple rounds of migrations. Walk through all applicable entries, oldest first.
 
-## Future direction: ticket-per-alignment-run
-
-A planned enhancement: before executing migrations (Phase 3), the skill should file a tracking ticket via `/linearissue` — e.g. "Align conventions to KB 2026-06-12 state" — scoped to the gaps found in Phase 2. Each Phase 3 step would post a progress comment threaded on that ticket via `/commenting`, and the Phase 4 summary would become the resolution comment. This gives alignment runs an audit trail: what was checked, what was applied, what was skipped, and why — visible to auditors and future contributors without reading CLI session logs.
