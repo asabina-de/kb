@@ -135,7 +135,7 @@ The branch with the **fewest commits between its tip and HEAD** is the most like
 **Title:**
 1. **Determine the type** from the nature of the change: `feat`, `fix`, `doc`, `refactor`, `chore`, `test`, `style`, or `perf` — same types as commit conventions in CONTRIBUTING.md.
 2. **Determine the scope** (optional) from the primary area of the codebase affected.
-3. **Draft the subject** — use the Linear ticket title as a starting point if available, otherwise derive from the branch name slug (strip the owner prefix and ticket ID, humanize the remainder). The ticket title is a starting point, not a passthrough — always run it through the quality gate (step 6) and rewrite if it doesn't meet PR title standards. *(Note: KB-32 will introduce a ticket title standard. Once that lands, ticket titles should already be closer to PR-ready, but the quality gate still applies.)*
+3. **Draft the subject** — use the Linear ticket title as a starting point if available, otherwise derive from the branch name slug (strip the owner prefix and ticket ID, humanize the remainder). The ticket title is a starting point, not a passthrough — always run it through the quality gate (step 6) and rewrite if it doesn't meet PR title standards. Ticket titles follow the same imperative voice convention (see quality gate below), so they should already be close to PR-ready.
 4. **Append the ticket ID** when one was detected from the branch name in Phase 1. Format: `[KB-10]` in square brackets at the end. This is required for traceability — merged commits produce `type(scope): subject [KB-10] (#N)`, preserving the Linear issue link in `git log`. Omit only for ad-hoc branches without a ticket.
 5. **Assemble the title:** `type(scope): subject [TICKET-ID]`.
 6. Run the title through the **title quality gate** below.
@@ -144,25 +144,39 @@ The branch with the **fewest commits between its tip and HEAD** is the most like
 
 Evaluate the drafted title against these criteria. The gate is **advisory** — warn and suggest, never block.
 
-> **Sync note:** This gate is mirrored in `/linearissue` (`skills/linearissue/SKILL.md`). If you change principles, anti-patterns, or examples here, check the other copy and keep them at parity. Some differences are intentional (brevity threshold, branch-name-friendliness) but the core principles and examples should match.
+> **Sync note:** This gate is mirrored in `/linearissue` (`skills/linearissue/SKILL.md`). If you change principles, anti-patterns, or examples here, check the other copy and keep them at parity. Some differences are intentional (brevity threshold is 60 chars here vs 72 for tickets; no branch-name-friendliness principle here) but the core principles and examples should match.
+
+**Canonical structure:** PR subjects follow the same imperative voice as ticket titles and commit subjects: **`[VERB] [DIFFERENTIATING NOUN] [CONTEXT]`**. The `type(scope):` prefix categorizes the change — it doesn't replace the verb. The subject still needs an imperative verb that carries meaning.
+
+**Verb tiers:**
+
+1. **Preferred — scope-signaling verbs:** `Trial`, `Select`, `Survey`, `Fix`, `Extract`, `Enable`, `Enforce`, `Drop`, `Resolve`, `Ingest`, `Silence`.
+2. **Allowed for task-framing:** `Add`, `Configure` — when no better verb fits.
+3. **Banned — generic verbs:** `Implement`, `Build`, `Create`, `Set up`, `Wire up`, `Compose`, `Inject`, `Conduct`, `Redesign`.
 
 **Principles:**
-1. **Value over mechanism** — frame what the PR delivers, not how it's implemented. "Stable room link for live AV" not "Implement re-entrancy for Daily transport".
-2. **Distinguishing phrase first** — the most identifiable words lead, so truncated branch names (`~25 chars` after the ticket prefix) stay meaningful.
+1. **Imperative voice with value framing** — the subject is a task phrased as an imperative verb + what it delivers. Choose verbs and nouns that communicate value, not implementation technique. "enable Google login" not "implement OAuth callback." The verb signals the kind of work; the noun names the value delivered.
+2. **Differentiator survives truncation** — `git log --oneline`, GitHub's PR list, and notification previews truncate titles aggressively (~25-30 chars of the subject visible after the `type(scope):` prefix). If the distinguishing word sits past the truncation point, related PRs become indistinguishable. The canonical structure `[VERB] [NOUN] [CONTEXT]` naturally solves this — the verb and noun are both visible before truncation. When the same branch of work produces multiple PRs, render the first 30 characters of each subject side by side and verify they're distinguishable:
+   ```
+   ✗ "congressional disclosure da..."  ← identical at 30 chars
+   ✗ "congressional disclosure da..."
+   ✓ "trial QuiverQuant for cong..."   ← distinguishable at position 7
+   ✓ "trial Unusual Whales for c..."
+   ```
 3. **Brevity** — keep the **subject** (the part after `type(scope): ` and before ` [TICKET-ID]`) under 60 characters. Warn above 60. The type/scope prefix and ticket suffix are structural — they don't count against the limit.
 4. **No metadata in the title** — priority, work type (spike, research), and category belong in labels, not bracket tags or prefixes.
-5. **Out-of-context readability** — would someone scanning this title weeks later — or a newcomer — understand the value without the conversation that produced it? Titles are read far more often than they're written, and almost never by the person who wrote them. If the title only makes sense to someone who was in the room, it fails.
+5. **Out-of-context readability** — would someone scanning this title weeks later — or a newcomer — understand the value without the conversation that produced it? Self-check: "Is this a task someone does, or a fact someone reads?" If the latter, reframe as the task that produces that fact.
 
 **Anti-patterns to detect:**
-- **Mechanism verbs leading** — "Wire up", "Implement", "Add", "Decouple", "Compose", "Inject", "Conduct", "Redesign" as the first word describe implementation, not value. Exception: action verbs that describe user-facing behavior are fine ("Allow bot to interrupt").
+- **Banned verbs (anywhere in the title)** — `Implement`, `Build`, `Create`, `Set up`, `Wire up`, `Compose`, `Inject`, `Conduct`, `Redesign`. Tier 3 verbs that carry no scope information.
+- **Mechanism verbs/phrases (anywhere, not just leading)** — "verified via", "implemented using", "configured with", "wired up through". These describe implementation technique, not value.
+- **Statement titles** — titles that read as facts rather than tasks. "OAuth callback for Google login" is a statement; "enable Google login" is a task. Test: could this appear on a to-do list?
 - **Bracket tags** — `[Research]`, `[Spike]`, `[WIP]` waste leading characters. Use labels instead.
-- **"Explore/Research/Spike:" prefixes** — front-load metadata that belongs in labels.
-- **"Draft design note:" prefixes** — the work type is obvious from context.
-- **"Fix broken..." with mechanism** — "Fix broken X — replace Y with Z" buries the value. Prefer "X works again" or name the symptom.
-- **Parenthetical lists** — "(Meet, Zoom, WhatsApp)" or "(Cartesia disconnect, room leave)" add precision but kill branch readability.
+- **"Explore/Research/Spike:" prefixes** — metadata that belongs in labels.
+- **Parenthetical lists** — "(Meet, Zoom, WhatsApp)" add precision but kill readability. Use slash-separated inline.
 - **Question-format titles** — "Does X expose Y?" belongs in the description.
 - **Kitchen-sink titles** — "Improve X — reduce Y and explore Z" tries to do too much in one title.
-- **Context-dependent titles** — titles that only make sense if you were in the conversation that produced them. "Own protocol types at pipecat boundary" means nothing to a cold reader. "Codename alignment across codebase" sounds important but conveys no real value.
+- **Context-dependent titles** — titles that only make sense if you were in the conversation that produced them.
 
 **Out-of-context failures (from audit):**
 
@@ -181,26 +195,25 @@ If any issues are detected, draft a suggested rewrite alongside the original. Pr
 
 ```
 Title:     <original title>
-Suggested: <rewritten title>  ← value-oriented, distinguishing phrase first
-Warning:   <what triggered the gate — e.g. "mechanism verb 'Implement' leading", "67 chars (>60)">
+Suggested: <rewritten title>  ← imperative, value-oriented
+Warning:   <what triggered the gate — e.g. "banned verb 'Implement'", "67 chars (>60)">
 ```
 
 **Examples (before → after):**
-- "Wire up Logfire for APM and distributed tracing" → "Logfire APM and tracing"
-- "Implement e2e tests: HTTP contract and Daily room verification" → "E2e tests for /connect and Daily"
-- "Explore service-level hooks for production frame-level observability" → "Production frame-level o11y hooks"
-- "Decouple FilterSink frame-type routing from pipecat string class names" → "Decouple frame routing from pipecat"
-- "Architectural spike: bot-as-participant in external video calls (Meet, Zoom, WhatsApp)" → "Bot joins Meet/Zoom/WhatsApp calls"
-- "Graceful LLM provider fallback when primary flakes" → "LLM fallback on provider outage"
-- "Market data provider comparison for backtesting" → "Viable market data providers"
-- "Worklog cron silent during active flow" → "Distraction-free worklog tracking"
+- "Wire up Logfire for APM and distributed tracing" → "enable Logfire APM and tracing"
+- "Implement e2e tests: HTTP contract and Daily room verification" → "add e2e tests for /connect and Daily"
+- "Explore service-level hooks for production frame-level observability" → "survey production frame-level o11y hooks"
+- "Decouple FilterSink frame-type routing from pipecat string class names" → "decouple frame routing from pipecat"
+- "Architectural spike: bot-as-participant in external video calls (Meet, Zoom, WhatsApp)" → "trial bot in Meet/Zoom/WhatsApp calls"
+- "Market data provider comparison for backtesting" → "survey market data providers"
+- "Worklog cron silent during active flow" → "silence worklog during active flow"
+- "congressional disclosure data verified via QuiverQuant trial" → "trial QuiverQuant for congress disclosures" ← differentiator moves from position 47 to position 7; sibling PRs become distinguishable in `git log --oneline`
 
 **Titles that pass (no rewrite needed):**
-- "Select auth provider" — short, clear, distinguishing
-- "Optimise for showtime" — punchy, value obvious
-- "Allow bot to interrupt" — user-facing behavior, 4 words
-- "Uncensor STT input" — brief, clear what it delivers
-- "Viable market data providers" — outcome-oriented, cold-reader friendly
+- "select auth provider" — imperative, clear scope (decision), distinguishing
+- "allow bot to interrupt" — imperative, user-facing behavior, 4 words
+- "fix duplicate disclosures on concurrent polls" — imperative, bug framing, specific
+- "enforce semantic PR titles" — imperative, clear what it delivers
 
 **Body:**
 ```markdown

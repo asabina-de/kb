@@ -209,16 +209,24 @@ Proposed tickets from: docs/decisions/{filename}
 
  1. [NEW]    {Title}                          Priority: Normal
              Target: {team-key} / {project-name}
+             Cold read: "{one-line interpretation by a zero-context reader}"
+             Truncated: "{title cut at ~30 chars}..."
  2. [NEW]    {Title}                          Priority: High
              Target: {team-key} / {project-name}
+             Cold read: "{interpretation}"
+             Truncated: "{truncated}..."
              ↳ depends on #1
  3. [NEW]    {Title}                          Priority: Normal
              Target: {other-team} / {other-project}  ⚠ routed away from ambient
+             Cold read: "{interpretation}"
+             Truncated: "{truncated}..."
              Suggested: {Rewritten title}  ← title gate fired
              Warning: mechanism verb 'Implement' leading
  4. [UPDATE] {Title} (LIN-123)               Priority: Normal
              Target: {team-key} / {project-name}
              ↳ description changed
+
+⚠ Overlap: #1 and #2 share first 25 chars — differentiator buried past truncation point
 
 Skipped:
  - "already done thing" — marked complete
@@ -226,6 +234,10 @@ Skipped:
 
 {N} new · {K} updates · {S} skipped
 ```
+
+**Cold-reader self-check:** Before presenting the proposal, the skill must simulate a zero-context reader for each title. The "Cold read" line states what the title communicates to someone who has never seen the conversation, ticket, or design note. If the cold read doesn't match the intent, the title fails — rewrite before presenting.
+
+**Batch overlap detection:** When proposing multiple tickets (filing or freeform), compare the first 25 characters of all titles. If any pair shares >50% of those characters, flag it with a `⚠ Overlap` line and suggest reordering so the differentiator leads. Render the truncated titles side-by-side to make the problem visible.
 
 ### Confirm
 
@@ -363,10 +375,16 @@ Proposed issues (freeform)
 
  1. [NEW]  {Title}                          Priority: Normal
            Target: {team-key} / {project-name}
+           Cold read: "{one-line interpretation by a zero-context reader}"
+           Truncated: "{title cut at ~30 chars}..."
            {2-line description preview}
  2. [NEW]  {Title}                          Priority: High
            Target: {other-team} / {other-project}  ⚠ routed away from ambient
+           Cold read: "{interpretation}"
+           Truncated: "{truncated}..."
            {2-line description preview}
+
+⚠ Overlap: #1 and #2 share first 25 chars — differentiator buried past truncation point
 
 {N} new issues
 ```
@@ -375,7 +393,9 @@ If any title triggered the quality gate, show both versions:
 
 ```
  1. [NEW]  {Original title}                 Priority: Normal
-           Suggested: {Rewritten title}  ← value-oriented
+           Cold read: "{interpretation}"
+           Truncated: "{truncated}..."
+           Suggested: {Rewritten title}  ← imperative, value-oriented
            Warning: mechanism verb 'Implement' leading
 ```
 
@@ -418,24 +438,53 @@ Every title — whether derived from a design note action item, drafted in freef
 
 > **Sync note:** This gate is mirrored in `/pr` (`skills/pr/SKILL.md`). If you change principles, anti-patterns, or examples here, check the other copy and keep them at parity. Some differences are intentional (brevity threshold, branch-name-friendliness is linearissue-specific) but the core principles and examples should match.
 
+### Canonical structure
+
+All titles follow imperative voice: **`[VERB] [DIFFERENTIATING NOUN] [CONTEXT]`**
+
+The verb signals scope (what kind of work), the noun differentiates (what specifically), the context narrows (where/for whom). Labels carry metadata (Spike, Decision, Bug) — never encode it in the title.
+
+This structure applies to ticket titles, PR subjects, and commit subjects — the same imperative phrasing across all three surfaces. See the verb tiers below for which verbs to use.
+
+### Verb tiers
+
+1. **Preferred — scope-signaling verbs.** These carry real meaning about the kind of work:
+   `Trial` (spike), `Select`/`Choose` (decision), `Survey`/`Map` (research), `Replan`/`Rescope` (replanning), `Ingest`/`Poll` (data pipeline), `Fix`/`Resolve` (bug), `Extract`/`Normalize` (schema work), `Enable` (user-facing capability), `Enforce` (validation/rules), `Drop`/`Remove` (deprecation).
+
+2. **Allowed for task-framing — when no better verb fits.** These convert a feature name into a task when a preferred verb doesn't apply:
+   `Add` (didn't exist before), `Configure` (settings/wiring). Prefer tier 1 when possible.
+
+3. **Banned — generic verbs that describe every ticket.** These add zero information:
+   `Implement`, `Build`, `Create`, `Set up`, `Wire up`, `Compose`, `Inject`, `Conduct`, `Redesign`.
+
+**Drop filler words.** "Survey viable disclosure vendors" → "Survey disclosure vendors". "Viable" does no work — you wouldn't survey non-viable ones.
+
 ### Principles
 
-1. **Value over mechanism** — frame what the issue delivers, not how it's implemented. "Stable room link for live AV" not "Implement re-entrancy for Daily transport". The title should answer "what changes for the user/system?" not "what code do we write?".
-2. **Distinguishing phrase first** — the most identifiable words lead. Linear branch names truncate after ~25 chars past the ticket prefix, so front-loaded meaning survives truncation.
+1. **Imperative voice with value framing** — every title is a task someone does, phrased as an imperative verb + what it delivers. Choose verbs and nouns that communicate value, not implementation technique. "Enable Google login" not "Implement OAuth callback." The verb should signal the kind of work; the noun should name the value delivered.
+2. **Differentiator survives truncation** — Linear branch names, board columns, and notification previews truncate titles aggressively (~25-30 chars visible). If the distinguishing word sits past the truncation point, related tickets become indistinguishable. The canonical structure `[VERB] [NOUN] [CONTEXT]` naturally solves this — the verb (position 1) and noun (position ~7) are both visible before truncation. When filing related tickets, render the first 30 characters side by side and verify they're distinguishable:
+   ```
+   ✗ "Congressional disclosure da..."  ← identical at 30 chars
+   ✗ "Congressional disclosure da..."
+   ✓ "Trial QuiverQuant for cong..."   ← distinguishable at position 7
+   ✓ "Trial Unusual Whales for c..."
+   ```
 3. **Brevity** — keep titles under 72 characters. Warn above 72. Shorter is almost always better.
 4. **No metadata in the title** — priority, work type (spike, research), and category belong in labels, not bracket tags or prefixes.
 5. **Branch-name-friendly** — avoid special characters, deep nesting, or parenthetical lists that produce ugly slugs.
-6. **Out-of-context readability** — would someone scanning this title weeks later — or a newcomer — understand the value without the conversation that produced it? Titles are read far more often than they're written, and almost never by the person who wrote them. If the title only makes sense to someone who was in the room, it fails.
+6. **Out-of-context readability** — would someone scanning this title weeks later — or a newcomer — understand the value without the conversation that produced it? Titles are read far more often than they're written, and almost never by the person who wrote them. If the title only makes sense to someone who was in the room, it fails. Self-check: "Is this a task someone does, or a fact someone reads?" If the latter, reframe as the task that produces that fact.
 
 ### Anti-patterns to detect
 
-- **Mechanism verbs leading** — "Wire up", "Implement", "Add", "Decouple", "Compose", "Inject", "Conduct", "Redesign", "Create", "Build", "Set up" as the first word. Exception: action verbs describing user-facing behavior are fine ("Allow bot to interrupt", "Select auth provider").
+- **Banned verbs (anywhere in the title)** — `Implement`, `Build`, `Create`, `Set up`, `Wire up`, `Compose`, `Inject`, `Conduct`, `Redesign`. These are tier 3 verbs that describe every ticket equally and carry no scope information. See verb tiers above.
+- **Mechanism verbs/phrases (anywhere, not just leading)** — "verified via", "implemented using", "configured with", "wired up through". These describe implementation technique, not value. "Congressional disclosure data verified via QuiverQuant trial" → "Trial QuiverQuant for congress disclosures".
+- **Statement titles** — titles that read as facts or decisions rather than tasks. "QuiverQuant as primary provider" is a statement. "Select disclosure data provider" is a task. Test: could this title appear as a line item on a to-do list? If not, it's a statement, not a task title. Common drift: the agent keeps shifting from task framing into outcome/statement framing.
 - **Bracket tags** — `[Research]`, `[Spike]`, `[WIP]`, `[Bug]` waste leading characters. Use Linear labels.
 - **"Explore/Research/Spike:" prefixes** — metadata that belongs in labels.
 - **Parenthetical lists** — "(Meet, Zoom, WhatsApp)" or "(bioguide_id, thomas_id)" add precision but kill readability. Use slash-separated inline: "Bot joins Meet/Zoom/WhatsApp calls".
 - **Question-format titles** — "Does X expose Y?" belongs in the description.
 - **Kitchen-sink titles** — "Improve X — reduce Y and explore Z" tries to do too much in one title.
-- **Technical-identifier-first** — "bioguide_id mapping for member identity" buries the value. Prefer "Member identity resolver" or "Resolve member identity from bioguide".
+- **Technical-identifier-first** — "bioguide_id mapping for member identity" buries the value. Prefer "Resolve member identity from bioguide".
 - **Redundant context** — "linearissue skill: value-oriented titles + freeform creation mode" — the project/component prefix is redundant when the ticket already has a project and labels.
 - **Context-dependent titles** — titles that only make sense if you were in the conversation that produced them. "Own protocol types at pipecat boundary" means nothing to a cold reader. "Codename alignment across codebase" sounds important but conveys no real value.
 
@@ -462,24 +511,27 @@ Warning:   <what triggered — e.g. "mechanism verb 'Implement' leading", "78 ch
 
 ### Examples (before → after)
 
-- "Implement member identity resolver (bioguide_id mapping)" → "Member identity resolver"
-- "Create ticker identity resolver (security master)" → "Ticker identity from security master"
-- "Add CI job for agents test suite" → "CI for agents test suite"
-- "Set up authentication token storage mechanism" → "Auth token storage"
-- "Wire up Logfire for APM and distributed tracing" → "Logfire APM and tracing"
-- "Explore service-level hooks for production frame-level observability" → "Production frame-level o11y hooks"
-- "Architectural spike: bot-as-participant in external video calls (Meet, Zoom, WhatsApp)" → "Bot joins Meet/Zoom/WhatsApp calls"
-- "Market data provider comparison for backtesting" → "Viable market data providers"
-- "Worklog cron silent during active flow" → "Distraction-free worklog tracking"
+- "Implement member identity resolver (bioguide_id mapping)" → "Resolve member identity from bioguide"
+- "Create ticker identity resolver (security master)" → "Extract ticker identity from security master"
+- "Add CI job for agents test suite" → "Add CI for agents test suite"
+- "Set up authentication token storage mechanism" → "Store auth tokens"
+- "Wire up Logfire for APM and distributed tracing" → "Enable Logfire APM and tracing"
+- "Explore service-level hooks for production frame-level observability" → "Survey production frame-level o11y hooks"
+- "Architectural spike: bot-as-participant in external video calls (Meet, Zoom, WhatsApp)" → "Trial bot in Meet/Zoom/WhatsApp calls"
+- "Market data provider comparison for backtesting" → "Survey market data providers"
+- "Worklog cron silent during active flow" → "Silence worklog during active flow"
+- "Congressional disclosure data verified via QuiverQuant trial" → "Trial QuiverQuant for congress disclosures" ← differentiator ("QuiverQuant") moves from position 47 to position 7; sibling "Trial Unusual Whales..." is instantly distinguishable
+- "Congressional disclosure data verified via Unusual Whales trial" → "Trial Unusual Whales for congress disclosures" ← without this fix, both siblings truncate to identical "Congressional disclosure da..."
+- "QuiverQuant as primary disclosure provider" → "Select disclosure data provider"
 
 ### Titles that pass (no rewrite needed)
 
-- "Select auth provider" — short, clear, distinguishing
-- "Optimise for showtime" — punchy, value obvious
-- "Allow bot to interrupt" — user-facing behavior, 4 words
-- "Uncensor STT input" — brief, clear what it delivers
-- "Graceful LLM fallback on provider outage" — value-first, concise
-- "Viable market data providers" — outcome-oriented, cold-reader friendly
+- "Select auth provider" — imperative, clear scope (decision), distinguishing
+- "Optimise for showtime" — imperative, punchy, value obvious
+- "Allow bot to interrupt" — imperative, user-facing behavior, 4 words
+- "Uncensor STT input" — imperative, brief, clear what it delivers
+- "Fix duplicate disclosures on concurrent polls" — imperative, bug framing, specific
+- "Trial Unusual Whales for congress disclosures" — imperative, spike framing, differentiator at position 7
 
 ## Anti-patterns
 

@@ -23,6 +23,23 @@ This document is the canonical source of truth for commit conventions, scope dis
 - **body** — explain *why*, not *what* (the diff shows what)
 - **footer** — `Co-Authored-By:`, `BREAKING CHANGE:`, references
 
+### AI Co-authorship
+
+Use both trailers on every AI-assisted commit. `Co-authored-by` works with GitHub today; `Assisted-by` is the emerging standard but forges don't render it yet. Using both ensures nothing is lost as tooling catches up:
+
+```
+Co-authored-by: Claude Code <noreply@anthropic.com>
+Assisted-by: Claude:claude-opus-4-6
+```
+
+**`Co-authored-by:`** is the established Git/GitHub convention. GitHub renders it as a secondary author avatar on the commit. The email is a provenance marker, not a contact address — it follows GitHub's `noreply@` convention. Use `noreply@{provider-domain}` (e.g. `noreply@anthropic.com`, `noreply@openai.com`, `noreply@google.com`).
+
+**`Assisted-by:`** is the emerging standard from the [Linux kernel guidelines](https://github.com/torvalds/linux/blob/master/Documentation/process/coding-assistants.rst#attribution). Format: `AGENT_NAME:MODEL_VERSION`. No email field — sidesteps the fake-email problem. Not yet widely supported by forges, but forward-compatible.
+
+Once forges render `Assisted-by` natively, `Co-authored-by` can be dropped.
+
+Both trailers survive squash-merge in the commit body, so provenance is preserved even when individual commits are collapsed.
+
 ### Types
 
 | Type | Use when… |
@@ -150,16 +167,16 @@ PR titles follow the same conventional-commit format as individual commits, with
 ```
 
 - **type** and **scope** — same rules as commits (see tables above)
-- **subject** — value-oriented, distinguishing phrase first (see quality gate below)
+- **subject** — imperative mood, value-oriented, distinguishing phrase first. Same imperative voice convention as commits and ticket titles.
 - **`[TICKET-ID]`** — the Linear ticket ID in square brackets, e.g. `[KB-31]`. Auto-injected from the branch name by the `/pr` skill. Omit only for ad-hoc branches without a ticket.
 
 ### Examples
 
 ```
-feat(auth): OAuth callback for Google login [KB-31]
-fix: null response from upstream handled [KB-45]
-doc: contributing guide updated with PR title convention [KB-31]
-chore(ci): semantic PR title enforcement [KB-31]
+feat(auth): enable Google login [KB-31]
+fix: handle null response from upstream [KB-45]
+doc: update contributing guide with PR title convention [KB-31]
+chore(ci): enforce semantic PR titles [KB-31]
 ```
 
 ### Why this format?
