@@ -34,6 +34,15 @@ Tag manual-only steps with **(manual)** so readers know an agent can't automate 
 
 ---
 
+## [2026-06-13]
+
+### Changed
+- **`/designnote` and `/pairprog` skills — source-linking for research output** — research and spike findings must now link every factual claim inline to its source (one click from claim to evidence). `/designnote` requires inline links in `## Exploration` and tells research subagents to return source URLs. `/pairprog` keys the rule on the kind of statement, not the surface: a finding (a verifiable claim about the outside world) links to its source wherever it's written — Linear comment or doc — while process/coordination comments (plans, step completions, blockers) are exempt; a finding may instead point to a doc that already carries the sourced version. Both include what-to-link guidance (pricing pages, API docs, field-schema source, package/repo pages, shutdown announcements) and a worked example.
+
+### Migration
+
+No action required in downstream repos — these are skill-definition changes that take effect the next time the skills run. If your project vendors copies of `skills/designnote/SKILL.md` or `skills/pairprog/SKILL.md`, re-sync them to pick up the source-linking requirement.
+
 ## [2026-06-12]
 
 ### Changed

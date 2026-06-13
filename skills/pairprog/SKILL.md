@@ -187,6 +187,7 @@ For each feasibility unknown, spawn a `Task` subagent to investigate:
 - Read relevant source code, docs, or external references
 - Try small proof-of-concept explorations (read-only or in scratch space)
 - Return a structured answer: feasible / not feasible / feasible with caveats
+- **Return the source URL behind every external claim** (API docs, pricing pages, package pages, GitHub repos, shutdown announcements). These travel with the finding wherever it's written — comment or doc — see "Source-linking" below.
 
 Subagents are read-only investigators. They don't write production code.
 
@@ -197,12 +198,45 @@ Skill("commenting", "Post an anchor comment on {ticket-id} titled \"Spike: Googl
 
 **Verdict:** Feasible ✓
 
-`@googleapis/google-auth-library` v9.x supports Node 18+. Tested import resolution
-against our `tsconfig.json` paths — no conflicts. The `OAuth2Client` class exposes
-`getToken()` and `refreshToken()` which map directly to our needs.
+`@googleapis/google-auth-library` v9.x supports [Node 18+](https://github.com/googleapis/google-auth-library-nodejs#supported-node-versions).
+Tested import resolution against our `tsconfig.json` paths — no conflicts. The
+[`OAuth2Client`](https://github.com/googleapis/google-auth-library-nodejs/blob/main/src/auth/oauth2client.ts)
+class exposes `getToken()` and `refreshToken()` which map directly to our needs.
 
 Relevant code: `src/config/auth.ts` already has a provider pattern we can extend.")
 ```
+
+The external claims here (Node support, the exposed methods) carry inline links; the internal reference (`src/config/auth.ts`) does not — it points inward at our own repo. That's the line the source-linking rule draws.
+
+### Source-linking (research findings)
+
+**The rule keys on the kind of statement, not where it's written.** A *finding* — a verifiable claim about the outside world — must link inline to its source wherever it lands, comment or doc. A reader corroborates the claim with one click; they never re-google what the spike already found. Don't wait for a finding to graduate into a doc to source it: many spikes resolve a question whose answer lives only in the Linear comment, and a bare claim there is the same re-google trap.
+
+This applies to any verifiable claim: pricing and plan limits, API behavior and rate limits, field schemas, version requirements, why an option was eliminated, shutdown/deprecation announcements. What to link, by claim type:
+
+- **Pricing / plan limits** → the vendor's pricing page
+- **API behavior, endpoints, rate limits** → the specific API doc page
+- **Field schemas, undocumented fields** → the source code or API reference that confirms them
+- **Library / package claims** → the PyPI/npm page and/or the GitHub repo
+- **A product exists / its positioning** → the provider homepage
+- **Eliminated candidate / discontinued service** → the page showing the disqualifying fact or the shutdown announcement
+
+A finding satisfies the rule when it **either** links inline to its source **or** points to the doc that already carries the sourced version (e.g. "Feasible — sourced details in `docs/decisions/0012-…`"). What fails the rule is a bare claim with neither.
+
+**Process/coordination comments are exempt** — they make no claim about the outside world, so there's nothing to corroborate. Plan checklists, "Step 1 complete · `a1b2c3d`", "🚨 Plan adjusted", "🚧 blocker: CI harness hangs" — these reference our own work, and their links (commit SHAs, file paths, ticket IDs) point *inward*. The test is direction and purpose: a link that points outward to corroborate a claim is required; a link that points inward to navigate our own work is not.
+
+"One click from claim to evidence" looks like:
+
+```markdown
+- `@googleapis/google-auth-library` v9.x supports
+  [Node 18+](https://github.com/googleapis/google-auth-library-nodejs#supported-node-versions);
+  the [`OAuth2Client`](https://github.com/googleapis/google-auth-library-nodejs/blob/main/src/auth/oauth2client.ts)
+  class exposes `getToken()` and `refreshToken()`.
+```
+
+Not a bare claim the reader must re-verify: `the google-auth library supports our Node version and exposes the token methods we need.`
+
+This is why the spike subagents are told to return source URLs: so a finding can be linked, not re-researched, wherever it's written.
 
 ### Check in with the navigator
 
@@ -296,7 +330,7 @@ For each step:
 1. **Announce** what you're about to do. "Starting Step 1 — adding the OAuth callback route."
 2. **Branch fit check.** Before touching any files, verify this step's files fit the branch purpose. Apply the Category A / Category B protocols from the Phase 0 branch fit check if a mismatch is detected.
 3. **Implement** the change. Use `Edit` / `Write` for code changes.
-4. **Decision record maintenance.** If the step touches a file in `docs/decisions/`, append a Status Log row: today's date, `claude` as author, the ticket ID in Related Tickets, and a concise note (e.g. "Updated via pairprog KB-9"). This keeps the record's audit trail intact.
+4. **Decision record maintenance.** If the step touches a file in `docs/decisions/`, append a Status Log row: today's date, `claude` as author, the ticket ID in Related Tickets, and a concise note (e.g. "Updated via pairprog KB-9"). This keeps the record's audit trail intact. If the step writes research or spike findings into the record (or any doc), apply the **Source-linking** rule from Phase 1 — every finding links inline to its source.
 5. **Run quality checks** if the repo has them (lint, typecheck, test). Use `Bash` for this. If a check fails, fix it before presenting.
 6. **Present the change.** Print a concise summary of what changed and why. Don't dump the full diff — describe the intent and highlight non-obvious decisions.
 7. **Draft commit message.** In both modes, use the `commitmsg` skill's methodology to draft the message: read `CONTRIBUTING.md` for the repo's convention (type, scope, subject rules, imperative mood, length limits), inspect the diff, and produce a conforming message. Never draft commit messages freehand — the convention is in the docs, not in your training data.
@@ -418,6 +452,7 @@ Skill("commenting", "Reply to anchor {plan-comment-id} on {ticket-id} titled \"�
 - **Don't ignore the repo's quality gates.** If the repo has lint/test/typecheck commands in CLAUDE.md or README, run them before presenting a change.
 - **Don't touch unrelated code.** Stay within the scope of the ticket. If you notice unrelated issues, mention them verbally — don't fix them unless the navigator asks.
 - **Don't post "starting spike" comments.** Wait for the spike to complete, then post findings. One comment per spike, not a running log.
+- **Don't post bare research findings.** A spike finding — a verifiable claim about the outside world — links inline to its source wherever it's written, comment or doc (see Phase 1 "Source-linking"). A claim a reader must re-google defeats the spike. Process/coordination comments (plans, step completions, blockers) are exempt — they make no external claim.
 - **Don't interleave parallel step comments.** When subagents work concurrently, post one combined comment after both complete.
 - **Don't create PRs without pitching first.** Always show the proposed PR content in chat and get explicit approval before running `gh pr create`.
 - **Don't skip Status Log maintenance on decision records.** If a step touches `docs/decisions/*.md`, append a Status Log row. The record's audit trail must reflect every mutation.
