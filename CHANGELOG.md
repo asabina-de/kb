@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to the KB conventions are documented in this file.
+All notable changes to the KB (knowledge base) conventions are documented in this file.
 
 This project ships continuously — there are no versioned releases. Each entry is dated when it merges to main. Downstream repos can scan by date to discover what changed since they last synced.
 
