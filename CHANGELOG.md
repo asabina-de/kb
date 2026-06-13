@@ -1,12 +1,36 @@
 # Changelog
 
-All notable changes to the KB templates are documented in this file.
+All notable changes to the KB (knowledge base) conventions are documented in this file.
 
 This project ships continuously — there are no versioned releases. Each entry is dated when it merges to main. Downstream repos can scan by date to discover what changed since they last synced.
 
-Format follows [Keep a Changelog](https://keepachangelog.com/), with an added **Migration** section for template changes that require action in downstream repos.
+Format follows [Keep a Changelog](https://keepachangelog.com/), with an added **Migration** section for changes that require action in downstream repos.
 
 **Migration instructions are stateless.** If you see the described artifacts in your project, the migration applies to you — no need to know which "version" you're on.
+
+### Writing migration entries
+
+A convention change affects **resources** — anything that must be updated to achieve parity. Resources are not limited to files in the repo. They include anything the changed code or convention *expects to exist and behave a certain way*.
+
+When writing a migration entry, infer the affected resources from the change itself: what does this change assume about the world? Those assumptions are your resource list. Group migration steps by resource type so readers can route each step to the right person or tool.
+
+Common resource types (not exhaustive — infer from context):
+
+- **Files** — templates, configs, workflows, skill definitions, documentation
+- **Repo settings** — merge mode, branch protection, squash title format (GitHub Settings)
+- **Tickets** — existing backlog titles, descriptions, DoDs, scope, breakdown
+- **CI/CD** — pipeline configs, check requirements, environment variables
+- **Infrastructure** — service configs, secrets, env vars, deployment settings
+- **Database** — schema migrations, seed data, connection strings
+- **Observability** — dashboards, alerts, log schemas, metric definitions
+- **External services** — API keys, webhook registrations, platform configs
+
+Tag manual-only steps with **(manual)** so readers know an agent can't automate them:
+
+```markdown
+**Repo settings (manual):**
+- Set squash-merge title source to "Pull request title" in GitHub Settings > Pull Requests
+```
 
 ---
 

@@ -31,8 +31,10 @@ The defining design principles are:
 
 The skill supports two commit modes. The navigator can switch between them at any time during the session. A typical pattern on non-trivial work: start in checkpoint to refine the design through implementation, then switch to yolo once the remaining work is known and trivial.
 
-- **Checkpoint mode:** The skill presents each atomic change and pauses for the navigator's steering input — design decisions, dropping constructs, changing approach. The navigator commits when satisfied. The skill never runs git write commands in this mode.
-- **Yolo mode:** The skill auto-commits each atomic step using the `commitmsg` skill for message generation. The navigator can interrupt at any time to steer.
+- **Checkpoint mode:** The skill presents each atomic change with a drafted commit message (using the `commitmsg` skill's methodology) and pauses for the navigator's steering input — design decisions, dropping constructs, changing approach. The navigator commits when satisfied. The skill never runs git write commands in this mode.
+- **Yolo mode:** The skill auto-commits each atomic step using the `commitmsg` skill's methodology for message generation. The navigator can interrupt at any time to steer.
+
+**Commit messages are always drafted via `commitmsg` methodology** — reading `CONTRIBUTING.md` for the repo's convention and applying it. The modes differ in who *commits* (yolo: auto, checkpoint: navigator), not who *drafts the message*. Never draft commit messages freehand.
 
 **Milestone file commit gate.** A `PostToolUse` hook monitors edits to milestone files (package manifests, lock files, flake.nix, etc.). When you see a `CHECKPOINT:` message from this hook, you **MUST** immediately:
 1. Stop implementation work
@@ -297,9 +299,10 @@ For each step:
 4. **Decision record maintenance.** If the step touches a file in `docs/decisions/`, append a Status Log row: today's date, `claude` as author, the ticket ID in Related Tickets, and a concise note (e.g. "Updated via pairprog KB-9"). This keeps the record's audit trail intact.
 5. **Run quality checks** if the repo has them (lint, typecheck, test). Use `Bash` for this. If a check fails, fix it before presenting.
 6. **Present the change.** Print a concise summary of what changed and why. Don't dump the full diff — describe the intent and highlight non-obvious decisions.
-7. **Checkpoint.**
-   - **Checkpoint mode:** Pause for the navigator's steering input. This is about design direction — does this approach hold up? Should we change course? If the navigator says "looks good," they commit. If they want changes, iterate. Don't ask the navigator to review code line-by-line in chat — that's what the PR is for.
-   - **Yolo mode:** Invoke the `commitmsg` skill's methodology (read repo convention, draft message) and auto-commit. Print the commit hash and message. Continue to the next step.
+7. **Draft commit message.** In both modes, use the `commitmsg` skill's methodology to draft the message: read `CONTRIBUTING.md` for the repo's convention (type, scope, subject rules, imperative mood, length limits), inspect the diff, and produce a conforming message. Never draft commit messages freehand — the convention is in the docs, not in your training data.
+8. **Checkpoint.**
+   - **Checkpoint mode:** Present the change summary and the drafted commit message. Pause for the navigator's steering input. If the navigator says "looks good," they commit using the drafted message. If they want changes, iterate. Don't ask the navigator to review code line-by-line in chat — that's what the PR is for.
+   - **Yolo mode:** Auto-commit with the drafted message. Print the commit hash and message. Continue to the next step.
 
    **Yolo commit discipline:** Commit immediately after each step passes quality checks — before starting the next step. Do not batch changes across steps and commit at the end. Committing on the go preserves the cleanest atomic boundary: each step's files haven't yet been mixed with the next step's. When a step spans multiple files (implementation + its tests), include all of them in the same commit. If the step also updates docs/config (env var examples, changelogs), bundle those in the same commit too — one logical concern, one commit.
 

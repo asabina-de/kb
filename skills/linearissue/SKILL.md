@@ -107,10 +107,22 @@ When filing a batch, run the check per ticket — different items may route to d
 If the triage surfaces a match, present options via `AskUserQuestion`:
 - **Fold into VID-XYZ** — add scope to the existing ticket (comment the new context)
 - **Stack on VID-XYZ** — create as a sub-issue or related issue
+- **Mark as duplicate** — set `duplicateOf` on the old ticket, transition to Cancelled, and **comment why** on the cancelled ticket (see cancellation rule below)
 - **Create new** — confirmed isolated, proceed with filing
 - **Cancel** — the user decides to handle it differently
 
 Only proceed to filing after the user confirms the triage result.
+
+### Cancellation and duplication rule
+
+**Every ticket state change that removes a ticket from the active backlog (Cancelled, Duplicate) must carry a comment explaining why.** A cancelled ticket with no explanation is a dead end for anyone reviewing the backlog later — they can't tell if it was superseded, descoped, invalid, or accidentally closed.
+
+When cancelling or duplicating a ticket:
+1. Post a comment via `/commenting` with a heading like "Cancelled: {reason}" or "Duplicated by {TICKET-ID}"
+2. Include a one-sentence explanation of why (e.g. "KB-36 bundles this rename with two others — same mechanical pattern, one ticket instead of three")
+3. If superseded by another ticket, reference it so readers can follow the chain
+
+This rule applies regardless of which skill triggers the cancellation — `/linearissue` triage, `/pairprog` scope discovery, or manual operator action. If the operator cancels directly, suggest the comment.
 
 ### Filing mode: parse invocation
 
@@ -552,6 +564,7 @@ Warning:   <what triggered — e.g. "mechanism verb 'Implement' leading", "78 ch
 - **Don't silently rewrite comment history.** The skill can only add new comments via `save_comment`. It cannot edit or delete existing comments. If a prior comment is wrong, post a follow-up — don't attempt to alter the record.
 - **Don't ask more than one round of clarification** (the "Exclude some" follow-up is the only permitted second question). If something surfaces during creation that should have been asked, note it in the summary and stop.
 - **Don't follow URLs unbounded.** Use `WebFetch` only to enrich descriptions for URLs *already referenced in the note*, not to search the web. This skill is deterministic; research belongs in `designnote`.
+- **Don't cancel or duplicate tickets without commenting why.** Every state change that removes a ticket from the active backlog must carry a comment explaining the reason. A cancelled ticket with no explanation is a dead end for backlog reviewers. See the cancellation rule in Phase 0.
 
 ## Required grants
 
