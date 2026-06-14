@@ -12,3 +12,6 @@ devenv.local.nix
 # Direnv
 .envrc
 dispatch-runs/
+
+# Node (CI tooling under .github/scripts)
+node_modules/

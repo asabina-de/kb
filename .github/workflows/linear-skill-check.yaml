@@ -6,6 +6,8 @@ on:
     # TODO: uncomment paths filter once verified — KB-37
     # paths:
     #   - 'skills/**'
+    #   - '.github/scripts/**'
+    #   - '.github/workflows/linear-skill-check.yaml'
 
 permissions:
   pull-requests: read
@@ -20,165 +22,21 @@ jobs:
         with:
           fetch-depth: 0
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: .github/scripts/package-lock.json
+
+      - name: Install deps
+        working-directory: .github/scripts
+        run: npm ci
+
+      # Run from the repo root so the script sees skills/ at cwd. Node resolves
+      # @linear/sdk from .github/scripts/node_modules via the script's own path.
       - name: Plan skill deployment
         env:
           LINEAR_API_KEY: ${{ secrets.LINEAR_API_KEY }}
           LINEAR_SKILL_TEAMS: ${{ vars.LINEAR_SKILL_TEAMS }}
-        run: |
-          set -euo pipefail
-
-          SKILLS_DIR="skills"
-          BASE_SHA="${{ github.event.pull_request.base.sha }}"
-
-          # --- noop guard ---
-
-          if [ -z "${LINEAR_API_KEY:-}" ] || [ -z "${LINEAR_SKILL_TEAMS:-}" ]; then
-            echo "Skipping skill deployment check — LINEAR_API_KEY or LINEAR_SKILL_TEAMS not configured."
-            exit 0
-          fi
-
-          # --- helpers ---
-
-          gql() {
-            local response
-            response=$(curl -s -w "\n%{http_code}" -X POST https://api.linear.app/graphql \
-              -H "Content-Type: application/json" \
-              -H "Authorization: $LINEAR_API_KEY" \
-              -d "$1")
-            local http_code
-            http_code=$(echo "$response" | tail -1)
-            local body
-            body=$(echo "$response" | sed '$d')
-            if [ "$http_code" -ge 400 ]; then
-              echo "GraphQL error (HTTP $http_code): $body" >&2
-              return 1
-            fi
-            echo "$body"
-          }
-
-          fetch_team_skills() {
-            local team_id="$1"
-            local q="{ agentSkills(filter: { team: { id: { eq: \"${team_id}\" } }, shared: { eq: true } }) { nodes { id title body } } }"
-            local payload
-            payload=$(jq -nc --arg q "$q" '{query: $q}')
-            gql "$payload" | jq -r '.data.agentSkills.nodes // []'
-          }
-
-          resolve_team_id() {
-            local team_name="$1"
-            local q="{ teams(filter: { name: { eq: \"${team_name}\" } }) { nodes { id name } } }"
-            local payload
-            payload=$(jq -nc --arg q "$q" '{query: $q}')
-            gql "$payload" | jq -r '.data.teams.nodes[0].id // ""'
-          }
-
-          skill_body_at() {
-            local ref="$1" skill="$2"
-            git show "$ref:$SKILLS_DIR/$skill/SKILL.md" 2>/dev/null || echo ""
-          }
-
-          # --- discover skills from repo ---
-
-          repo_skills=()
-          for dir in "$SKILLS_DIR"/*/; do
-            skill=$(basename "$dir")
-            if [ -f "$dir/SKILL.md" ]; then
-              repo_skills+=("$skill")
-            fi
-          done
-
-          echo "## Linear Skill Deployment Plan"
-          echo ""
-          echo "Skills in repo: ${repo_skills[*]}"
-          echo ""
-
-          # --- iterate teams ---
-
-          IFS=',' read -ra TEAM_NAMES <<< "$LINEAR_SKILL_TEAMS"
-          any_changes=false
-
-          for team_name in "${TEAM_NAMES[@]}"; do
-            team_name=$(echo "$team_name" | xargs)  # trim whitespace
-            team_id=$(resolve_team_id "$team_name")
-
-            if [ -z "$team_id" ]; then
-              echo "### Team: $team_name (NOT FOUND — skipping)"
-              echo ""
-              continue
-            fi
-
-            echo "### Team: $team_name"
-            echo ""
-
-            linear_skills=$(fetch_team_skills "$team_id")
-
-            for skill in "${repo_skills[@]}"; do
-              base_body=$(skill_body_at "$BASE_SHA" "$skill")
-              head_body=$(skill_body_at "HEAD" "$skill")
-
-              linear_body=$(echo "$linear_skills" | jq -r --arg t "$skill" '.[] | select(.title == $t) | .body // ""')
-              linear_id=$(echo "$linear_skills" | jq -r --arg t "$skill" '.[] | select(.title == $t) | .id // ""')
-
-              if [ -z "$head_body" ]; then
-                if [ -n "$linear_id" ]; then
-                  echo "- **$skill**: DELETE (file removed, exists on Linear)"
-                  any_changes=true
-                fi
-              elif [ -z "$linear_id" ]; then
-                echo "- **$skill**: CREATE"
-                any_changes=true
-              elif [ "$head_body" = "$linear_body" ]; then
-                echo "- **$skill**: UP-TO-DATE"
-              elif [ "$base_body" != "$head_body" ] && [ "$base_body" = "$linear_body" ]; then
-                echo "- **$skill**: UPDATE (changed in this PR)"
-                any_changes=true
-              elif [ "$base_body" = "$head_body" ] && [ "$head_body" != "$linear_body" ]; then
-                echo "- **$skill**: DRIFT (Linear edited manually, no file change)"
-                echo ""
-                echo "  <details><summary>Drift diff (repo vs Linear)</summary>"
-                echo ""
-                echo '  ```diff'
-                diff <(echo "$head_body") <(echo "$linear_body") || true
-                echo '  ```'
-                echo "  </details>"
-                echo ""
-              elif [ "$base_body" != "$head_body" ] && [ "$base_body" != "$linear_body" ]; then
-                echo "- **$skill**: CONFLICT (file and Linear both changed)"
-                echo ""
-                echo "  <details><summary>File diff (base to head)</summary>"
-                echo ""
-                echo '  ```diff'
-                diff <(echo "$base_body") <(echo "$head_body") || true
-                echo '  ```'
-                echo "  </details>"
-                echo ""
-                echo "  <details><summary>Linear drift (base to Linear)</summary>"
-                echo ""
-                echo '  ```diff'
-                diff <(echo "$base_body") <(echo "$linear_body") || true
-                echo '  ```'
-                echo "  </details>"
-                echo ""
-                any_changes=true
-              else
-                echo "- **$skill**: UPDATE (content differs)"
-                any_changes=true
-              fi
-            done
-
-            # Check for skills on Linear not in repo (orphans)
-            orphans=$(echo "$linear_skills" | jq -r --argjson repo "$(printf '%s\n' "${repo_skills[@]}" | jq -R . | jq -s .)" '[.[] | select(.title as $t | $repo | index($t) | not)] | .[].title')
-            if [ -n "$orphans" ]; then
-              echo ""
-              echo "**Orphaned skills on Linear** (not in repo):"
-              while IFS= read -r orphan; do
-                echo "- $orphan"
-              done <<< "$orphans"
-            fi
-
-            echo ""
-          done
-
-          if [ "$any_changes" = false ]; then
-            echo "No skill changes detected."
-          fi
+          GITHUB_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: node .github/scripts/linear-skills.mjs check
