@@ -565,6 +565,7 @@ Warning:   <what triggered — e.g. "mechanism verb 'Implement' leading", "78 ch
 - **Don't ask more than one round of clarification** (the "Exclude some" follow-up is the only permitted second question). If something surfaces during creation that should have been asked, note it in the summary and stop.
 - **Don't follow URLs unbounded.** Use `WebFetch` only to enrich descriptions for URLs *already referenced in the note*, not to search the web. This skill is deterministic; research belongs in `designnote`.
 - **Don't cancel or duplicate tickets without commenting why.** Every state change that removes a ticket from the active backlog must carry a comment explaining the reason. A cancelled ticket with no explanation is a dead end for backlog reviewers. See the cancellation rule in Phase 0.
+- **Don't move issues across teams without setting team and project together.** Always set both in a single `save_issue` call to avoid transient inconsistency where the issue sits in a team that doesn't own the target project.
 
 ## Required grants
 
