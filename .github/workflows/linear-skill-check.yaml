@@ -3,8 +3,9 @@ name: Linear skill check
 on:
   pull_request:
     types: [opened, synchronize]
-    paths:
-      - 'skills/**'
+    # TODO: uncomment paths filter once verified — KB-37
+    # paths:
+    #   - 'skills/**'
 
 permissions:
   pull-requests: read
