@@ -195,19 +195,57 @@ Otherwise, decompose the research into N independent questions. Spawn N subagent
 - The locked decisions
 - The relevant Linear/note context the main agent has already gathered, passed as prompt input
 - **One specific research question**
-- Explicit instruction: *return structured findings as a string. Do not write to the filesystem. Do not read or modify any design notes.*
+- Explicit instruction: *return structured findings as a string, and for every factual claim include the source URL it came from. Do not write to the filesystem. Do not read or modify any design notes.*
 
 Main agent waits for all subagents, then integrates findings. **Subagents never hold the write lock — the main agent serializes all writes to the note.**
 
 Guidelines:
 
 - **Don't give subagents Linear read tools by default.** Main agent pulls Linear context once and passes it in as prompt input. This avoids each subagent re-querying the same data.
+- **Carry sources forward — never discard them.** Subagent results contain the source URLs behind each finding. Capture them as you integrate, so Phase 6 can link every claim inline. Findings that arrive without a source must be re-sourced or dropped, not stated bare.
 - **Cross-check load-bearing claims.** Any number, date, attribution, or architectural claim that would drive a recommendation should appear in at least two sources before being stated as fact.
 - **Respect stopping criteria.** Don't over-research. Match depth to Phase 4.
 
 ## Phase 6 — Write
 
 Two modes: **create new** or **extend existing**.
+
+### Source-linking requirement (research output)
+
+**Every factual claim written into `## Exploration` (or any research-derived section) must link inline to the source it came from.** A reader corroborates a claim with one click — they never have to re-google what the research already found. Discarding the source URLs your research surfaced and stating findings bare defeats the purpose of researching.
+
+This applies to any claim a reader might doubt or want to verify: pricing and plan limits, API behavior and rate limits, field schemas, data history depth, version requirements, why a candidate was eliminated, shutdown/deprecation announcements.
+
+What to link, by claim type:
+
+- **Pricing / plan limits** → the vendor's pricing page
+- **API behavior, endpoints, rate limits** → the specific API doc page
+- **Field schemas, undocumented fields** → the source code or API reference that confirms them
+- **Library / package claims** → the PyPI/npm page and/or the GitHub repo
+- **A product exists / its positioning** → the provider homepage
+- **Eliminated candidate** → the page showing the disqualifying fact (e.g. a pricing tier, a shutdown announcement)
+- **Service discontinued** → the shutdown/deprecation announcement
+
+"One click from claim to evidence" looks like:
+
+```markdown
+- **QuiverQuant** — congressional-trades API, but the cheapest plan with bulk
+  history is [$1,000/mo](https://api.quiverquant.com/pricing), pricing us out.
+- **Finnhub** — free tier covers [60 calls/min](https://finnhub.io/docs/api/rate-limit),
+  enough for our nightly batch. The `/stock/insider-transactions`
+  [endpoint](https://finnhub.io/docs/api/insider-transactions) returns a `transactionPrice`
+  field absent from the docs but present in [responses](https://github.com/finnhub/examples/blob/main/insider.json).
+- **Sentieo** — [shut down in 2023](https://example.com/sentieo-shutdown), eliminated.
+```
+
+Not this — a bare claim the reader must re-research:
+
+```markdown
+- QuiverQuant is too expensive for our budget.
+- Finnhub's free tier is enough and returns the transaction price.
+```
+
+If a claim genuinely has no linkable source (e.g. a conclusion you reasoned to, not a fact you looked up), state that it's an inference rather than dressing it as a sourced finding.
 
 ### Create new record
 
@@ -301,6 +339,7 @@ If any research step failed or was skipped (e.g., web unavailable, Linear MCP ab
 - **Don't commit or stage.** All git operations are HITL per the repo's `CLAUDE.md`.
 - **Don't skip scope discovery.** Prefer extending an existing note. Duplication erodes the knowledge base and fragments context.
 - **Don't write from subagents.** Subagents return findings as strings. The main agent holds the write lock on the design note and serializes all writes.
+- **Don't strip source links from research findings.** Subagent results carry the URLs behind each claim — carry them forward and link them inline (see Phase 6). A bare factual claim in `## Exploration` that forces the reader to re-google is a defect, not a finished note.
 - **Don't silently mint new tags.** Prefer reuse from the existing vocabulary. Disqualify the too-general tags. If a new tag is necessary, log the reason in the Status Log `Notes` column.
 - **Don't overwrite custom sections when extending.** Preserve exactly what's there. Only append.
 - **Don't write to `ARCHIVE/` directories.** They are historical. Read-only from the skill's perspective.
