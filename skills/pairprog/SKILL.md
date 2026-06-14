@@ -105,7 +105,7 @@ Guards: never push a `tmp/` branch. Never cut a named branch or file a ticket au
 Detected when the navigator corrects agent behaviour mid-session and the fix touches `AGENTS.md`, `CONTRIBUTING.md`, or skill files in the repo (e.g. `claude/skills/**`).
 
 - Do it in place on the current branch. No escalation needed — the correction request is the approval.
-- Isolate in its own commit with a `docs(agents):` or `docs(contributing):` subject so the PR diff shows the mixing explicitly.
+- Isolate it in its own commit so the PR diff shows the mixing explicitly. Draft the message via the commit step below (Phase 3, step 7) — derive type and scope from the repo's `CONTRIBUTING.md`; never hardcode them. Meta-instruction files often map to no canonical scope, so if none fits, omit it rather than invent one.
 
 **Why the distinction matters:** Category B corrections must take effect immediately — deferring them to another branch means working with broken instructions for the rest of the session. Category A has no such urgency and should always be routed properly.
 
