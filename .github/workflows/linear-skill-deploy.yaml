@@ -39,7 +39,7 @@ jobs:
             local response
             response=$(curl -s -w "\n%{http_code}" -X POST https://api.linear.app/graphql \
               -H "Content-Type: application/json" \
-              -H "Authorization: Bearer $LINEAR_API_KEY" \
+              -H "Authorization: $LINEAR_API_KEY" \
               -d "$1")
             local http_code
             http_code=$(echo "$response" | tail -1)
