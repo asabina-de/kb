@@ -141,6 +141,7 @@ Execute these commands (detailed explanations in README.md):
 - Break work into focused, single-concern commits
 - Stick to short commit titles that are less than 80 characters long
 - Add `Co-authored-by:` and `Assisted-by:` trailers in commit messages (see CONTRIBUTING.md for format)
+- **Add new commits by default; don't rewrite published history.** Even on a solo topic branch, tack each change on as a new commit. Multiple small commits make review easier — they show the flow of work over time, which becomes more valuable as the commit list grows. Reserve `git commit --amend` and `git push --force-with-lease` for when you're explicitly instructed to use them to solve a specific problem (e.g. a bad commit breaking CI). Never use a plain `--force` push.
 
 ### Pre-Commit Workflow
 
