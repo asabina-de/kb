@@ -1,0 +1,17 @@
+{
+  "name": "linear-skills-ci",
+  "version": "0.0.0",
+  "private": true,
+  "description": "CI-only tooling: sync skills/*/SKILL.md to Linear agent skills.",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "check": "node linear-skills.mjs check",
+    "deploy": "node linear-skills.mjs deploy"
+  },
+  "dependencies": {
+    "@linear/sdk": "^86.0.0"
+  }
+}

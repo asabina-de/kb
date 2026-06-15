@@ -1,0 +1,38 @@
+name: Deploy skills to Linear
+
+on:
+  push:
+    branches: [main]
+    # TODO: uncomment paths filter once verified — KB-37
+    # paths:
+    #   - 'skills/**'
+    #   - '.github/scripts/**'
+    #   - '.github/workflows/linear-skill-deploy.yaml'
+
+permissions:
+  contents: read
+
+jobs:
+  deploy-skills:
+    name: Deploy skills to Linear teams
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: .github/scripts/package-lock.json
+
+      - name: Install deps
+        working-directory: .github/scripts
+        run: npm ci
+
+      # Run from the repo root so the script sees skills/ at cwd. Node resolves
+      # @linear/sdk from .github/scripts/node_modules via the script's own path.
+      - name: Deploy skills
+        env:
+          LINEAR_API_KEY: ${{ secrets.LINEAR_API_KEY }}
+          LINEAR_SKILL_TEAMS: ${{ vars.LINEAR_SKILL_TEAMS }}
+        run: node .github/scripts/linear-skills.mjs deploy
