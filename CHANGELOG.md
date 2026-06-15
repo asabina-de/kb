@@ -37,9 +37,13 @@ Tag manual-only steps with **(manual)** so readers know an agent can't automate 
 ## [2026-06-15]
 
 ### Changed
+- **`/commit` skill broadened to own full commit unit** — the skill now covers five areas beyond message drafting: type/scope selection guidance (canonical scopes from CONTRIBUTING.md, with missing-scope amendment suggestions), atomicity checks (multi-concern diff detection with concrete split plans), staging guidance (specific-file `git add` over blanket staging, mixed-state warnings), amend-vs-new commit decisions (default new, risk assessment when amend is requested), and convention health checks (escalate when CONTRIBUTING.md is missing, incomplete, or contains anti-patterns). Other skills (`/pair`, `/align`) should reference `/commit` as the authority on commit conventions — not just message text, but the full commit decision.
 - **Skills renamed to platform-agnostic imperative names** — five skill directories were renamed so the invocation matches the artifact or task, not the platform or grammar: `commenting` → `comment`, `commitmsg` → `commit`, `designnote` → `decision`, `linearissue` → `issue`, `pairprog` → `pair`. Cross-references between skills, `Skill("…")` call sites, `/`-invocation examples, and `skills/README.md` were updated to the new names. This is a rename only — skill behavior, descriptions, and bodies are otherwise unchanged.
 
 ### Migration
+
+**Files:**
+- If your project vendors a copy of `skills/commit/SKILL.md`, re-sync it to pick up the broadened scope (staging guidance, atomicity checks, type/scope selection, amend-vs-new decisions, convention health checks).
 
 **Files:**
 - If your project vendors copies of any renamed skill (`skills/commenting`, `skills/commitmsg`, `skills/designnote`, `skills/linearissue`, `skills/pairprog`), move them to the new directory names and update any internal `Skill("…")` references.
