@@ -2,6 +2,8 @@ name: Linear skill check
 
 on:
   pull_request:
+    # opened: PR first created. synchronize: new commits pushed to PR branch.
+    # Together = "run on creation and every subsequent push."
     types: [opened, synchronize]
     # TODO: uncomment paths filter once verified — KB-37
     # paths:
