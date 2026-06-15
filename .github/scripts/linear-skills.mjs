@@ -5,9 +5,10 @@
 //   check  — dry run for PRs. Diffs repo (base + head) against Linear and
 //            prints a per-team plan (CREATE / UPDATE / DELETE / DRIFT /
 //            CONFLICT / UP-TO-DATE). Read-only; never mutates Linear.
-//   deploy — upserts every repo skill to each team and deletes orphans
-//            (skills on Linear with no matching repo dir). Exits non-zero
-//            if any mutation fails.
+//   deploy — upserts every repo skill to each team, deletes orphans (skills
+//            on Linear with no matching repo dir) and removes surplus copies
+//            when a title was duplicated by an earlier run. Exits non-zero if
+//            any mutation fails.
 //
 // Env:
 //   LINEAR_API_KEY     — personal/OAuth API key (required)
@@ -54,16 +55,37 @@ async function resolveTeamId(name) {
   return data?.teams?.nodes?.[0]?.id ?? "";
 }
 
+// Fetch every skill scoped to the team. NOTE: do NOT filter on `shared` — that
+// boolean means "shared with the whole workspace", not "team-shared". Skills
+// created via agentSkillCreate with a teamId default to shared=false yet still
+// show up as team-shared skills. Filtering shared=true here returned nothing,
+// so each deploy re-created all skills instead of upserting (KB-50).
 async function fetchTeamSkills(teamId) {
   const { data } = await gql(
     `query($teamId: ID!) {
-       agentSkills(filter: { team: { id: { eq: $teamId } }, shared: { eq: true } }) {
-         nodes { id title body }
+       agentSkills(filter: { team: { id: { eq: $teamId } } }) {
+         nodes { id title body createdAt }
        }
      }`,
     { teamId },
   );
   return data?.agentSkills?.nodes ?? [];
+}
+
+// Group team skills by title. A title may map to several skills when earlier
+// deploys created duplicates; the oldest is treated as canonical (kept and
+// updated in place) and the rest are surplus copies to delete.
+function groupByTitle(skills) {
+  const byTitle = new Map();
+  for (const skill of skills) {
+    const copies = byTitle.get(skill.title);
+    if (copies) copies.push(skill);
+    else byTitle.set(skill.title, [skill]);
+  }
+  for (const copies of byTitle.values()) {
+    copies.sort((a, b) => String(a.createdAt).localeCompare(String(b.createdAt)));
+  }
+  return byTitle;
 }
 
 async function createSkill(title, body, teamId) {
@@ -180,12 +202,13 @@ async function runCheck() {
 
     console.log(`### Team: ${teamName}\n`);
     const linearSkills = await fetchTeamSkills(teamId);
-    const byTitle = new Map(linearSkills.map((s) => [s.title, s]));
+    const byTitle = groupByTitle(linearSkills);
 
     for (const skill of repoSkills) {
       const baseBody = baseSha ? skillBodyAtRef(baseSha, skill) : "";
       const headBody = skillBodyOnDisk(skill);
-      const existing = byTitle.get(skill);
+      const copies = byTitle.get(skill) ?? [];
+      const existing = copies[0];
       const linearBody = existing?.body ?? "";
       const linearId = existing?.id ?? "";
 
@@ -217,6 +240,13 @@ async function runCheck() {
         anyChanges = true;
       } else {
         console.log(`- **${skill}**: UPDATE (content differs)`);
+        anyChanges = true;
+      }
+
+      if (copies.length > 1) {
+        console.log(
+          `  - DUPLICATE: ${copies.length - 1} surplus cop${copies.length - 1 === 1 ? "y" : "ies"} on Linear — will delete`,
+        );
         anyChanges = true;
       }
     }
@@ -263,24 +293,31 @@ async function runDeploy() {
 
     console.log(`=== Team: ${teamName} ===`);
     const linearSkills = await fetchTeamSkills(teamId);
-    const byTitle = new Map(linearSkills.map((s) => [s.title, s]));
+    const byTitle = groupByTitle(linearSkills);
 
     for (const skill of repoSkills) {
       const fileBody = skillBodyOnDisk(skill);
-      const existing = byTitle.get(skill);
+      const copies = byTitle.get(skill) ?? [];
+      const [canonical, ...dupes] = copies;
 
       try {
-        if (!existing) {
+        if (!canonical) {
           console.log(`  CREATE: ${skill}`);
           (await createSkill(skill, fileBody, teamId)) ? created++ : fail();
-        } else if (fileBody !== existing.body) {
+        } else if (fileBody !== canonical.body) {
           console.log(`  UPDATE: ${skill}`);
-          (await updateSkill(existing.id, skill, fileBody))
+          (await updateSkill(canonical.id, skill, fileBody))
             ? updated++
             : fail();
         } else {
           console.log(`  UP-TO-DATE: ${skill}`);
           skipped++;
+        }
+
+        // Collapse any duplicate copies of this title onto the canonical one.
+        for (const dup of dupes) {
+          console.log(`  DELETE (duplicate): ${skill}`);
+          (await deleteSkill(dup.id)) ? deleted++ : fail();
         }
       } catch (err) {
         console.log(`  FAILED: ${err.message ?? err}`);
