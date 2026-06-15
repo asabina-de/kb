@@ -450,7 +450,7 @@ Print:
 
 Every title — whether derived from a design note action item, drafted in freeform mode, or proposed as an iteration refinement — must pass through this gate. The gate is **advisory**: warn and suggest, never block.
 
-> **Sync note:** This gate is mirrored in `/pr` (`skills/pr/SKILL.md`). If you change principles, anti-patterns, or examples here, check the other copy and keep them at parity. Some differences are intentional (brevity threshold, branch-name-friendliness is issue-specific) but the core principles and examples should match.
+> **Sync note:** This gate is mirrored in `/pr` (`skills/pr/SKILL.md`) and the verb-tier/imperative-voice principles are shared with `/commit` (`skills/commit/SKILL.md`). If you change principles, anti-patterns, or examples here, check the other copies and keep them at parity. Some differences are intentional (brevity threshold, branch-name-friendliness is issue-specific; `/commit` applies the same voice to commit subjects with ≤80 char limits) but the core principles and examples should match. Skills are self-contained (see CLAUDE.md "Skill Architecture Constraints") — each carries its own copy.
 
 ### Pre-presentation checklist
 

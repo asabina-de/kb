@@ -166,6 +166,18 @@ Before opening a pull request, verify:
 - Reference documentation files when discussing changes
 - Keep the user informed of significant decisions or blockers
 
+## Skill Architecture Constraints
+
+**Skills must be self-contained.** Each skill (`skills/*/SKILL.md`) is a single file that carries all the instructions it needs. Skills must not reference companion files, shared docs, or other skills' content by file path — because not all deployment surfaces support multi-file skills:
+
+- **Claude Code (filesystem):** Skills are directories, but only `SKILL.md` is loaded as the prompt. Companion files work only if the skill reads them via tools at runtime.
+- **Claude Managed Agents (API):** Skills are passed as a single string parameter. There is no filesystem — companion files don't exist. Any shared content must be inlined (hydrated) into the skill string before dispatch.
+- **Linear AI:** Skills are plain text fields on team settings. No file references, no imports, no companion files.
+
+This means: if two skills need the same guidance (e.g., imperative-voice title conventions), each skill carries its own copy with a sync note pointing to the other. This is intentional duplication — the alternative (shared files) breaks portability. Sync notes are the maintenance mechanism: when you change a duplicated section, check the other copies listed in the sync note.
+
+The `/commit` skill is the authority on commit conventions (message drafting, type/scope selection, atomicity, staging, amend-vs-new). Other skills that produce commits (like `/pair`) delegate to `/commit` at invocation time rather than inlining the methodology. Title quality gates (verb tiers, imperative voice) are duplicated across `/commit`, `/pr`, and `/issue` with sync notes because each applies the same principles in a different context (commit subjects, PR titles, ticket titles).
+
 ## Claude-Specific Instructions
 
 - Challenge the user on ideas to collaboratively arrive at the best design. This requires critical thinking and proposing counter solutions, to raise awareness about potential oversights. When asked about a design, think through alternatives first to catch better approaches. **Do not be eager to agree with the user when there are solid arguments to push back.**
