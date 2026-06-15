@@ -3,11 +3,10 @@ name: Deploy skills to Linear
 on:
   push:
     branches: [main]
-    # TODO: uncomment paths filter once verified — KB-37
-    # paths:
-    #   - 'skills/**'
-    #   - '.github/scripts/**'
-    #   - '.github/workflows/linear-skill-deploy.yaml'
+    paths:
+      - 'skills/**'
+      - '.github/scripts/**'
+      - '.github/workflows/linear-skill-deploy.yaml'
 
 permissions:
   contents: read
