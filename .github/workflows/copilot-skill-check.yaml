@@ -1,0 +1,28 @@
+name: Copilot skill check
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+    paths:
+      - 'skills/**'
+      - '.github/workflows/copilot-skill-check.yaml'
+      - '.github/workflows/copilot-skill-publish.yaml'
+
+permissions:
+  pull-requests: read
+  contents: read
+
+jobs:
+  check-skills:
+    name: Check Copilot skill publish (dry run)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check gh version
+        run: gh --version
+
+      - name: Dry-run publish
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh skill publish --dry-run
