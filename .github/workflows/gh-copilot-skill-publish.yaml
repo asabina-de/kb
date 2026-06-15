@@ -1,0 +1,32 @@
+name: Publish skills to GH Copilot
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'skills/**'
+      - '.github/workflows/gh-copilot-skill-publish.yaml'
+
+permissions:
+  contents: read
+
+jobs:
+  publish-skills:
+    name: Publish skills to GH Copilot
+    # GH_COPILOT_SKILLS gates the deploy — unset = graceful noop (fork-friendly).
+    if: vars.GH_COPILOT_SKILLS != ''
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check gh version
+        run: gh --version
+
+      # gh skill publish is repo-scoped: it publishes all skills discovered in
+      # the repo (skills/*, .github/skills/*, etc.). Running it again with the
+      # same content is safe — the repo IS the source of truth, so there is no
+      # separate state to drift.
+      - name: Publish skills
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh skill publish
