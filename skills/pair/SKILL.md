@@ -34,7 +34,7 @@ The skill supports two commit modes. The navigator can switch between them at an
 - **Checkpoint mode:** The skill presents each atomic change with a drafted commit message (using the `commit` skill's methodology) and pauses for the navigator's steering input — design decisions, dropping constructs, changing approach. The navigator commits when satisfied. The skill never runs git write commands in this mode.
 - **Yolo mode:** The skill auto-commits each atomic step using the `commit` skill's methodology for message generation. The navigator can interrupt at any time to steer.
 
-**Commit messages are always drafted via `commit` methodology** — reading `CONTRIBUTING.md` for the repo's convention and applying it. The modes differ in who *commits* (yolo: auto, checkpoint: navigator), not who *drafts the message*. Never draft commit messages freehand.
+**Commit messages are always drafted via the `/commit` skill.** Invoke it (or apply its methodology) for every commit message — never draft freehand. The `/commit` skill owns the full commit unit: convention lookup, staging checks, atomicity, type/scope selection, amend-vs-new, and message formatting. The modes differ in who *commits* (yolo: auto, checkpoint: navigator), not who *drafts the message*.
 
 **Milestone file commit gate.** A `PostToolUse` hook monitors edits to milestone files (package manifests, lock files, flake.nix, etc.). When you see a `CHECKPOINT:` message from this hook, you **MUST** immediately:
 1. Stop implementation work
@@ -333,7 +333,7 @@ For each step:
 4. **Decision record maintenance.** If the step touches a file in `docs/decisions/`, append a Status Log row: today's date, `claude` as author, the ticket ID in Related Tickets, and a concise note stating *what changed and why* — not just that an edit happened. Bake the purpose in so the row is scannable on its own (e.g. "Added disclosure-provider pricing comparison via pair KB-9", not a bare "Updated via pair KB-9"). This keeps the record's audit trail intact. If the step writes research or spike findings into the record (or any doc), apply the **Source-linking** rule from Phase 1 — every finding links inline to its source.
 5. **Run quality checks** if the repo has them (lint, typecheck, test). Use `Bash` for this. If a check fails, fix it before presenting.
 6. **Present the change.** Print a concise summary of what changed and why. Don't dump the full diff — describe the intent and highlight non-obvious decisions.
-7. **Draft commit message.** In both modes, use the `commit` skill's methodology to draft the message: read `CONTRIBUTING.md` for the repo's convention (type, scope, subject rules, imperative mood, length limits), inspect the diff, and produce a conforming message. Never draft commit messages freehand — the convention is in the docs, not in your training data.
+7. **Draft commit message.** In both modes, delegate to the `/commit` skill for message drafting. The `/commit` skill handles convention lookup, type/scope selection, atomicity checks, and message formatting. Never draft commit messages freehand.
 8. **Checkpoint.**
    - **Checkpoint mode:** Present the change summary and the drafted commit message. Pause for the navigator's steering input. If the navigator says "looks good," they commit using the drafted message. If they want changes, iterate. Don't ask the navigator to review code line-by-line in chat — that's what the PR is for.
    - **Yolo mode:** Auto-commit with the drafted message. Print the commit hash and message. Continue to the next step.

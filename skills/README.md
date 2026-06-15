@@ -7,7 +7,7 @@ Claude Code skills that operate on KB-defined artifacts (decision records, TODO.
 | Skill | Purpose | KB artifacts touched |
 |-------|---------|---------------------|
 | **comment** | Post structured comments to Linear issues (threading, provenance, formatting) | None (protocol only) |
-| **commit** | Suggest commit messages following repo conventions | Reads CONTRIBUTING.md, AGENTS.md |
+| **commit** | Guide full commit unit: message drafting, type/scope selection, atomicity, staging, amend-vs-new | Reads CONTRIBUTING.md, AGENTS.md |
 | **decision** | Draft or extend decision records in `docs/decisions/` | Writes `docs/decisions/*.md` |
 | **issue** | File Linear issues from decision record action items, iterate on tickets, or create freeform | Reads/edits `docs/decisions/*.md` |
 | **pair** | Interactive pair-programming on Linear tickets | Reads CLAUDE.md, AGENTS.md, CONTRIBUTING.md |
