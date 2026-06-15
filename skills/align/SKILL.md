@@ -34,7 +34,7 @@ KB repo (source of truth)
   │
   ├── File migrations → Edit/Write directly
   ├── Repo settings → surface gh CLI commands (HITL)
-  ├── Ticket migrations → /linearissue for title/scope fixes
+  ├── Ticket migrations → /issue for title/scope fixes
   └── Manual steps → surface instructions, can't automate
 ```
 
@@ -167,11 +167,11 @@ Step 5: 🔧 EXTERNAL — Set squash-merge title to "PR title" (manual)
 
 ### File tracking ticket
 
-Before executing any migrations, file a tracking ticket via `/linearissue` scoped to the gaps found in Phase 2. Title format: `Align conventions to KB YYYY-MM-DD state` (or more specific if only a subset of entries apply). The ticket description should list the migration steps as a checklist.
+Before executing any migrations, file a tracking ticket via `/issue` scoped to the gaps found in Phase 2. Title format: `Align conventions to KB YYYY-MM-DD state` (or more specific if only a subset of entries apply). The ticket description should list the migration steps as a checklist.
 
 If the operator prefers not to file a ticket (e.g. the alignment is trivial), skip — but offer it. For non-trivial runs (3+ steps, destructive operations, ticket audits), strongly recommend it.
 
-Store the ticket ID — all Phase 3 progress comments thread on it via `/commenting`.
+Store the ticket ID — all Phase 3 progress comments thread on it via `/comment`.
 
 ## Phase 3 — Execute migrations
 
@@ -206,10 +206,10 @@ For each approved step:
 2. **Execute** the change:
    - **File changes:** `Edit` / `Write` / `Bash` (for `git mv`, `git rm`)
    - **Repo settings:** surface `gh` CLI commands for the operator. On explicit approval ("go ahead"), execute them. Never auto-execute external changes.
-   - **Ticket changes:** delegate to the `/linearissue` skill for title rewrites and scope fixes. Present proposed changes and get approval before applying.
+   - **Ticket changes:** delegate to the `/issue` skill for title rewrites and scope fixes. Present proposed changes and get approval before applying.
    - **Manual steps:** print instructions clearly. Mark as done only when the operator confirms they've completed it.
 3. **Verify** the step succeeded — re-run the gap check for that specific item.
-4. **Comment progress** — if a tracking ticket was filed, post a progress comment via `/commenting` threaded on it. Include what was done, what resource type it affected, and any decisions made (e.g. "operator chose to keep original title for KB-14"). This builds the audit trail.
+4. **Comment progress** — if a tracking ticket was filed, post a progress comment via `/comment` threaded on it. Include what was done, what resource type it affected, and any decisions made (e.g. "operator chose to keep original title for KB-14"). This builds the audit trail.
 5. **Mark complete** and move to the next step.
 
 ### Defensive measures
@@ -248,11 +248,11 @@ Files changed: {list}
 Suggested commit: doc: align repo conventions to KB standards [YYYY-MM-DD] [ai:claude]
 ```
 
-Do not commit — git is HITL. Present the suggested commit message using `commitmsg` methodology.
+Do not commit — git is HITL. Present the suggested commit message using `commit` methodology.
 
 ### Close the tracking ticket
 
-If a tracking ticket was filed in Phase 2, post a resolution comment via `/commenting` with the full summary above (applied, manual, skipped, tickets audited). This is the audit record — anyone reviewing the alignment run later sees exactly what was checked, what was changed, and what decisions the operator made.
+If a tracking ticket was filed in Phase 2, post a resolution comment via `/comment` with the full summary above (applied, manual, skipped, tickets audited). This is the audit record — anyone reviewing the alignment run later sees exactly what was checked, what was changed, and what decisions the operator made.
 
 Transition the ticket to Done if all steps are complete (including manual ones confirmed by the operator). If manual steps remain, leave it In Progress with the outstanding items listed in the comment.
 

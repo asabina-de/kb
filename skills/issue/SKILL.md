@@ -1,11 +1,11 @@
 ---
-name: linearissue
-description: "Use this skill when the user asks you to turn a design note's action items into Linear issues, OR when the user wants to iterate on an existing Linear issue, OR when the user wants to create a new issue freeform (without a design note). Filing mode triggers: 'file tickets from this note', 'linearize X', 'create Linear issues for the action items in X', 'turn this note into tickets', 'ship this to Linear', 'file these TODOs from the design note', 'make tickets from X', 'linearissue this note', 'create issues from X.md'. Iteration mode triggers: user passes a Linear issue URL (e.g. https://linear.app/...) or issue ID (e.g. VID-123) with a follow-on prompt like 'help me refine this', 'roast this scope', 'add context about X', 'what questions should we answer first', 'sharpen the description', or any request to think about, improve, or comment on an existing issue. Freeform mode triggers: 'create an issue for X', 'file a ticket about Y', 'new issue: Z', 'ticket this', or any request to create a Linear issue without referencing a design note or existing issue. Also trigger when the user invokes `/linearissue`. Do NOT trigger for creating Linear documents (that's the designnote skill's strategy-routing path), for filing tickets from records in `status: decided` (decisions are made; they don't spawn tickets — only `status: exploring` records have actionable items), or for any operation that would also commit to git."
+name: issue
+description: "Use this skill when the user asks you to turn a design note's action items into Linear issues, OR when the user wants to iterate on an existing Linear issue, OR when the user wants to create a new issue freeform (without a design note). Filing mode triggers: 'file tickets from this note', 'linearize X', 'create Linear issues for the action items in X', 'turn this note into tickets', 'ship this to Linear', 'file these TODOs from the design note', 'make tickets from X', 'issue this note', 'create issues from X.md'. Iteration mode triggers: user passes a Linear issue URL (e.g. https://linear.app/...) or issue ID (e.g. VID-123) with a follow-on prompt like 'help me refine this', 'roast this scope', 'add context about X', 'what questions should we answer first', 'sharpen the description', or any request to think about, improve, or comment on an existing issue. Freeform mode triggers: 'create an issue for X', 'file a ticket about Y', 'new issue: Z', 'ticket this', or any request to create a Linear issue without referencing a design note or existing issue. Also trigger when the user invokes `/issue`. Do NOT trigger for creating Linear documents (that's the decision skill's strategy-routing path), for filing tickets from records in `status: decided` (decisions are made; they don't spawn tickets — only `status: exploring` records have actionable items), or for any operation that would also commit to git."
 api_description: "File action items from a design note as Linear issues with bidirectional cross-references and idempotent re-runs, iterate on an existing Linear issue by posting analysis, context, or refinements as comments, or create new issues freeform. All titles must pass a mandatory checklist: imperative voice, verb from tiered list, [VERB] [NOUN] [CONTEXT] structure, cold-reader test. Three modes: filing (from a note), iteration (from a ticket ID or URL), and freeform (from a prompt)."
 allowed-tools: Bash Glob Grep Read Edit WebFetch AskUserQuestion Skill mcp__claude_ai_Linear__list_issues mcp__claude_ai_Linear__get_issue mcp__claude_ai_Linear__save_issue mcp__claude_ai_Linear__list_comments mcp__claude_ai_Linear__list_teams mcp__claude_ai_Linear__get_team mcp__claude_ai_Linear__list_projects mcp__claude_ai_Linear__get_project mcp__claude_ai_Linear__list_issue_statuses mcp__claude_ai_Linear__list_issue_labels mcp__github__list_pull_requests mcp__github__pull_request_read mcp__github__search_pull_requests
 ---
 
-# linearissue
+# issue
 
 Create Linear issues — from a design note's action items, from an existing ticket (iteration), or freeform from a prompt. All modes enforce value-oriented titles via a quality gate, use an in-chat confirmation gate, and support idempotent re-runs.
 
@@ -25,13 +25,13 @@ The defining design principles of this skill are:
 prompt
   │
   ▼
-designnote skill  →  design note (with action items in canonical sections)
+decision skill  →  design note (with action items in canonical sections)
   │
   ▼
 [HITL gate: human reviews, edits, greenlights the note]
   │
   ▼
-linearissue       →  prints proposed tickets in chat
+issue       →  prints proposed tickets in chat
   │
   ▼
 [HITL gate: AskUserQuestion confirmation]
@@ -40,7 +40,7 @@ linearissue       →  prints proposed tickets in chat
 creates tickets + writes Linear: LIN-NNN annotations back into the note
 ```
 
-The human gate on the design note itself is where the real review happens. By the time `linearissue` runs, the note is greenlit — ticket derivation is mechanical. The in-chat confirmation is a final sanity check, not a deep review.
+The human gate on the design note itself is where the real review happens. By the time `issue` runs, the note is greenlit — ticket derivation is mechanical. The in-chat confirmation is a final sanity check, not a deep review.
 
 ## Tools declared in allowed-tools
 
@@ -49,7 +49,7 @@ The human gate on the design note itself is where the real review happens. By th
 - `WebFetch` — follow URLs referenced in the note when enriching ticket descriptions
 - `AskUserQuestion` — the confirmation gate (and batched clarification if needed)
 - Linear MCP read tools — search for existing tickets, resolve teams/projects, look up statuses and labels
-- `Skill` — invoke the `commenting` skill for posting comments to Linear issues
+- `Skill` — invoke the `comment` skill for posting comments to Linear issues
 - Linear MCP write tools — `save_issue`
 
 The skill does not declare `Task` — there is no parallel research phase. Ticket derivation is deterministic and serial.
@@ -70,13 +70,13 @@ Examine the first argument (or the full prompt if no explicit argument):
 
 After detecting the mode, rename the session to reflect the scope:
 
-Rename the session so the user can identify it at a glance (e.g. in a terminal tab). A good name reflects the mode and scope — e.g. "card layout abstraction (linearissue)" for filing, "VID-123 OAuth2 Google login (linearissue:iterate)" for iteration, or "auth token storage (linearissue:freeform)" for freeform.
+Rename the session so the user can identify it at a glance (e.g. in a terminal tab). A good name reflects the mode and scope — e.g. "card layout abstraction (issue)" for filing, "VID-123 OAuth2 Google login (issue:iterate)" for iteration, or "auth token storage (issue:freeform)" for freeform.
 
 If a tool or command is available to rename the session programmatically, use it. Otherwise, suggest the user rename it — but don't block on this. Move on to the next phase either way.
 
 ### Triage: check for duplicates and scope overlap
 
-Before creating any new issue — whether from a design note or freeform — run a tiered check to avoid duplicates, scope overlap, and contradictions in the backlog. This applies in both filing mode and when other skills (pairprog, freeform conversation) route through `save_issue` to create a ticket.
+Before creating any new issue — whether from a design note or freeform — run a tiered check to avoid duplicates, scope overlap, and contradictions in the backlog. This applies in both filing mode and when other skills (pair, freeform conversation) route through `save_issue` to create a ticket.
 
 **Tier 0 — Project fit (always run, before anything else):**
 
@@ -118,11 +118,11 @@ Only proceed to filing after the user confirms the triage result.
 **Every ticket state change that removes a ticket from the active backlog (Cancelled, Duplicate) must carry a comment explaining why.** A cancelled ticket with no explanation is a dead end for anyone reviewing the backlog later — they can't tell if it was superseded, descoped, invalid, or accidentally closed.
 
 When cancelling or duplicating a ticket:
-1. Post a comment via `/commenting` with a heading like "Cancelled: {reason}" or "Duplicated by {TICKET-ID}"
+1. Post a comment via `/comment` with a heading like "Cancelled: {reason}" or "Duplicated by {TICKET-ID}"
 2. Include a one-sentence explanation of why (e.g. "KB-36 bundles this rename with two others — same mechanical pattern, one ticket instead of three")
 3. If superseded by another ticket, reference it so readers can follow the chain
 
-This rule applies regardless of which skill triggers the cancellation — `/linearissue` triage, `/pairprog` scope discovery, or manual operator action. If the operator cancels directly, suggest the comment.
+This rule applies regardless of which skill triggers the cancellation — `/issue` triage, `/pair` scope discovery, or manual operator action. If the operator cancels directly, suggest the comment.
 
 ### Filing mode: parse invocation
 
@@ -268,7 +268,7 @@ If the user bails, stop. Print nothing further.
 For each confirmed ticket:
 
 1. **Existing detection.** If the note's source-anchor area already has an inline `Linear: LIN-NNN` annotation, or if a Linear search by source anchor URL in the description footer finds an existing ticket, treat as **update**. Otherwise **create**.
-2. **Create:** call `save_issue` with team, project, title, description (including the source-anchor footer), priority, parent (if dependency-hinted as a sub-task — but default to flat unless the note structure clearly implies sub-tasking). Keep the description to 2–5 sentences maximum: one sentence on what the work is, one sentence on why it matters (if not obvious), a **DoD** sentence ("Done when X is true/observable/verifiable"), and the source-anchor backlink. The DoD should be concrete enough that someone can check it without reading the full context — e.g. "Done when `/linearissue` activates freeform mode on bare prompts and all titles pass the quality gate." Prepend `*[ai:claude-code]*` as the first line of the description so authorship is visible before the content. Do not copy prose, context, or reasoning from the design note into the description — the backlink is the bridge. If there is important context that should accompany the ticket, post it as a comment after creation instead.
+2. **Create:** call `save_issue` with team, project, title, description (including the source-anchor footer), priority, parent (if dependency-hinted as a sub-task — but default to flat unless the note structure clearly implies sub-tasking). Keep the description to 2–5 sentences maximum: one sentence on what the work is, one sentence on why it matters (if not obvious), a **DoD** sentence ("Done when X is true/observable/verifiable"), and the source-anchor backlink. The DoD should be concrete enough that someone can check it without reading the full context — e.g. "Done when `/issue` activates freeform mode on bare prompts and all titles pass the quality gate." Prepend `*[ai:claude-code]*` as the first line of the description so authorship is visible before the content. Do not copy prose, context, or reasoning from the design note into the description — the backlink is the bridge. If there is important context that should accompany the ticket, post it as a comment after creation instead.
 3. **Update:** call `save_issue` with `id` set to the existing `LIN-NNN`, updating only fields that have meaningfully changed (description content, priority). Don't touch state, assignee, or labels unless explicitly indicated.
 4. **Capture** the returned ticket ID and URL.
 
@@ -278,7 +278,7 @@ After all `save_issue` calls succeed:
 
 5. **Re-read the note** (in case of any concurrent edits, though unlikely).
 6. **Append `Linear: LIN-NNN` cross-references.** For each newly-created ticket, find the source action item line in the note and append ` (Linear: [LIN-NNN]({url}))` immediately after the item text. For multi-line items, append on a new line indented to the item's level.
-7. **Append a Status Log row** to the note: today's date, `claude` as author, the comma-separated list of created/updated ticket IDs in the Related Tickets column, and a Notes column summary like "Filed N tickets via linearissue (M new, K updated)".
+7. **Append a Status Log row** to the note: today's date, `claude` as author, the comma-separated list of created/updated ticket IDs in the Related Tickets column, and a Notes column summary like "Filed N tickets via issue (M new, K updated)".
 8. **Save the note** via `Edit`.
 
 ### Partial failure
@@ -331,7 +331,7 @@ For mixed intents, address all of them in a single pass rather than asking for c
 
 Produce one or both of:
 
-1. **Comment draft** — the primary output in almost all cases. Write it as you would a thoughtful comment from a collaborator: direct, specific, actionable. Scope crystallization, analysis, questions, and context all belong here. (Provenance and formatting are handled by the commenting skill — do not add `*[ai:claude-code]*` manually.)
+1. **Comment draft** — the primary output in almost all cases. Write it as you would a thoughtful comment from a collaborator: direct, specific, actionable. Scope crystallization, analysis, questions, and context all belong here. (Provenance and formatting are handled by the comment skill — do not add `*[ai:claude-code]*` manually.)
 2. **Anchor update** — only if the intent is explicitly to fix the title or description. Draft the new title and/or description. Keep to 2–4 sentences. Do not migrate comment-appropriate content into the description.
 
 Print both drafts in chat before asking for confirmation. Make it easy to scan.
@@ -348,7 +348,7 @@ On "Edit first": ask what to change, revise, re-present, confirm again.
 
 On approval, write in this order:
 1. `save_issue` for any title/description changes (only if confirmed)
-2. `Skill("commenting", ...)` to delegate the comment to the commenting skill (only if confirmed) — describe the issue ID, comment title (e.g. "Assessment", "Context", "Scope refinement"), the originating skill name ("linearissue"), and the comment body. The commenting skill handles formatting, provenance, and threading.
+2. `Skill("comment", ...)` to delegate the comment to the comment skill (only if confirmed) — describe the issue ID, comment title (e.g. "Assessment", "Context", "Scope refinement"), the originating skill name ("issue"), and the comment body. The comment skill handles formatting, provenance, and threading.
 
 ### Summary
 
@@ -422,7 +422,7 @@ For each confirmed ticket, call `save_issue` with team, project, title, descript
 
 - Descriptions are minimal anchors (2–4 sentences max)
 - Prepend `*[ai:claude-code]*` to the description
-- If extra context is needed beyond the anchor, post it as a comment after creation via the commenting skill
+- If extra context is needed beyond the anchor, post it as a comment after creation via the comment skill
 
 ### Summary
 
@@ -450,7 +450,7 @@ Print:
 
 Every title — whether derived from a design note action item, drafted in freeform mode, or proposed as an iteration refinement — must pass through this gate. The gate is **advisory**: warn and suggest, never block.
 
-> **Sync note:** This gate is mirrored in `/pr` (`skills/pr/SKILL.md`). If you change principles, anti-patterns, or examples here, check the other copy and keep them at parity. Some differences are intentional (brevity threshold, branch-name-friendliness is linearissue-specific) but the core principles and examples should match.
+> **Sync note:** This gate is mirrored in `/pr` (`skills/pr/SKILL.md`). If you change principles, anti-patterns, or examples here, check the other copy and keep them at parity. Some differences are intentional (brevity threshold, branch-name-friendliness is issue-specific) but the core principles and examples should match.
 
 ### Pre-presentation checklist
 
@@ -510,7 +510,7 @@ This structure applies to ticket titles, PR subjects, and commit subjects — th
 - **Question-format titles** — "Does X expose Y?" belongs in the description.
 - **Kitchen-sink titles** — "Improve X — reduce Y and explore Z" tries to do too much in one title.
 - **Technical-identifier-first** — "bioguide_id mapping for member identity" buries the value. Prefer "Resolve member identity from bioguide".
-- **Redundant context** — "linearissue skill: value-oriented titles + freeform creation mode" — the project/component prefix is redundant when the ticket already has a project and labels.
+- **Redundant context** — "issue skill: value-oriented titles + freeform creation mode" — the project/component prefix is redundant when the ticket already has a project and labels.
 - **Context-dependent titles** — titles that only make sense if you were in the conversation that produced them. "Own protocol types at pipecat boundary" means nothing to a cold reader. "Codename alignment across codebase" sounds important but conveys no real value.
 
 ### Out-of-context failures (from audit)
@@ -561,7 +561,7 @@ Warning:   <what triggered — e.g. "mechanism verb 'Implement' leading", "78 ch
 ## Anti-patterns
 
 - **Don't run on `decided`/`superseded`/`deprecated` records** or anything in `ARCHIVE/`. Settled records are read-only.
-- **Don't run on Linear documents.** This skill operates on repo-local `docs/decisions/**` files. Linear-routed records (from `designnote`'s strategy path) are not in scope.
+- **Don't run on Linear documents.** This skill operates on repo-local `docs/decisions/**` files. Linear-routed records (from `decision`'s strategy path) are not in scope.
 - **Don't transition frontmatter status.** Status transitions (`exploring → decided`) are HITL. Don't rename files either — serial-numbered filenames are permanent.
 - **Don't commit or stage.** All git operations are HITL per the repo's `CLAUDE.md`.
 - **Don't overwrite existing `Linear: LIN-NNN` annotations.** If present, the item is already ticketed; treat as update or skip, never re-create.
@@ -576,7 +576,7 @@ Warning:   <what triggered — e.g. "mechanism verb 'Implement' leading", "78 ch
 - **Don't run filing-mode phases in iteration mode.** If a Linear URL or issue ID was detected, skip straight to the iteration phase. Do not look for design notes, parse action items, or propose ticket creation.
 - **Don't silently rewrite comment history.** The skill can only add new comments via `save_comment`. It cannot edit or delete existing comments. If a prior comment is wrong, post a follow-up — don't attempt to alter the record.
 - **Don't ask more than one round of clarification** (the "Exclude some" follow-up is the only permitted second question). If something surfaces during creation that should have been asked, note it in the summary and stop.
-- **Don't follow URLs unbounded.** Use `WebFetch` only to enrich descriptions for URLs *already referenced in the note*, not to search the web. This skill is deterministic; research belongs in `designnote`.
+- **Don't follow URLs unbounded.** Use `WebFetch` only to enrich descriptions for URLs *already referenced in the note*, not to search the web. This skill is deterministic; research belongs in `decision`.
 - **Don't cancel or duplicate tickets without commenting why.** Every state change that removes a ticket from the active backlog must carry a comment explaining the reason. A cancelled ticket with no explanation is a dead end for backlog reviewers. See the cancellation rule in Phase 0.
 - **Don't move issues across teams without setting team and project together.** Always set both in a single `save_issue` call to avoid transient inconsistency where the issue sits in a team that doesn't own the target project.
 
@@ -596,4 +596,4 @@ The skill's `allowed-tools` declaration pre-approves the tool categories. For sc
 
 The skill checks for this grant in Phase 0 and warns if it's missing.
 
-Linear MCP write tool (`save_issue`) is declared in `allowed-tools` and should not require per-call approval. If it does, the walk-away UX breaks — configure pre-approval before first use. Comments are posted via `Skill("commenting", ...)`, which requires the `Skill` tool to be allowed so the commenting skill can be invoked.
+Linear MCP write tool (`save_issue`) is declared in `allowed-tools` and should not require per-call approval. If it does, the walk-away UX breaks — configure pre-approval before first use. Comments are posted via `Skill("comment", ...)`, which requires the `Skill` tool to be allowed so the comment skill can be invoked.

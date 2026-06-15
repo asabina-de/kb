@@ -1,11 +1,11 @@
 ---
-name: designnote
-description: "Use this skill when the user asks you to start, extend, or record a decision record — ideation around a design problem, architectural choice, trade-off analysis, open question, or a decision that needs long-term awareness. Trigger for prompts like 'take a note on X', 'design note for X', 'let's think through X', 'capture the options for X', 'document this decision', 'explore trade-offs for X', 'start a dnote for X', 'write up the problem of X', 'we should think about X and park it', 'note the constraints around X', 'ideate on X'. Also trigger when the user invokes `/designnote`. The skill reads existing records, related Linear tickets, and the repo's TODO.md, researches open questions in parallel via subagents, and writes (or extends) a decision record in `docs/decisions/` — OR, for strategy/process/team-facing content, a Linear document. It batches clarifying questions into ONE up-front round so the user can walk away and return to a finished artifact. Do NOT trigger for quick factual questions (use qsearch or answer directly), for code changes (just do the work), for small one-liners that belong in TODO.md (add the line directly without invoking the skill), for operational status updates on existing Linear tickets, or for creating Linear issues from an existing record's action items (that's the linearissue skill)."
+name: decision
+description: "Use this skill when the user asks you to start, extend, or record a decision record — ideation around a design problem, architectural choice, trade-off analysis, open question, or a decision that needs long-term awareness. Trigger for prompts like 'take a note on X', 'design note for X', 'let's think through X', 'capture the options for X', 'document this decision', 'explore trade-offs for X', 'start a dnote for X', 'write up the problem of X', 'we should think about X and park it', 'note the constraints around X', 'ideate on X'. Also trigger when the user invokes `/decision`. The skill reads existing records, related Linear tickets, and the repo's TODO.md, researches open questions in parallel via subagents, and writes (or extends) a decision record in `docs/decisions/` — OR, for strategy/process/team-facing content, a Linear document. It batches clarifying questions into ONE up-front round so the user can walk away and return to a finished artifact. Do NOT trigger for quick factual questions (use qsearch or answer directly), for code changes (just do the work), for small one-liners that belong in TODO.md (add the line directly without invoking the skill), for operational status updates on existing Linear tickets, or for creating Linear issues from an existing record's action items (that's the issue skill)."
 api_description: "Draft or extend a decision record documenting a problem, options considered, trade-offs, and chosen approach. Writes to docs/decisions/ or a Linear document depending on scope. Researches open questions in parallel and batches clarifying questions into one up-front round."
 allowed-tools: Task WebSearch WebFetch AskUserQuestion Glob Grep Read Write Edit mcp__claude_ai_Linear__list_issues mcp__claude_ai_Linear__get_issue mcp__claude_ai_Linear__list_comments mcp__claude_ai_Linear__list_documents mcp__claude_ai_Linear__get_document mcp__claude_ai_Linear__save_document mcp__claude_ai_Linear__list_projects mcp__claude_ai_Linear__get_project mcp__claude_ai_Linear__list_teams mcp__claude_ai_Linear__get_team mcp__claude_ai_Linear__search_documentation
 ---
 
-# designnote
+# decision
 
 Draft or extend a **decision record** — a living, evolving document that records a problem, the options considered, the reasoning, the chosen approach, and any open questions that may be revisited. Decision records are the canonical surface for long-lived architectural thinking in this workflow. Records start in `status: exploring` and graduate to `status: decided` when the decision is made.
 
@@ -17,7 +17,7 @@ The defining design principles of this skill are:
 >
 > **Prefer extending an existing record to creating a new one. Duplication erodes the knowledge base.**
 
-The user should be able to kick this off, answer a small batch of up-front questions, walk away, and return to a decision record they can review, edit, and then hand off to the `linearissue` skill for execution.
+The user should be able to kick this off, answer a small batch of up-front questions, walk away, and return to a decision record they can review, edit, and then hand off to the `issue` skill for execution.
 
 ## How this fits the broader workflow
 
@@ -25,19 +25,19 @@ The user should be able to kick this off, answer a small batch of up-front quest
 prompt
   │
   ▼
-designnote skill  →  decision record (with action items in canonical sections)   ← you are here
+decision skill  →  decision record (with action items in canonical sections)   ← you are here
   │
   ▼
 [HITL gate: human reviews, edits, greenlights the record]
   │
   ▼
-linearissue       →  proposes tickets in chat → confirms via AskUserQuestion → creates tickets
+issue       →  proposes tickets in chat → confirms via AskUserQuestion → creates tickets
   │
   ▼
 Linear: LIN-NNN annotations written back into the record
 ```
 
-This skill produces the artifact that `linearissue` consumes. The two skills share no runtime state — the decision record file is the only interface between them. After `designnote` finishes, the human reviews and edits the record. Only then does `linearissue` read it.
+This skill produces the artifact that `issue` consumes. The two skills share no runtime state — the decision record file is the only interface between them. After `decision` finishes, the human reviews and edits the record. Only then does `issue` read it.
 
 ## Context on the artifact
 
@@ -126,7 +126,7 @@ Write out the routing decision explicitly in your Phase 4 "locked decisions" com
 
 ### Rename the session
 
-After interpreting the prompt, rename the session so the user can identify it at a glance (e.g. in a terminal tab). A good name is a 2–4 word summary of the design topic — e.g. "card layout abstraction (designnote)" or "VID-123 auth token storage (designnote)" if a ticket is related.
+After interpreting the prompt, rename the session so the user can identify it at a glance (e.g. in a terminal tab). A good name is a 2–4 word summary of the design topic — e.g. "card layout abstraction (decision)" or "VID-123 auth token storage (decision)" if a ticket is related.
 
 If a tool or command is available to rename the session programmatically, use it. Otherwise, suggest the user rename it — but don't block on this. Move on to scope discovery either way.
 
@@ -272,7 +272,7 @@ If a claim genuinely has no linkable source (e.g. a conclusion you reasoned to, 
 
    | Status | Date       | Author | Related Tickets | Notes                         |
    | :----- | :--------- | :----- | :-------------- | :---------------------------- |
-   | TODO   | YYYY-MM-DD | claude | [LIN-NNN](...)  | Initial creation via designnote |
+   | TODO   | YYYY-MM-DD | claude | [LIN-NNN](...)  | Initial creation via decision |
 
    ## Context
 
@@ -296,7 +296,7 @@ If a claim genuinely has no linkable source (e.g. a conclusion you reasoned to, 
    ```
 
 4. **Populate** with findings from the research phase. Add custom sections as needed: `## Open Questions`, `## Trigger Points`, `## Upstream References`, `## Related Design Notes`. Match the richer style of existing records in the repo if they follow one.
-5. **Action items.** If the research surfaces concrete follow-up work, add a `## Action items` section with checklist items. These are the hooks the `linearissue` skill will find later. When structuring action items, be aware of the decomposition-vs-dependency distinction: items that represent parts of one goal (same person, same work stream) can be grouped under a parent item, but items that represent different goals gating each other (different person, different work) should be flat peers with explicit "blocked by" / "depends on" language — not nested sub-items. The `linearissue` skill uses this structure to decide between sub-issues and blocking relations. Getting it wrong here creates misleading progress counters and merge chain hell downstream.
+5. **Action items.** If the research surfaces concrete follow-up work, add a `## Action items` section with checklist items. These are the hooks the `issue` skill will find later. When structuring action items, be aware of the decomposition-vs-dependency distinction: items that represent parts of one goal (same person, same work stream) can be grouped under a parent item, but items that represent different goals gating each other (different person, different work) should be flat peers with explicit "blocked by" / "depends on" language — not nested sub-items. The `issue` skill uses this structure to decide between sub-issues and blocking relations. Getting it wrong here creates misleading progress counters and merge chain hell downstream.
 6. **Set `review_date`** to 3 months from today by default. Adjust if the topic is time-sensitive (shorter) or foundational (longer).
 
 ### Extend existing record
@@ -327,7 +327,7 @@ Print a concise summary:
 - **Tags used:** with reuse-or-mint justification for each
 - **Related discovered:** Linear tickets, related notes, TODO.md stubs that informed the work
 - **Open questions captured:** count and pointer to the section
-- **Suggested next step:** e.g., "Review the note, edit as needed, then run `/linearissue` on this path to file tickets from the action items."
+- **Suggested next step:** e.g., "Review the note, edit as needed, then run `/issue` on this path to file tickets from the action items."
 - **Suggested commit message** following the repo's convention (if the repo's `CLAUDE.md` documents one). Include an `[ai:claude]` tag if that's the repo convention. **Do not commit** — git is HITL.
 
 If any research step failed or was skipped (e.g., web unavailable, Linear MCP absent), flag it clearly in both the wrap-up and the note's Status Log.
@@ -346,8 +346,8 @@ If any research step failed or was skipped (e.g., web unavailable, Linear MCP ab
 - **Don't ask more than one round of clarification.** Phase 3 is the only interruption. Anything that surfaces mid-research goes into the note's `## Open Questions` section and the run continues.
 - **Don't silently fall back to training data.** If web research fails and the prompt requires fresh info, flag it in the Status Log notes column and in the wrap-up.
 - **Don't assume repo conventions.** If `docs/decisions/` doesn't exist, ask the user whether to bootstrap or bail. Don't create the directory silently.
-- **Don't replicate action items elsewhere.** The design note is the single source of truth. No parallel work-plan files, no task list extractions, no duplicate representations. The `linearissue` skill will consume the note directly.
-- **Don't pre-mint ticket IDs.** The note carries action items in plain markdown. Linear IDs are written back by `linearissue` after tickets exist, not before.
+- **Don't replicate action items elsewhere.** The design note is the single source of truth. No parallel work-plan files, no task list extractions, no duplicate representations. The `issue` skill will consume the note directly.
+- **Don't pre-mint ticket IDs.** The note carries action items in plain markdown. Linear IDs are written back by `issue` after tickets exist, not before.
 - **Don't interpret "create a design note" as license to create churn.** If an existing note covers the scope, extend it. If a TODO.md one-liner would suffice, just add the line. The warrants-a-note test is: (a) involves a choice with trade-offs, (b) has open questions worth parking, or (c) couples to other architectural concerns. If fewer than one applies, it's probably a TODO.md line.
 
 ## Required grants
