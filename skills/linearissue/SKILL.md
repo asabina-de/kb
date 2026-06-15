@@ -1,7 +1,7 @@
 ---
 name: linearissue
 description: "Use this skill when the user asks you to turn a design note's action items into Linear issues, OR when the user wants to iterate on an existing Linear issue, OR when the user wants to create a new issue freeform (without a design note). Filing mode triggers: 'file tickets from this note', 'linearize X', 'create Linear issues for the action items in X', 'turn this note into tickets', 'ship this to Linear', 'file these TODOs from the design note', 'make tickets from X', 'linearissue this note', 'create issues from X.md'. Iteration mode triggers: user passes a Linear issue URL (e.g. https://linear.app/...) or issue ID (e.g. VID-123) with a follow-on prompt like 'help me refine this', 'roast this scope', 'add context about X', 'what questions should we answer first', 'sharpen the description', or any request to think about, improve, or comment on an existing issue. Freeform mode triggers: 'create an issue for X', 'file a ticket about Y', 'new issue: Z', 'ticket this', or any request to create a Linear issue without referencing a design note or existing issue. Also trigger when the user invokes `/linearissue`. Do NOT trigger for creating Linear documents (that's the designnote skill's strategy-routing path), for filing tickets from records in `status: decided` (decisions are made; they don't spawn tickets — only `status: exploring` records have actionable items), or for any operation that would also commit to git."
-api_description: "File action items from a design note as Linear issues with bidirectional cross-references and idempotent re-runs, iterate on an existing Linear issue by posting analysis, context, or refinements as comments, or create new issues freeform with title quality enforcement. Three modes: filing (from a note), iteration (from a ticket ID or URL), and freeform (from a prompt)."
+api_description: "File action items from a design note as Linear issues with bidirectional cross-references and idempotent re-runs, iterate on an existing Linear issue by posting analysis, context, or refinements as comments, or create new issues freeform. All titles must pass a mandatory checklist: imperative voice, verb from tiered list, [VERB] [NOUN] [CONTEXT] structure, cold-reader test. Three modes: filing (from a note), iteration (from a ticket ID or URL), and freeform (from a prompt)."
 allowed-tools: Bash Glob Grep Read Edit WebFetch AskUserQuestion Skill mcp__claude_ai_Linear__list_issues mcp__claude_ai_Linear__get_issue mcp__claude_ai_Linear__save_issue mcp__claude_ai_Linear__list_comments mcp__claude_ai_Linear__list_teams mcp__claude_ai_Linear__get_team mcp__claude_ai_Linear__list_projects mcp__claude_ai_Linear__get_project mcp__claude_ai_Linear__list_issue_statuses mcp__claude_ai_Linear__list_issue_labels mcp__github__list_pull_requests mcp__github__pull_request_read mcp__github__search_pull_requests
 ---
 
@@ -170,7 +170,7 @@ Parse the note for action items. Canonical sources, in priority order:
 
 For each candidate, capture:
 
-- **Title:** the first line of the item, cleaned up (strip checklist markers, leading "TODO:", trailing punctuation). Run through the **title quality gate** — if the gate fires, store both the original and suggested rewrite for presentation in Phase 3.
+- **Title:** the first line of the item, cleaned up (strip checklist markers, leading "TODO:", trailing punctuation). Run through the **title quality gate pre-presentation checklist** — imperative `[VERB] [NOUN] [CONTEXT]`, verb from tier list, cold-reader check. If the gate fires, store both the original and suggested rewrite for presentation in Phase 3.
 - **Description:** the item's body content + the parent section heading + up to ~10 lines of preceding contextual prose from the section. Quote rather than paraphrase.
 - **Source anchor:** `{relative-note-path}#{slugified-section-heading}` so the Linear ticket can deep-link back.
 - **Tags from the note's front matter** — these may inform Linear labels.
@@ -369,7 +369,7 @@ Read the user's prompt and extract:
 
 For each item, draft:
 
-- **Title** — derive from the user's description, then run through the **title quality gate**. If the gate fires, present the original and suggested rewrite.
+- **Title** — derive from the user's description, then run the **title quality gate pre-presentation checklist**: imperative `[VERB] [NOUN] [CONTEXT]`, verb from tier list, cold-reader check. If the gate fires, present the original and suggested rewrite.
 - **Description** — 2–5 sentences maximum: what the work is, why it matters (if not obvious), and a **DoD** sentence ("Done when X is true/observable/verifiable"). Prepend `*[ai:claude-code]*` as the first line. Keep it minimal — the anchor principle applies just as in filing mode.
 - **Priority** — infer from the user's language (urgent, blocker, nice-to-have, etc.). Default Normal.
 - **Labels** — infer from context (e.g. "bug" → Bug label, "research" → Research label). Only apply if confident.
@@ -446,9 +446,22 @@ Print:
 
 ## Title quality gate
 
+> **IMPERATIVE. ALWAYS.** Every title is `[VERB] [NOUN] [CONTEXT]` — a task someone does, not a statement someone reads. Verb from the tier list below. No exceptions. Run the checklist before presenting any title.
+
 Every title — whether derived from a design note action item, drafted in freeform mode, or proposed as an iteration refinement — must pass through this gate. The gate is **advisory**: warn and suggest, never block.
 
 > **Sync note:** This gate is mirrored in `/pr` (`skills/pr/SKILL.md`). If you change principles, anti-patterns, or examples here, check the other copy and keep them at parity. Some differences are intentional (brevity threshold, branch-name-friendliness is linearissue-specific) but the core principles and examples should match.
+
+### Pre-presentation checklist
+
+Run this mechanically before presenting any title to the user. Every box must pass.
+
+1. **Imperative voice?** — Is this a task (verb + object), not a statement or noun phrase? "Enforce X" yes, "X enforcement" no, "X across surfaces" no.
+2. **Verb from tier 1 or 2?** — Check the verb against the tier list below. Tier 3 = rewrite.
+3. **Structure: `[VERB] [NOUN] [CONTEXT]`?** — Verb first, differentiating noun second, narrowing context third.
+4. **Cold read matches intent?** — Would a stranger scanning this title understand the task without conversation context?
+5. **Under 72 chars?**
+6. **Distinguishable at 30 chars from siblings?** — Only when filing multiple related tickets.
 
 ### Canonical structure
 
