@@ -1,11 +1,11 @@
 ---
-name: pairprog
-description: "Use this skill when the user wants to pair-program on a ticket — working through a Linear issue collaboratively with the AI driving and the human navigating. Trigger for prompts like 'let's work on this ticket', 'pair on LIN-123', 'pairprog', 'let's tackle this branch', 'work on the current branch', 'pick up LIN-123', 'start working on this', 'let's pair on this'. Also trigger when the user invokes `/pairprog`. The skill reads the current branch (or a specified ticket/branch), looks up the Linear ticket, explores the codebase for context, identifies unknowns and feasibility risks, asks the human navigator for direction on key decisions, then executes the work in atomic steps with frequent HITL checkpoints. It uses concurrent subagents to parallelize independent exploration and implementation work. It comments assessments, spike findings, and plans back to the Linear ticket so context survives across sessions. In default mode, the human commits after reviewing each atomic change. In yolo mode, the skill auto-commits atomically and gates at PR creation. This is NOT a walk-away skill. It is an interactive pairing session where the human stays engaged as navigator. Do NOT trigger for autonomous background work (use designnote or direct implementation), for ticket creation (use linearissue), for research without implementation (use qsearch), or for commit message drafting (use commitmsg)."
+name: pair
+description: "Use this skill when the user wants to pair-program on a ticket — working through a Linear issue collaboratively with the AI driving and the human navigating. Trigger for prompts like 'let's work on this ticket', 'pair on LIN-123', 'pair', 'let's tackle this branch', 'work on the current branch', 'pick up LIN-123', 'start working on this', 'let's pair on this'. Also trigger when the user invokes `/pair`. The skill reads the current branch (or a specified ticket/branch), looks up the Linear ticket, explores the codebase for context, identifies unknowns and feasibility risks, asks the human navigator for direction on key decisions, then executes the work in atomic steps with frequent HITL checkpoints. It uses concurrent subagents to parallelize independent exploration and implementation work. It comments assessments, spike findings, and plans back to the Linear ticket so context survives across sessions. In default mode, the human commits after reviewing each atomic change. In yolo mode, the skill auto-commits atomically and gates at PR creation. This is NOT a walk-away skill. It is an interactive pairing session where the human stays engaged as navigator. Do NOT trigger for autonomous background work (use decision or direct implementation), for ticket creation (use issue), for research without implementation (use qsearch), or for commit message drafting (use commit)."
 api_description: "Pair-program on a Linear ticket: explore the codebase, assess unknowns, spike on feasibility, plan atomic steps, and implement with frequent HITL checkpoints. Posts assessments, spike findings, and progress back to the Linear ticket. Human commits each step; AI drives."
 allowed-tools: Bash Glob Grep Read Write Edit Task Skill AskUserQuestion WebFetch mcp__claude_ai_Linear__get_issue mcp__claude_ai_Linear__list_issues mcp__claude_ai_Linear__list_comments mcp__claude_ai_Linear__save_issue mcp__claude_ai_Linear__list_teams mcp__claude_ai_Linear__get_team mcp__claude_ai_Linear__list_projects mcp__claude_ai_Linear__get_project mcp__claude_ai_Linear__list_issue_statuses mcp__claude_ai_Linear__list_issue_labels
 ---
 
-# pairprog
+# pair
 
 Pair-program on a ticket. **You drive, the human navigates.**
 
@@ -25,16 +25,16 @@ The defining design principles are:
 >
 > **Comment everything back to the ticket.** Assessments, spike findings, plans, and step completions are posted as Linear comments. This means a cancelled session can be picked up later — the ticket carries the full context.
 
-**Commenting protocol.** All Linear comments are posted via the `commenting` skill (`Skill("commenting", ...)`). Pairprog describes what to comment; the commenting skill handles formatting, provenance, and threading. Store anchor comment IDs returned by the commenting skill to thread subsequent replies.
+**Commenting protocol.** All Linear comments are posted via the `comment` skill (`Skill("comment", ...)`). This skill describes what to comment; the comment skill handles formatting, provenance, and threading. Store anchor comment IDs returned by the comment skill to thread subsequent replies.
 
 ## Commit modes
 
 The skill supports two commit modes. The navigator can switch between them at any time during the session. A typical pattern on non-trivial work: start in checkpoint to refine the design through implementation, then switch to yolo once the remaining work is known and trivial.
 
-- **Checkpoint mode:** The skill presents each atomic change with a drafted commit message (using the `commitmsg` skill's methodology) and pauses for the navigator's steering input — design decisions, dropping constructs, changing approach. The navigator commits when satisfied. The skill never runs git write commands in this mode.
-- **Yolo mode:** The skill auto-commits each atomic step using the `commitmsg` skill's methodology for message generation. The navigator can interrupt at any time to steer.
+- **Checkpoint mode:** The skill presents each atomic change with a drafted commit message (using the `commit` skill's methodology) and pauses for the navigator's steering input — design decisions, dropping constructs, changing approach. The navigator commits when satisfied. The skill never runs git write commands in this mode.
+- **Yolo mode:** The skill auto-commits each atomic step using the `commit` skill's methodology for message generation. The navigator can interrupt at any time to steer.
 
-**Commit messages are always drafted via `commitmsg` methodology** — reading `CONTRIBUTING.md` for the repo's convention and applying it. The modes differ in who *commits* (yolo: auto, checkpoint: navigator), not who *drafts the message*. Never draft commit messages freehand.
+**Commit messages are always drafted via `commit` methodology** — reading `CONTRIBUTING.md` for the repo's convention and applying it. The modes differ in who *commits* (yolo: auto, checkpoint: navigator), not who *drafts the message*. Never draft commit messages freehand.
 
 **Milestone file commit gate.** A `PostToolUse` hook monitors edits to milestone files (package manifests, lock files, flake.nix, etc.). When you see a `CHECKPOINT:` message from this hook, you **MUST** immediately:
 1. Stop implementation work
@@ -82,7 +82,7 @@ If the user passed a branch name directly rather than a ticket ID, check it out 
 Once the ticket ID is known and the branch is checked out, fetch all of these in parallel:
 
 - **Linear ticket:** `get_issue` with the ticket ID. Capture title, description, state, priority, labels, project, parent issue.
-- **Linear comments:** `list_comments` — read existing comments. If a previous pairprog session left assessment/plan/spike comments, note them. This is the resumption path.
+- **Linear comments:** `list_comments` — read existing comments. If a previous pair session left assessment/plan/spike comments, note them. This is the resumption path.
 - **Branch state:** `git log --oneline -10`, `git status`, `git diff main...HEAD` (or appropriate base branch) to understand what's already been done on this branch.
 - **Codebase orientation:** Use `Task` with `subagent_type: Explore` to understand the areas of the codebase most likely relevant to the ticket (based on ticket title/description keywords).
 - **Repo conventions:** Read `CLAUDE.md` / `AGENTS.md` / `CONTRIBUTING.md` at the repo root for development workflow, testing, and quality requirements.
@@ -117,7 +117,7 @@ After the branch is checked out and the ticket is loaded, call `save_issue` with
 
 ### Rename the session
 
-After the ticket is loaded, rename the session so the user can identify it at a glance (e.g. in a terminal tab or session list). A good name includes the ticket number and a 2–4 word summary — e.g. "VID-662 rename titles (pairprog)".
+After the ticket is loaded, rename the session so the user can identify it at a glance (e.g. in a terminal tab or session list). A good name includes the ticket number and a 2–4 word summary — e.g. "VID-662 rename titles (pair)".
 
 If a tool or command is available to rename the session programmatically, use it. Otherwise, suggest the user rename it themselves — but don't block on this. It's a nice-to-have, not a gate. Move on to the next phase either way.
 
@@ -136,13 +136,13 @@ Description:
 > [Quoted ticket description, trimmed to essentials]
 
 Prior session context (from comments):
-> [If previous pairprog comments exist, summarize what was assessed/planned/completed]
+> [If previous pair comments exist, summarize what was assessed/planned/completed]
 
 Branch work so far:
 > [Summary of existing commits on this branch, if any]
 ```
 
-If prior pairprog comments indicate the session was interrupted, note what was completed and what remains.
+If prior pair comments indicate the session was interrupted, note what was completed and what remains.
 
 ## Phase 1 — Assess and derisk
 
@@ -157,10 +157,10 @@ Read the ticket and existing branch work. Categorize what remains:
 
 ### Comment the assessment to Linear
 
-Post the assessment as an anchor comment via the commenting skill. Include the categorized unknowns (Clear and ready / Unclear / Feasibility unknowns / Blocked) as the body content:
+Post the assessment as an anchor comment via the comment skill. Include the categorized unknowns (Clear and ready / Unclear / Feasibility unknowns / Blocked) as the body content:
 
 ```
-Skill("commenting", "Post an anchor comment on {ticket-id} titled \"Assessment\" from skill \"pairprog\" with body:
+Skill("comment", "Post an anchor comment on {ticket-id} titled \"Assessment\" from skill \"pair\" with body:
 
 **Clear and ready:**
 - Add Google OAuth callback endpoint
@@ -191,10 +191,10 @@ For each feasibility unknown, spawn a `Task` subagent to investigate:
 
 Subagents are read-only investigators. They don't write production code.
 
-**Wait for all spikes to complete before commenting.** Don't post "starting spike" comments — post one consolidated findings anchor per spike after the subagent returns, via the commenting skill:
+**Wait for all spikes to complete before commenting.** Don't post "starting spike" comments — post one consolidated findings anchor per spike after the subagent returns, via the comment skill:
 
 ```
-Skill("commenting", "Post an anchor comment on {ticket-id} titled \"Spike: Google OAuth library compatibility\" from skill \"pairprog\" with body:
+Skill("comment", "Post an anchor comment on {ticket-id} titled \"Spike: Google OAuth library compatibility\" from skill \"pair\" with body:
 
 **Verdict:** Feasible ✓
 
@@ -308,10 +308,10 @@ Wait for the navigator's approval or adjustment before proceeding.
 
 ### Comment the plan to Linear
 
-After the navigator approves (or adjusts) the plan, post it as an anchor comment via the commenting skill:
+After the navigator approves (or adjusts) the plan, post it as an anchor comment via the comment skill:
 
 ```
-Skill("commenting", "Post an anchor comment on {ticket-id} titled \"Plan\" from skill \"pairprog\" with body:
+Skill("comment", "Post an anchor comment on {ticket-id} titled \"Plan\" from skill \"pair\" with body:
 
 - [ ] Step 1: Add Google OAuth callback route
 - [ ] Step 2: Token storage in session metadata (parallel with 3)
@@ -330,10 +330,10 @@ For each step:
 1. **Announce** what you're about to do. "Starting Step 1 — adding the OAuth callback route."
 2. **Branch fit check.** Before touching any files, verify this step's files fit the branch purpose. Apply the Category A / Category B protocols from the Phase 0 branch fit check if a mismatch is detected.
 3. **Implement** the change. Use `Edit` / `Write` for code changes.
-4. **Decision record maintenance.** If the step touches a file in `docs/decisions/`, append a Status Log row: today's date, `claude` as author, the ticket ID in Related Tickets, and a concise note stating *what changed and why* — not just that an edit happened. Bake the purpose in so the row is scannable on its own (e.g. "Added disclosure-provider pricing comparison via pairprog KB-9", not a bare "Updated via pairprog KB-9"). This keeps the record's audit trail intact. If the step writes research or spike findings into the record (or any doc), apply the **Source-linking** rule from Phase 1 — every finding links inline to its source.
+4. **Decision record maintenance.** If the step touches a file in `docs/decisions/`, append a Status Log row: today's date, `claude` as author, the ticket ID in Related Tickets, and a concise note stating *what changed and why* — not just that an edit happened. Bake the purpose in so the row is scannable on its own (e.g. "Added disclosure-provider pricing comparison via pair KB-9", not a bare "Updated via pair KB-9"). This keeps the record's audit trail intact. If the step writes research or spike findings into the record (or any doc), apply the **Source-linking** rule from Phase 1 — every finding links inline to its source.
 5. **Run quality checks** if the repo has them (lint, typecheck, test). Use `Bash` for this. If a check fails, fix it before presenting.
 6. **Present the change.** Print a concise summary of what changed and why. Don't dump the full diff — describe the intent and highlight non-obvious decisions.
-7. **Draft commit message.** In both modes, use the `commitmsg` skill's methodology to draft the message: read `CONTRIBUTING.md` for the repo's convention (type, scope, subject rules, imperative mood, length limits), inspect the diff, and produce a conforming message. Never draft commit messages freehand — the convention is in the docs, not in your training data.
+7. **Draft commit message.** In both modes, use the `commit` skill's methodology to draft the message: read `CONTRIBUTING.md` for the repo's convention (type, scope, subject rules, imperative mood, length limits), inspect the diff, and produce a conforming message. Never draft commit messages freehand — the convention is in the docs, not in your training data.
 8. **Checkpoint.**
    - **Checkpoint mode:** Present the change summary and the drafted commit message. Pause for the navigator's steering input. If the navigator says "looks good," they commit using the drafted message. If they want changes, iterate. Don't ask the navigator to review code line-by-line in chat — that's what the PR is for.
    - **Yolo mode:** Auto-commit with the drafted message. Print the commit hash and message. Continue to the next step.
@@ -342,10 +342,10 @@ For each step:
 
 ### Comment step completions to Linear
 
-After each step is committed (by the navigator in checkpoint mode, or auto-committed in yolo mode), post a reply threaded under the plan anchor via the commenting skill:
+After each step is committed (by the navigator in checkpoint mode, or auto-committed in yolo mode), post a reply threaded under the plan anchor via the comment skill:
 
 ```
-Skill("commenting", "Reply to anchor {plan-comment-id} on {ticket-id} titled \"Step 1 complete\" from skill \"pairprog\" with body:
+Skill("comment", "Reply to anchor {plan-comment-id} on {ticket-id} titled \"Step 1 complete\" from skill \"pair\" with body:
 
 Added Google OAuth callback route in `src/routes/auth.ts` and `src/config/oauth.ts`.
 Test added in `src/routes/__tests__/auth.test.ts` — passing.
@@ -375,10 +375,10 @@ Pair programming is fluid. The plan from Phase 2 is a starting point, not a cont
 
 Accommodate without friction. The navigator steers.
 
-When mid-session adaptation happens, post the change as a reply to the plan anchor via the commenting skill. Use the appropriate emoji prefix in the title:
+When mid-session adaptation happens, post the change as a reply to the plan anchor via the comment skill. Use the appropriate emoji prefix in the title:
 
 ```
-Skill("commenting", "Reply to anchor {plan-comment-id} on {ticket-id} titled \"🚨 Plan adjusted\" from skill \"pairprog\" with body:
+Skill("comment", "Reply to anchor {plan-comment-id} on {ticket-id} titled \"🚨 Plan adjusted\" from skill \"pair\" with body:
 
 Step 3 (Silent token refresh middleware) replaced with:
 Step 3a: Explicit re-login flow on token expiry
@@ -409,7 +409,7 @@ Print what was accomplished:
 
 If there are uncommitted changes (checkpoint mode only):
 
-- Use the `commitmsg` skill to generate messages for any uncommitted work
+- Use the `commit` skill to generate messages for any uncommitted work
 - If multiple logical changes are uncommitted, suggest breaking them into separate commits and provide a message for each
 - The navigator decides what to stage and commit
 
@@ -423,10 +423,10 @@ If the navigator says "not yet" or "more work needed," skip. The navigator will 
 
 ### Comment wrap-up to Linear
 
-Post a final session summary as a resolution reply to the plan anchor via the commenting skill:
+Post a final session summary as a resolution reply to the plan anchor via the comment skill:
 
 ```
-Skill("commenting", "Reply to anchor {plan-comment-id} on {ticket-id} titled \"✅ Session complete\" from skill \"pairprog\" with body:
+Skill("comment", "Reply to anchor {plan-comment-id} on {ticket-id} titled \"✅ Session complete\" from skill \"pair\" with body:
 
 **Completed:**
 - [x] Step 1: OAuth callback route

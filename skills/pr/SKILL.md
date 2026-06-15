@@ -1,6 +1,6 @@
 ---
 name: pr
-description: "Use this skill when the user wants to create a pull request for the current branch. Trigger for prompts like 'create a PR', 'open a PR', 'make a pull request', 'pr this', 'ship it', or when the user invokes `/pr`. Also invoked by other skills (/pairprog, /troubleshoot) at wrap-up. The skill detects the correct base branch automatically — if the current branch is stacked on another feature branch rather than main, it uses that branch as the base. It reads the Linear ticket (if any) and recent commits to draft a title and body, pitches the draft in chat for the operator to review, and creates the PR via the GitHub MCP on approval. DX-first: fast, good defaults, minimal ceremony. Do NOT trigger for reviewing existing PRs, for merging, or for anything other than creating a new PR."
+description: "Use this skill when the user wants to create a pull request for the current branch. Trigger for prompts like 'create a PR', 'open a PR', 'make a pull request', 'pr this', 'ship it', or when the user invokes `/pr`. Also invoked by other skills (/pair, /troubleshoot) at wrap-up. The skill detects the correct base branch automatically — if the current branch is stacked on another feature branch rather than main, it uses that branch as the base. It reads the Linear ticket (if any) and recent commits to draft a title and body, pitches the draft in chat for the operator to review, and creates the PR via the GitHub MCP on approval. DX-first: fast, good defaults, minimal ceremony. Do NOT trigger for reviewing existing PRs, for merging, or for anything other than creating a new PR."
 allowed-tools: Bash Glob Grep Read Agent AskUserQuestion mcp__claude_ai_Linear__get_issue mcp__claude_ai_Linear__save_issue mcp__claude_ai_Linear__list_comments mcp__github__list_pull_requests mcp__github__pull_request_read mcp__github__merge_pull_request mcp__github__update_pull_request mcp__github__search_repositories mcp__github__get_file_contents mcp__github__list_branches
 ---
 
@@ -144,7 +144,7 @@ The branch with the **fewest commits between its tip and HEAD** is the most like
 
 Evaluate the drafted title against these criteria. The gate is **advisory** — warn and suggest, never block.
 
-> **Sync note:** This gate is mirrored in `/linearissue` (`skills/linearissue/SKILL.md`). If you change principles, anti-patterns, or examples here, check the other copy and keep them at parity. Some differences are intentional (brevity threshold is 60 chars here vs 72 for tickets; no branch-name-friendliness principle here) but the core principles and examples should match.
+> **Sync note:** This gate is mirrored in `/issue` (`skills/issue/SKILL.md`). If you change principles, anti-patterns, or examples here, check the other copy and keep them at parity. Some differences are intentional (brevity threshold is 60 chars here vs 72 for tickets; no branch-name-friendliness principle here) but the core principles and examples should match.
 
 **Canonical structure:** PR subjects follow the same imperative voice as ticket titles and commit subjects: **`[VERB] [DIFFERENTIATING NOUN] [CONTEXT]`**. The `type(scope):` prefix categorizes the change — it doesn't replace the verb. The subject still needs an imperative verb that carries meaning.
 
@@ -292,7 +292,7 @@ The subagent should:
    - Report the failure: which check failed, link to the logs.
    - Fetch the failure details via `mcp__github__pull_request_read` and `Bash` with `gh run view <run-id> --log-failed` for actionable output.
    - Summarize what went wrong and suggest next steps (e.g. "lint failure in X — fixable here" or "test timeout — needs investigation").
-   - Ask the user how to proceed: fix it now (resume pairprog), investigate further, or leave it for later.
+   - Ask the user how to proceed: fix it now (resume pair), investigate further, or leave it for later.
 4. **On timeout (no checks appear within 2 minutes):**
    - Report: "No CI checks have started on PR #N. This repo may not have CI configured for this path, or checks are queued."
    - Do not suggest merging.

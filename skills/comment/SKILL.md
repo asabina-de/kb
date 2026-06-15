@@ -1,11 +1,11 @@
 ---
-name: commenting
-description: "Use this skill when another skill or the user needs to post a structured comment to a Linear issue. This skill owns the commenting protocol: thread lifecycle (anchor → replies → resolution), provenance markers, formatting, and threading via parentId. Trigger when a skill wants to post an assessment, finding, plan, status update, or session summary to a Linear issue. Also trigger when the user invokes `/commenting`. Do NOT use this skill for reading comments (use list_comments directly) or for creating/updating issues (use save_issue directly). This skill only handles comment creation with proper formatting and threading."
+name: comment
+description: "Use this skill when another skill or the user needs to post a structured comment to a Linear issue. This skill owns the commenting protocol: thread lifecycle (anchor → replies → resolution), provenance markers, formatting, and threading via parentId. Trigger when a skill wants to post an assessment, finding, plan, status update, or session summary to a Linear issue. Also trigger when the user invokes `/comment`. Do NOT use this skill for reading comments (use list_comments directly) or for creating/updating issues (use save_issue directly). This skill only handles comment creation with proper formatting and threading."
 api_description: "Post structured comments to Linear issues following a uniform protocol: thread anchors, threaded replies, provenance markers, and resolution semantics. Handles formatting and threading so calling skills don't have to."
 allowed-tools: mcp__claude_ai_Linear__save_comment mcp__claude_ai_Linear__list_comments mcp__claude_ai_Linear__get_issue
 ---
 
-# commenting
+# comment
 
 Post structured comments to Linear issues. This skill owns the **how** of commenting — formatting, provenance, threading. Calling skills own the **what** — when to comment and what content to include.
 
@@ -34,7 +34,7 @@ Every comment has three parts:
 Example:
 
 ```markdown
-**Assessment** (pairprog)
+**Assessment** (pair)
 
 *[ai:claude-code]*
 
@@ -47,7 +47,7 @@ Example:
 
 - **Anchor:** A top-level comment that starts a thread. One anchor per logical unit of work (one assessment, one spike, one plan, one session summary). Post with `save_comment(issueId, body)`.
 - **Reply:** A threaded response under an anchor. Used for updates, completions, and corrections to the anchor's unit of work. Post with `save_comment(issueId, body, parentId)` where `parentId` is the anchor's comment ID.
-- **Resolution:** The final reply in a thread. Prefix the heading with ✅ to signal completion: `**✅ Step 1 complete** (pairprog)`. (Linear MCP doesn't expose `resolvedAt`, so the emoji is the visual signal.)
+- **Resolution:** The final reply in a thread. Prefix the heading with ✅ to signal completion: `**✅ Step 1 complete** (pair)`. (Linear MCP doesn't expose `resolvedAt`, so the emoji is the visual signal.)
 
 ### When to anchor vs reply
 
@@ -79,12 +79,12 @@ When something changes mid-thread (plan adjusted, step skipped, blocker found), 
 
 ## Interface
 
-Calling skills invoke this skill via `Skill("commenting", args)` where `args` is a natural-language instruction. The commenting skill parses the intent and calls `save_comment` with proper formatting.
+Calling skills invoke this skill via `Skill("comment", args)` where `args` is a natural-language instruction. The comment skill parses the intent and calls `save_comment` with proper formatting.
 
 ### Anchor examples
 
 ```
-Post an anchor comment on VID-123 titled "Assessment" from skill "pairprog" with body:
+Post an anchor comment on VID-123 titled "Assessment" from skill "pair" with body:
 
 **Clear and ready:**
 - Item 1
@@ -107,7 +107,7 @@ The config file is missing the API key entry.
 ### Reply examples
 
 ```
-Reply to anchor {comment-id} on VID-123 titled "Step 1 complete" from skill "pairprog" with body:
+Reply to anchor {comment-id} on VID-123 titled "Step 1 complete" from skill "pair" with body:
 
 Added OAuth callback route in `src/routes/auth.ts`.
 Test added — passing.
@@ -115,7 +115,7 @@ Commit: `a1b2c3d`
 ```
 
 ```
-Reply to anchor {comment-id} on VID-123 titled "🚨 Plan adjusted" from skill "pairprog" with body:
+Reply to anchor {comment-id} on VID-123 titled "🚨 Plan adjusted" from skill "pair" with body:
 
 Step 3 replaced with Step 3a: explicit re-login flow.
 Reason: navigator decided silent refresh adds complexity.
@@ -124,7 +124,7 @@ Reason: navigator decided silent refresh adds complexity.
 ### Resolution example
 
 ```
-Reply to anchor {comment-id} on VID-123 titled "✅ Session complete" from skill "pairprog" with body:
+Reply to anchor {comment-id} on VID-123 titled "✅ Session complete" from skill "pair" with body:
 
 **Completed:**
 - [x] Step 1: OAuth callback route

@@ -34,6 +34,22 @@ Tag manual-only steps with **(manual)** so readers know an agent can't automate 
 
 ---
 
+## [2026-06-15]
+
+### Changed
+- **Skills renamed to platform-agnostic imperative names** — five skill directories were renamed so the invocation matches the artifact or task, not the platform or grammar: `commenting` → `comment`, `commitmsg` → `commit`, `designnote` → `decision`, `linearissue` → `issue`, `pairprog` → `pair`. Cross-references between skills, `Skill("…")` call sites, `/`-invocation examples, and `skills/README.md` were updated to the new names. This is a rename only — skill behavior, descriptions, and bodies are otherwise unchanged.
+
+### Migration
+
+**Files:**
+- If your project vendors copies of any renamed skill (`skills/commenting`, `skills/commitmsg`, `skills/designnote`, `skills/linearissue`, `skills/pairprog`), move them to the new directory names and update any internal `Skill("…")` references.
+
+**Tooling / habits:**
+- Invoke the skills under their new names: `/comment`, `/commit`, `/decision`, `/issue`, `/pair`.
+
+**CI/CD:**
+- The Linear skill deploy (`.github/workflows/linear-skill-deploy.yaml`) derives each skill's Linear title from its directory name. On the next deploy this rename creates the five new skill entries and deletes the old ones — no manual action needed, but expect the corresponding Linear AI skills to be re-created under the new titles.
+
 ## [2026-06-13]
 
 ### Changed
