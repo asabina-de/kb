@@ -14,11 +14,22 @@
 #   - gh >= 2.90.0 on the runner (ships on GH-hosted runners as of 2.93).
 #
 # Identity:
-#   Commits are authored as github-actions[bot]. The email format
-#   ({id}+{login}@users.noreply.github.com) is derived from the bot's
-#   user ID via the GitHub API (https://api.github.com/users/github-actions[bot]).
-#   This is the de facto community standard — not officially documented by
-#   GitHub but tacitly endorsed by actions/checkout and used by Dependabot.
+#   Commits are authored using the workflow actor's GitHub identity,
+#   derived from the github.actor and github.actor_id context variables.
+#   The noreply email format ({id}+{login}@users.noreply.github.com) is
+#   GitHub's standard for all users and bots. For scheduled runs, the
+#   actor is whoever last modified this workflow file. For manual dispatch,
+#   it's whoever clicked the button.
+#
+# Migration:
+#   1. Copy this file to .github/workflows/update-skills.yaml in the
+#      target repo.
+#   2. Adjust the skill list in the "Install skills" step if you only
+#      need a subset (default: commit, pair, pr).
+#   3. Merge to the default branch so the schedule trigger activates.
+#   4. Optionally trigger a manual run to sync immediately:
+#        gh workflow run update-skills.yaml
+#   5. Verify .github/skills/ was populated and committed.
 
 name: Update skills from KB
 
@@ -43,10 +54,12 @@ jobs:
         run: gh skill install asabina-de/kb commit pair pr
 
       - name: Commit if changed
+        env:
+          GIT_AUTHOR_NAME: ${{ github.actor }}
+          GIT_AUTHOR_EMAIL: ${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com
+          GIT_COMMITTER_NAME: ${{ github.actor }}
+          GIT_COMMITTER_EMAIL: ${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
           # Stage any skill directories that gh skill install may have written to.
           git add .github/skills/ .claude/skills/ .agents/skills/ 2>/dev/null || true
 
