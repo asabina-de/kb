@@ -2,7 +2,9 @@ name: Publish skills to GH Copilot
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
+      - 'vidbina/kb-54-*'  # TEMPORARY: testing publish on feature branch — remove before merge
     paths:
       - 'skills/**'
       - '.github/workflows/gh-copilot-skill-publish.yaml'
