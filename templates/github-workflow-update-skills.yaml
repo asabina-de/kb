@@ -1,0 +1,59 @@
+# Sync skills from the central KB repo into this repo's .github/skills/.
+#
+# The GH Copilot cloud agent (GitHub UI chat, @copilot from Linear) reads
+# skills from the repo's .github/skills/ directory. This workflow keeps
+# those files in sync with the canonical source (asabina-de/kb).
+#
+# Runs weekly and on manual dispatch. Only commits when the installed
+# skills differ from what's already in the repo.
+#
+# Prerequisites:
+#   - The source repo (asabina-de/kb) must be accessible to this repo's
+#     GITHUB_TOKEN. Public repos work out of the box. Private repos need
+#     a GitHub App token or PAT with read access, stored as a secret.
+#   - gh >= 2.90.0 on the runner (ships on GH-hosted runners as of 2.93).
+#
+# Identity:
+#   Commits are authored as github-actions[bot]. The email format
+#   ({id}+{login}@users.noreply.github.com) is derived from the bot's
+#   user ID via the GitHub API (https://api.github.com/users/github-actions[bot]).
+#   This is the de facto community standard — not officially documented by
+#   GitHub but tacitly endorsed by actions/checkout and used by Dependabot.
+
+name: Update skills from KB
+
+on:
+  schedule:
+    - cron: '0 6 * * 1'  # weekly, Monday 06:00 UTC
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  update-skills:
+    name: Sync skills from KB
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install skills from KB
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh skill install asabina-de/kb commit pair pr
+
+      - name: Commit if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          # Stage any skill directories that gh skill install may have written to.
+          git add .github/skills/ .claude/skills/ .agents/skills/ 2>/dev/null || true
+
+          if git diff --cached --quiet; then
+            echo "Skills are up to date — nothing to commit."
+          else
+            DATE=$(date -u +%Y-%m-%d)
+            git commit -m "chore: sync skills from kb ($DATE)"
+            git push
+          fi
