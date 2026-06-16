@@ -6,6 +6,7 @@ on:
     paths:
       - 'skills/**'
       - '.github/workflows/gh-copilot-skill-publish.yaml'
+  workflow_dispatch: {}
 
 permissions:
   contents: read
