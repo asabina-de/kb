@@ -1,0 +1,72 @@
+# Sync skills from the central KB repo into this repo's .github/skills/.
+#
+# The GH Copilot cloud agent (GitHub UI chat, @copilot from Linear) reads
+# skills from the repo's .github/skills/ directory. This workflow keeps
+# those files in sync with the canonical source (asabina-de/kb).
+#
+# Runs weekly and on manual dispatch. Only commits when the installed
+# skills differ from what's already in the repo.
+#
+# Prerequisites:
+#   - The source repo (asabina-de/kb) must be accessible to this repo's
+#     GITHUB_TOKEN. Public repos work out of the box. Private repos need
+#     a GitHub App token or PAT with read access, stored as a secret.
+#   - gh >= 2.90.0 on the runner (ships on GH-hosted runners as of 2.93).
+#
+# Identity:
+#   Commits are authored using the workflow actor's GitHub identity,
+#   derived from the github.actor and github.actor_id context variables.
+#   The noreply email format ({id}+{login}@users.noreply.github.com) is
+#   GitHub's standard for all users and bots. For scheduled runs, the
+#   actor is whoever last modified this workflow file. For manual dispatch,
+#   it's whoever clicked the button.
+#
+# Migration:
+#   1. Copy this file to .github/workflows/update-skills.yaml in the
+#      target repo.
+#   2. Adjust the skill list in the "Install skills" step if you only
+#      need a subset (default: commit, pair, pr).
+#   3. Merge to the default branch so the schedule trigger activates.
+#   4. Optionally trigger a manual run to sync immediately:
+#        gh workflow run update-skills.yaml
+#   5. Verify .github/skills/ was populated and committed.
+
+name: Update skills from KB
+
+on:
+  schedule:
+    - cron: '0 6 * * 1'  # weekly, Monday 06:00 UTC
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  update-skills:
+    name: Sync skills from KB
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install skills from KB
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh skill install asabina-de/kb commit pair pr
+
+      - name: Commit if changed
+        env:
+          GIT_AUTHOR_NAME: ${{ github.actor }}
+          GIT_AUTHOR_EMAIL: ${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com
+          GIT_COMMITTER_NAME: ${{ github.actor }}
+          GIT_COMMITTER_EMAIL: ${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com
+        run: |
+          # Stage any skill directories that gh skill install may have written to.
+          git add .github/skills/ .claude/skills/ .agents/skills/ 2>/dev/null || true
+
+          if git diff --cached --quiet; then
+            echo "Skills are up to date — nothing to commit."
+          else
+            DATE=$(date -u +%Y-%m-%d)
+            git commit -m "chore: sync skills from kb ($DATE)"
+            git push
+          fi
