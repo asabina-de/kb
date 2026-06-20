@@ -7,8 +7,10 @@ on:
     types: [opened, synchronize]
     paths:
       - 'skills/**'
+      - '.github/skills/**'
       - '.github/scripts/**'
       - '.github/workflows/linear-skill-check.yaml'
+      - '.github/workflows/check-skill-sync.yaml'
 
 permissions:
   pull-requests: read
@@ -23,19 +25,34 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Check if skills/ changed
+        id: skills-diff
+        run: |
+          if git diff --quiet "$GITHUB_BASE_SHA" HEAD -- skills/; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "No changes in skills/ — skipping Linear check"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+        env:
+          GITHUB_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+
       - uses: actions/setup-node@v4
+        if: steps.skills-diff.outputs.changed == 'true'
         with:
           node-version: 22
           cache: npm
           cache-dependency-path: .github/scripts/package-lock.json
 
       - name: Install deps
+        if: steps.skills-diff.outputs.changed == 'true'
         working-directory: .github/scripts
         run: npm ci
 
       # Run from the repo root so the script sees skills/ at cwd. Node resolves
       # @linear/sdk from .github/scripts/node_modules via the script's own path.
       - name: Plan skill deployment
+        if: steps.skills-diff.outputs.changed == 'true'
         env:
           LINEAR_API_KEY: ${{ secrets.LINEAR_API_KEY }}
           LINEAR_SKILL_TEAMS: ${{ vars.LINEAR_SKILL_TEAMS }}
