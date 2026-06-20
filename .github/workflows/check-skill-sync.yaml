@@ -1,0 +1,45 @@
+name: Check skill sync
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+    paths:
+      - 'skills/**'
+      - '.github/skills/**'
+      - '.github/workflows/check-skill-sync.yaml'
+
+permissions:
+  contents: read
+
+jobs:
+  check-skill-sync:
+    name: Verify skills/ and .github/skills/ are in sync
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check sync
+        run: |
+          rc=0
+
+          # Every skill in .github/skills/ must match its source in skills/
+          for gh_skill in .github/skills/*/SKILL.md; do
+            [ -f "$gh_skill" ] || continue
+            name=$(basename "$(dirname "$gh_skill")")
+            src="skills/$name/SKILL.md"
+
+            if [ ! -f "$src" ]; then
+              echo "::error::$gh_skill exists but $src does not"
+              rc=1
+            elif ! diff -q "$src" "$gh_skill" >/dev/null 2>&1; then
+              echo "::error::$src and $gh_skill have diverged"
+              diff -u "$src" "$gh_skill" || true
+              rc=1
+            fi
+          done
+
+          if [ $rc -eq 0 ]; then
+            echo "All .github/skills/ files are in sync with skills/"
+          fi
+
+          exit $rc
