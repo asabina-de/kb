@@ -206,7 +206,8 @@ If the project already has a Figma file with defined styles and variables, use t
 
 1. Install the plugin in Figma
 2. Run it on your project file — it extracts local styles into DESIGN.md format
-3. Review and customize the generated file
+3. Compare the generated file against the [KB template](./templates/DESIGN.md) — the Figma plugin typically covers colors, typography, and spacing tokens but may omit prose sections (Brand & Style rationale, Do's and Don'ts, component guidance). Fill in any missing sections from the template.
+4. Review and customize the generated file
 
 **Option B: Start from the KB template**
 

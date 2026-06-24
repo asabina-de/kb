@@ -9,6 +9,11 @@
 # Sections marked <!-- CROSS-PROJECT --> carry reusable guidance — customize
 # values but keep the structure.
 
+# NOTE: "Tokens" in this file refers to *design tokens* — named values for
+# colors, spacing, typography, and other visual properties. This is standard
+# design systems terminology (see https://tr.designtokens.org/format/), not
+# related to LLM/AI tokens.
+
 name: "Project Name"
 
 # <!-- PROJECT-SPECIFIC: replace with your project's color tokens -->
@@ -192,13 +197,18 @@ Semantic = directional indicator).
 
 ## Layout & Spacing
 
-Spacing follows an 8px base unit scale. Consistent spacing rhythm creates
-visual grouping; uneven spacing breaks perceived structure.
+Spacing follows a consistent base unit scale. Consistent spacing rhythm
+creates visual grouping; uneven spacing breaks perceived structure.
 
-- **Base unit:** 8px
-- **Micro adjustments:** 4px (for tight inline spacing)
-- **Section padding:** Use the `md` (24px) or `lg` (40px) tokens
-- **Row/item gaps:** Use `sm` (12px) or `base` (8px) tokens
+The spec supports `px`, `em`, and `rem` units for dimensions — choose based
+on your project's needs (px for fixed layouts, rem for responsive scaling).
+The values in the YAML frontmatter above are placeholders; adjust them to
+match your project's spacing system.
+
+- **Base unit:** [your base unit, e.g., 8px or 0.5rem]
+- **Micro adjustments:** [half the base unit, for tight inline spacing]
+- **Section padding:** Use the `md` or `lg` spacing tokens
+- **Row/item gaps:** Use `sm` or `base` spacing tokens
 
 Every element should align to at least one other element. Stray elements that
 don't share edges or baselines with neighbors look accidental.
@@ -230,8 +240,8 @@ Corner radii follow a semantic scale:
 ## Components
 
 [Document component-specific styling guidance here. Use sub-headings for
-component categories. Focus on token usage, interactive states, and structural
-patterns — not implementation details.]
+component categories. Focus on design token usage, interactive states, and
+structural patterns — not implementation details.]
 
 ### Buttons
 
@@ -258,7 +268,6 @@ patterns — not implementation details.]
 **Do:**
 
 - Verify both light and dark modes after every visual change
-- Test with varying data lengths (short names, long names, edge cases)
 - Use semantic color tokens — never hardcode hex values in components
 - Maintain consistent spacing rhythm using the defined scale
 

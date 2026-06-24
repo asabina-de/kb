@@ -76,6 +76,12 @@ If `DESIGN.md` does not exist yet, consult the [KB template](https://github.com/
 
 Sections marked `<!-- PROJECT-SPECIFIC -->` must be authored per project (brand personality, color palette, ICP framing, component inventory). Sections marked `<!-- CROSS-PROJECT -->` carry reusable structure — customize values but keep the structure.
 
+**Keeping DESIGN.md in sync:**
+
+- When making design decisions during implementation (choosing a color, adding a spacing value, introducing a new component pattern), check whether the decision is already captured in DESIGN.md. If not, flag it to the operator: "This introduces [a new color / spacing value / component pattern] not yet in DESIGN.md — should we codify it?"
+- When design files (Figma, code) conflict with what DESIGN.md documents (e.g., a component uses a color not in the palette, or spacing deviates from the scale), surface the conflict to the operator. Don't silently follow either source — the operator decides which is correct and whether DESIGN.md needs updating.
+- Quick decisions made under time pressure to unblock work should still be surfaced after the fact: "I used [value/pattern] to keep moving — this should be reviewed for inclusion in DESIGN.md."
+
 ## Documentation Workflow
 
 > [!TIP]

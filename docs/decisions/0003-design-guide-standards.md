@@ -120,7 +120,7 @@ Specifically:
 
 2. **AGENTS.md** (the template, not the KB's own) references DESIGN.md as required reading when design work starts. It also points to Figma workflow guidance and the design onboarding path — described by function, not by tool-specific endpoint names, so the guidance works across different agent systems.
 
-3. **Figma workflow patterns** (edit the base component, variables-first, verify visually, friction log of Plugin API edge cases) live in a dedicated capability separate from DESIGN.md. This is semantically distinct: DESIGN.md = "what to design", the Figma capability = "how to work effectively in Figma."
+3. **Figma workflow patterns** (edit the base component, variables-first, verify visually, friction log of Plugin API edge cases) live in a dedicated skill (tracked as KB-62). This is semantically distinct: DESIGN.md = "what to design", the Figma conventions skill = "how to work effectively in Figma."
 
 4. **The KB template links to the canonical spec** at the top of the file rather than duplicating the spec's documentation. Projects can use the [Figma plugin](https://github.com/bergside/design-md-figma) to seed their DESIGN.md from existing Figma files, or use the [npm CLI](https://github.com/google-labs-code/design.md) to validate their file against the spec.
 
@@ -136,8 +136,8 @@ Specifically:
 **Negative:**
 
 - Our ICP framing must fit within the spec's Overview section — no dedicated section for it
-- Figma-specific guidance is split across two locations (general design principles in DESIGN.md, tool workflow in the Figma conventions capability)
-- Projects that don't use Figma still get a template that assumes the Figma ecosystem (plugin, variable export) — may need adaptation for other tools
+- Figma workflow patterns live outside DESIGN.md (in the Figma conventions skill, KB-62) — collaborators need to know both resources exist
+- Projects that don't use Figma still get a template whose onboarding path references the Figma ecosystem (plugin, variable export) — may need adaptation for other tools
 
 **Trade-offs accepted:**
 
