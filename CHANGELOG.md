@@ -34,6 +34,22 @@ Tag manual-only steps with **(manual)** so readers know an agent can't automate 
 
 ---
 
+## [2026-06-24]
+
+### Added
+- **`/figma-conventions` skill** — opinionated Figma workflow conventions extracted from pairing sessions. Covers component editing discipline (always edit the base, never instances), variable-first architecture, flow layout over freeform, source-of-truth tracing, visual verification protocol, column alignment in data tables, gap-based resizable bars (Figma workaround for numeric component properties), and nested instance limitations. Includes an enforcement phases framework (always-enforce / implementation-phase / defer-to-refinement) so agents can modulate which conventions to enforce during rapid prototyping vs polish.
+- **`templates/DESIGN.md`** — spec-compliant design guide template following the [DESIGN.md open spec](https://github.com/google-labs-code/design.md/blob/main/docs/spec.md). YAML frontmatter with token placeholders, all 8 sections in prescribed order, `<!-- PROJECT-SPECIFIC -->` and `<!-- CROSS-PROJECT -->` markers.
+- **AGENTS.md template updated** with "Design Work" section referencing DESIGN.md and Figma workflow conventions, plus DESIGN.md sync protocol (flag undocumented decisions, surface conflicts).
+
+### Migration
+
+**Files:**
+- If your project has a `DESIGN_GUIDE.md`, consider migrating to the `DESIGN.md` format for ecosystem compatibility (CLI linting, Figma plugin generation). See `docs/decisions/0003-design-guide-standards.md` for rationale.
+- Re-sync `AGENTS.md` from `templates/AGENTS.md` to pick up the "Design Work" section.
+
+**Tooling / habits:**
+- Use `npx @google/design.md lint DESIGN.md` to validate design guide files against the spec.
+
 ## [2026-06-15]
 
 ### Changed
