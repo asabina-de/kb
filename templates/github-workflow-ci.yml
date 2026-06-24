@@ -36,12 +36,25 @@ jobs:
     name: Lint and Unit Tests
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+
       # Add your lightweight CI steps here:
       # - Linting
       # - Unit tests
       # - Code formatting checks
       # - Static analysis
-      - run: echo "Lightweight jobs always run"
+
+      # Lint DESIGN.md against the open spec when the file exists.
+      # Advisory only (continue-on-error) — tighten once projects are spec-compliant.
+      - name: Set up Node for DESIGN.md linter
+        if: hashFiles('DESIGN.md') != ''
+        uses: actions/setup-node@v4
+        with:
+          node-version: "lts/*"
+      - name: Lint DESIGN.md
+        if: hashFiles('DESIGN.md') != ''
+        continue-on-error: true
+        run: npx --yes @google/design.md lint DESIGN.md
 
   # Expensive jobs (skip on draft PRs)
   integration-tests:

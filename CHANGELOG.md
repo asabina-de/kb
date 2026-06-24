@@ -34,6 +34,16 @@ Tag manual-only steps with **(manual)** so readers know an agent can't automate 
 
 ---
 
+## [2026-06-24]
+
+### Added
+- **DESIGN.md spec linting in CI template** — `templates/github-workflow-ci.yml` now includes a conditional step that lints `DESIGN.md` against the [open spec](https://github.com/google-labs-code/design.md/blob/main/docs/spec.md) via `npx @google/design.md lint`. The step only runs when `DESIGN.md` exists in the repo root. Runs in advisory mode (`continue-on-error: true`) during initial adoption — tighten to strict once projects are spec-compliant.
+
+### Migration
+
+**CI/CD:**
+- If your project copies `templates/github-workflow-ci.yml` as its CI workflow, re-sync to pick up the new DESIGN.md lint step. No action needed if you don't have a `DESIGN.md` file — the step auto-skips.
+
 ## [2026-06-15]
 
 ### Changed
