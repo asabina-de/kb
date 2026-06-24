@@ -149,4 +149,4 @@ Specifically:
 - **Template existence:** `templates/DESIGN.md` exists in the KB with spec-compliant structure and `<!-- PROJECT-SPECIFIC -->` markers
 - **AGENTS.md reference:** `templates/AGENTS.md` includes a design-work section that references DESIGN.md
 - **Onboarding path:** KB README and/or PROJECT_SETUP_GUIDE.md documents how to set up DESIGN.md in a new project (spec link, Figma plugin, CLI validation)
-- **Spec-purity check:** DESIGN.md files should pass validation via the `@google/design.md` npm CLI — this can be added as a pre-commit hook or CI check per project
+- **Spec-purity check:** DESIGN.md files should pass linting via `npx @google/design.md lint` — this can be added as a pre-commit hook or CI check per project

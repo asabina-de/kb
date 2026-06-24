@@ -228,7 +228,7 @@ Then fill in the project-specific sections (marked with `<!-- PROJECT-SPECIFIC -
 Use the [npm CLI](https://github.com/google-labs-code/design.md) to validate your file against the spec:
 
 ```bash
-npx @google/design.md validate DESIGN.md
+npx @google/design.md lint DESIGN.md
 ```
 
 This checks YAML schema, WCAG contrast ratios, circular token references, and section ordering.

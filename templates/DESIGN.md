@@ -2,7 +2,7 @@
 # DESIGN.md — follows the open spec at:
 # https://github.com/google-labs-code/design.md/blob/main/docs/spec.md
 #
-# Validate with: npx @google/design.md validate DESIGN.md
+# Lint with: npx @google/design.md lint DESIGN.md
 # Generate from Figma: https://github.com/bergside/design-md-figma
 #
 # Sections marked <!-- PROJECT-SPECIFIC --> must be authored per project.
