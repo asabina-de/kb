@@ -4,13 +4,11 @@ on:
   pull_request:
     # opened: PR first created. synchronize: new commits pushed to PR branch.
     # Together = "run on creation and every subsequent push."
+    # No paths filter — this workflow must always run because branch protection
+    # requires the "Check Linear skill deployment plan" status. If the workflow
+    # doesn't trigger, the status is never reported and the PR can't merge.
+    # The internal skills-diff step short-circuits when skills/ is unchanged.
     types: [opened, synchronize]
-    paths:
-      - 'skills/**'
-      - '.github/skills/**'
-      - '.github/scripts/**'
-      - '.github/workflows/linear-skill-check.yaml'
-      - '.github/workflows/check-skill-sync.yaml'
 
 permissions:
   pull-requests: read
