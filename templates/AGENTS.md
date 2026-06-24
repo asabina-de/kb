@@ -65,6 +65,17 @@ npm run lint --help && npm run test --help && npm run build --help
 - **ALWAYS use `git rm` for file removals and `git mv` for file renames** - never use plain `rm` or `mv` for tracked files
 - **HITL — Git is human-in-the-loop.** Never create commits, push branches, or open/merge PRs unless the user has explicitly asked you to do so. Default to checking with a human operator before work is locked into the record.
 
+## Design Work
+
+**Before starting or continuing any design work** (UI implementation, component creation, visual changes, Figma collaboration), read these resources:
+
+1. **`DESIGN.md`** — the project's visual design specification. Follows the [DESIGN.md open spec](https://github.com/google-labs-code/design.md/blob/main/docs/spec.md). Contains color tokens, typography scale, spacing system, component token mappings, and design rationale. The YAML frontmatter is machine-readable; the Markdown body explains the "why."
+2. **Figma workflow conventions** — if the project uses Figma, consult the team's Figma workflow guidance for patterns on variable architecture, component editing discipline (always edit the base component, not instances), and visual verification after changes.
+
+If `DESIGN.md` does not exist yet, consult the [KB template](https://github.com/google-labs-code/design.md/blob/main/docs/spec.md) and the project lead before creating one. A DESIGN.md can be seeded from an existing Figma file using the [Figma-to-DESIGN.md plugin](https://github.com/bergside/design-md-figma) or authored manually following the spec.
+
+Sections marked `<!-- PROJECT-SPECIFIC -->` must be authored per project (brand personality, color palette, ICP framing, component inventory). Sections marked `<!-- CROSS-PROJECT -->` carry reusable structure — customize values but keep the structure.
+
 ## Documentation Workflow
 
 > [!TIP]

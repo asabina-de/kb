@@ -241,6 +241,10 @@ _Ordered by developer workflow relevance_
 - **decisions/** (`./docs/decisions/`) - Decision records (exploration through to decided)
   - MADR-style serial numbering (`nnnn-slug.md`), enriched frontmatter, status log
   - See [templates/decisions/README.md](./templates/decisions/README.md) for format details, naming conventions, and status vocabulary
+- **DESIGN.md** (`./DESIGN.md`) - Visual design specification _(conditional)_
+  - Follows the [DESIGN.md open spec](https://github.com/google-labs-code/design.md/blob/main/docs/spec.md)
+  - YAML frontmatter with machine-readable tokens; Markdown body with design rationale
+  - Can be seeded from Figma via the [Figma plugin](https://github.com/bergside/design-md-figma) or validated with the [npm CLI](https://github.com/google-labs-code/design.md)
 - **LINTING_FORMATTING.md** (`./docs/LINTING_FORMATTING.md`) - Code Quality Standards _(conditional)_
 - **AGENTS.md** (`./AGENTS.md`) - AI agent guidelines _(conditional)_
   - `CLAUDE.md` and `GEMINI.md` are symlinks to `AGENTS.md`
@@ -254,6 +258,7 @@ _Ordered by developer workflow relevance_
 - **Add as workflow demands**:
   - **TODO.md**: When you need a repo-specific scratchpad.
   - **decisions/**: When exploring designs or recording architectural choices.
+  - **DESIGN.md**: When the project has a visual design component (UI, components, Figma integration).
   - **LINTING_FORMATTING.md**: Only when team size or complexity demands a separate file.
   - **AI Guidance**: When using AI development tools (`AGENTS.md`).
 

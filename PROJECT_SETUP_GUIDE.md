@@ -196,6 +196,42 @@ cp -r <path-to-kb>/templates/decisions ./docs/
 
 Refer to the main [Engineering Handbook (README.md)](./README.md) for the philosophy on when and how to use each of these documents.
 
+### 7. Design Guide Setup (Optional)
+
+If the project has a visual design component (UI, components, Figma integration), set up a `DESIGN.md` file. This follows the [DESIGN.md open spec](https://github.com/google-labs-code/design.md/blob/main/docs/spec.md).
+
+**Option A: Seed from an existing Figma file**
+
+If the project already has a Figma file with defined styles and variables, use the [Figma-to-DESIGN.md plugin](https://github.com/bergside/design-md-figma) to generate a starter file:
+
+1. Install the plugin in Figma
+2. Run it on your project file — it extracts local styles into DESIGN.md format
+3. Review and customize the generated file
+
+**Option B: Start from the KB template**
+
+```bash
+cp <path-to-kb>/templates/DESIGN.md ./DESIGN.md
+```
+
+Then fill in the project-specific sections (marked with `<!-- PROJECT-SPECIFIC -->` comments):
+
+- `## Brand & Style` — brand personality, target audience, ICP framing
+- `## Colors` — semantic color palette (update YAML frontmatter tokens too)
+- `## Typography` — type scale (update YAML frontmatter tokens too)
+- `## Components` — project-specific component token mappings
+- `## Do's and Don'ts` — project-specific guardrails
+
+**Validation**
+
+Use the [npm CLI](https://github.com/google-labs-code/design.md) to validate your file against the spec:
+
+```bash
+npx @google/design.md validate DESIGN.md
+```
+
+This checks YAML schema, WCAG contrast ratios, circular token references, and section ordering.
+
 ## Template Customization Guide
 
 ### 1. GUIDELINES.md Customization
