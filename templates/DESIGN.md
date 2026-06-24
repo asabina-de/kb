@@ -268,6 +268,7 @@ structural patterns — not implementation details.]
 **Do:**
 
 - Verify both light and dark modes after every visual change
+- Test with varying data lengths (short names, long names, edge cases)
 - Use semantic color tokens — never hardcode hex values in components
 - Maintain consistent spacing rhythm using the defined scale
 
