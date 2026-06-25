@@ -34,6 +34,16 @@ Tag manual-only steps with **(manual)** so readers know an agent can't automate 
 
 ---
 
+## [2026-06-25]
+
+### Added
+- **`templates/github-workflow-design.yml`** — standalone CI workflow that lints `DESIGN.md` against the [open spec](https://github.com/google-labs-code/design.md/blob/main/docs/spec.md) via `npx @google/design.md lint`. Triggers only on `DESIGN.md` changes (`paths: [DESIGN.md]`). Advisory by default (`continue-on-error: true`) — tighten to strict once the project's file is fully spec-compliant.
+
+### Migration
+
+**CI/CD:**
+- Copy `templates/github-workflow-design.yml` to `.github/workflows/design.yml` in projects that have a `DESIGN.md`. The workflow only triggers when `DESIGN.md` changes, so it adds no overhead to projects without one.
+
 ## [2026-06-24]
 
 ### Added
