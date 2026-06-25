@@ -2,17 +2,7 @@
 
 Slide types for reusable pitch deck templates. Each type is a componentized master slide in Figma Slides with placeholder content (no client names). The inventory drives KB-67 implementation.
 
-## Design language
-
-- Dark background (near-black), white/gray text
-- Section labels in spaced uppercase monospace (`02 :: SECTION NAME`)
-- Page numbers as `NN / total` bottom-right
-- Company name bottom-left on applicable slides
-- Consistent type hierarchy: bold heading, regular body, monospace labels
-
 ## Slide type inventory
-
-### First implementation
 
 | # | Type | Layout | When to use |
 |---|---|---|---|
@@ -30,11 +20,6 @@ Slide types for reusable pitch deck templates. Each type is a componentized mast
 | 12 | **Quote / Testimonial** | Large pull-quote + attribution (name, role, org) | Social proof, client voice, stakeholder endorsement. |
 | 13 | **Metrics Highlight** | 2–3 large numbers with labels + optional context line | Impact stats, KPIs, before/after metrics — any "numbers that matter" message. |
 | 14 | **Full-Bleed Image** | Full-frame image with optional overlay text | Visual break, section divider, mood setter. |
-
-### Deferred (inventoried, not yet implemented)
-
-| # | Type | Layout | When to use |
-|---|---|---|---|
 | 15 | **Team / People** | Headshots + names + roles + brief bios | Emotional connector. Who the client will work with. |
 | 16 | **Comparison Matrix** | Feature/candidate grid with check/cross/rating marks | Tool evaluations, vendor comparisons, option scoring. |
 | 17 | **Case Study** | Problem → approach → result (3-panel or stacked) | Past work proof. Concrete example of delivered value. |
@@ -45,7 +30,7 @@ Slide types for reusable pitch deck templates. Each type is a componentized mast
 
 ### Typical engagement proposal arc
 
-Based on the Junction pitch deck structure:
+Based on an existing engagement proposal structure:
 
 1. **Cover** — who, what, when
 2. **Three-Column Points** — what we heard (empathy, mirror their pain)
@@ -67,12 +52,11 @@ Optional inserts depending on context:
 
 - All interaction goes through `use_figma` Plugin API — `get_metadata` and `generate_figma_design` don't support Slides files
 - The `figma-use-slides` skill handles Slides-specific operations
-- Target file: https://www.figma.com/slides/xXJMUyCLRXHmNPfwooiqK7 (needs edit access for MCP)
 - Each slide type becomes a Figma component on a Components page
 - See `skills/figma-conventions/SKILL.md` for component organization patterns
 
 ## Source
 
 Inventory derived from analysis of:
-- Junction Growth Investors engagement proposal (10 slides, Claude Design export)
-- Common pitch deck patterns across consulting/advisory presentations
+- An existing engagement proposal (10 slides, Claude Design export)
+- Common pitch deck patterns across consulting, advisory, and contract engineering presentations
