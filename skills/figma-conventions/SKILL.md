@@ -194,6 +194,18 @@ Organize Figma files with clear page separation:
 
 Within the Components page, organize in horizontal columns left-to-right by category, with generous spacing (80px+) between items for isolation.
 
+### Semantic text content — style through properties, not content hacks
+
+Text node content should be the raw, unstyled value. All visual transformations — uppercase, letter spacing, underlines, strikethrough — are applied via styling properties, never baked into the text string.
+
+**Common violations:**
+- Adding spaces between characters for a spaced look (`"E N G A G E M E N T"`) — use `letterSpacing` instead
+- Typing text in all caps (`"ENGAGEMENT PROPOSAL"`) — use `textCase = 'UPPER'` instead
+- Adding underscores or dashes as placeholder lines — use a rectangle or stroke instead
+- Inserting bullets as text characters (`"• Item"`) — use `setRangeListOptions` for native list formatting
+
+**Why this matters:** content hacks make text uneditable and unsearchable. A user who changes the text to "Project Update" shouldn't have to manually re-space characters. Styling properties are parametric — they survive text edits and can be toggled without rewriting content.
+
 ## Don't pretend to see something you don't
 
 When verifying a change visually, if the screenshot shows the same state as before, say so. Don't construct a narrative about how it "actually looks correct" when it doesn't. The user can see the same image.
