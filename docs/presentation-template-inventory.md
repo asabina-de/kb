@@ -48,11 +48,17 @@ Optional inserts depending on context:
 - **Agenda/TOC** after Cover (for longer decks, 10+ slides)
 - **Full-Bleed Image** as section dividers between phases
 
-## Figma Slides implementation notes
+## Figma Slides template
 
+**Master deck:** [Asabina Master Deck](https://www.figma.com/slides/xXJMUyCLRXHmNPfwooiqK7)
+
+**Implementation notes:**
 - All interaction goes through `use_figma` Plugin API — `get_metadata` and `generate_figma_design` don't support Slides files
 - The `figma-use-slides` skill handles Slides-specific operations
-- Each slide type becomes a Figma component on a Components page
+- Per-slide dark/light theming via `setExplicitVariableModeForCollection` on the "Deck Theme" collection
+- "Deck Theme" variables: Background, Text/Primary, Text/Muted, Text/Label, Text/Accent, Font/Family
+- Two modes: "Asabina Dark" (black bg, white text) and "Asabina Light" (white bg, dark text)
+- Pink accent `rgb(255, 85, 131)` stays constant across both modes
 - See `skills/figma-conventions/SKILL.md` for component organization patterns
 
 ## Source
