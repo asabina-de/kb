@@ -268,7 +268,14 @@ If the user bails, stop. Print nothing further.
 For each confirmed ticket:
 
 1. **Existing detection.** If the note's source-anchor area already has an inline `Linear: LIN-NNN` annotation, or if a Linear search by source anchor URL in the description footer finds an existing ticket, treat as **update**. Otherwise **create**.
-2. **Create:** call `save_issue` with team, project, title, description (including the source-anchor footer), priority, parent (if dependency-hinted as a sub-task — but default to flat unless the note structure clearly implies sub-tasking). Keep the description to 2–5 sentences maximum: one sentence on what the work is, one sentence on why it matters (if not obvious), a **DoD** sentence ("Done when X is true/observable/verifiable"), and the source-anchor backlink. The DoD should be concrete enough that someone can check it without reading the full context — e.g. "Done when `/issue` activates freeform mode on bare prompts and all titles pass the quality gate." Prepend `*[ai:claude-code]*` as the first line of the description so authorship is visible before the content. Do not copy prose, context, or reasoning from the design note into the description — the backlink is the bridge. If there is important context that should accompany the ticket, post it as a comment after creation instead.
+2. **Create:** call `save_issue` with team, project, title, description (including the source-anchor footer), priority, parent (if dependency-hinted as a sub-task — but default to flat unless the note structure clearly implies sub-tasking). Keep the description to 2–5 sentences of context followed by a **"Done when:" checklist** — a markdown checkbox list where each item is a concrete, verifiable condition. Use checklist style (`- [ ] condition`) not prose style ("Done when X is true"). Checklist items can be checked off as they're completed, giving visibility into partial progress. Each item should be specific enough that someone can check it without reading the full context. Example:
+   ```
+   **Done when:**
+   - [ ] Export existing data as CSV
+   - [ ] Validate schema against spec
+   - [ ] Document migration steps in README
+   ```
+   Prepend `*[ai:claude-code]*` as the first line of the description so authorship is visible before the content. Do not copy prose, context, or reasoning from the design note into the description — the backlink is the bridge. If there is important context that should accompany the ticket, post it as a comment after creation instead.
 3. **Update:** call `save_issue` with `id` set to the existing `LIN-NNN`, updating only fields that have meaningfully changed (description content, priority). Don't touch state, assignee, or labels unless explicitly indicated.
 4. **Capture** the returned ticket ID and URL.
 
@@ -370,7 +377,7 @@ Read the user's prompt and extract:
 For each item, draft:
 
 - **Title** — derive from the user's description, then run the **title quality gate pre-presentation checklist**: imperative `[VERB] [NOUN] [CONTEXT]`, verb from tier list, cold-reader check. If the gate fires, present the original and suggested rewrite.
-- **Description** — 2–5 sentences maximum: what the work is, why it matters (if not obvious), and a **DoD** sentence ("Done when X is true/observable/verifiable"). Prepend `*[ai:claude-code]*` as the first line. Keep it minimal — the anchor principle applies just as in filing mode.
+- **Description** — 2–5 sentences of context followed by a **"Done when:" checklist** — markdown checkboxes (`- [ ] condition`) for each verifiable completion criterion. Prepend `*[ai:claude-code]*` as the first line. Keep it minimal — the anchor principle applies just as in filing mode.
 - **Priority** — infer from the user's language (urgent, blocker, nice-to-have, etc.). Default Normal.
 - **Labels** — infer from context (e.g. "bug" → Bug label, "research" → Research label). Only apply if confident.
 
@@ -571,7 +578,7 @@ Warning:   <what triggered — e.g. "mechanism verb 'Implement' leading", "78 ch
 - **Don't infer parallel-safety from nothing.** If the note doesn't mention file scope or parallelism, leave parallel-safety unset. Don't fabricate predictions.
 - **Don't bundle unrelated action items into a single ticket.** One action item = one ticket. If items are tightly coupled, the note should reflect that and the skill can model them as parent/sub-tasks — but only if the note is structured that way. Crucially, don't model items as sub-issues when they're actually dependencies: if two items would be assigned to different people doing different work, they're flat peers with a `blocks`/`blockedBy` relation, not a parent/child decomposition. See **Phase 2 → Work breakdown** for the full rule.
 - **Don't over-fill descriptions.** A description is a minimal anchor — 2–5 sentences max (what, why, DoD, backlink). Do not copy prose, reasoning, or context from the design note into it. The backlink to the note is the bridge; if extra context is needed, post it as a comment after creation. Stuffing descriptions creates maintenance debt and obscures the signal.
-- **Don't skip the DoD.** Every ticket needs a "Done when..." sentence in the description. It should be concrete and verifiable — not "done when implemented" but "done when X is observable/testable." If the source material doesn't imply a clear DoD, draft one from the action item's intent and surface it in the confirmation gate for the user to refine.
+- **Don't skip the DoD.** Every ticket needs a "Done when:" checklist in the description — markdown checkboxes (`- [ ] condition`), not a prose sentence. Each item should be concrete and verifiable — not "done when implemented" but specific observable conditions. Checklist style enables partial-progress tracking (items can be checked off as completed). If the source material doesn't imply clear DoD items, draft them from the action item's intent and surface them in the confirmation gate for the user to refine.
 - **Don't default to description updates in iteration mode.** The user's intent is almost always to add a comment. Only propose a title/description change when the prompt explicitly targets the anchor (e.g. "the title is wrong", "rewrite the description"). When in doubt, put it in a comment.
 - **Don't run filing-mode phases in iteration mode.** If a Linear URL or issue ID was detected, skip straight to the iteration phase. Do not look for design notes, parse action items, or propose ticket creation.
 - **Don't silently rewrite comment history.** The skill can only add new comments via `save_comment`. It cannot edit or delete existing comments. If a prior comment is wrong, post a follow-up — don't attempt to alter the record.
