@@ -16,6 +16,124 @@ Read this skill before any Figma modification work. The conventions apply whethe
 
 **Also read:** the project's `DESIGN.md` for visual design tokens (colors, typography, spacing). This skill is about *how to work in Figma*; DESIGN.md is about *what the design looks like*. Both are needed for design work.
 
+## Pre-flight: Figma personal access token
+
+Before using the Figma REST API (e.g. for comment workflows), the agent needs a personal access token (PAT). Credentials are stored in **project-scoped memory** — never in committed files. Because memories are directory-local, different projects naturally use different tokens and accounts.
+
+**Discovery flow:**
+
+1. Check project memory for a file named `figma_pat.md` (or similar) containing a PAT reference
+2. If found, use the stored token
+3. If not found, prompt the user:
+   > "I need a Figma personal access token to work with comments. Create one at https://www.figma.com/developers/api#access-tokens with the scopes below, then paste it here."
+4. Save the token to project memory (e.g. `figma_pat.md`) with a description noting its purpose and scopes
+
+**Required scopes** (minimum for comment workflows):
+- `file_comments:read` — list comments on a file
+- `file_comments:write` — post, reply to, and delete comments
+
+Add additional scopes as needed for other REST API operations (e.g. `file_dev_resources:read` for dev resources).
+
+**Auth header:** all Figma REST API requests authenticate via:
+
+```
+X-Figma-Token: <PAT>
+```
+
+**Why memory, not config files:** PATs are user-specific secrets. Committing them (even to `.env` files that are gitignored) creates a pattern where secrets live adjacent to code. Memory-based storage keeps credentials out of the repository entirely and naturally supports multi-account setups — a contributor working across multiple projects gets the right token for each without manual switching.
+
+## Comment feedback workflow (REST API — no MCP support)
+
+The Figma MCP server has no comment tools. Agents that need to read or post Figma comments must use the [REST API comment endpoints](https://developers.figma.com/docs/rest-api/comments-endpoints/) directly via `curl` or equivalent HTTP calls. All requests require the `X-Figma-Token` header (see Pre-flight above).
+
+### Endpoint reference
+
+| Action | Method | Path | Key fields |
+|--------|--------|------|------------|
+| List comments | `GET` | `/v1/files/{file_key}/comments` | `?as_md=true` for markdown output |
+| Post comment | `POST` | `/v1/files/{file_key}/comments` | `message` (required), `client_meta` (pin position), `comment_id` (for replies) |
+| Delete comment | `DELETE` | `/v1/files/{file_key}/comments/{comment_id}` | — |
+| List reactions | `GET` | `/v1/files/{file_key}/comments/{comment_id}/reactions` | `?cursor=` for pagination |
+| Post reaction | `POST` | `/v1/files/{file_key}/comments/{comment_id}/reactions` | `emoji` (shortcode, e.g. `:+1:`) |
+| Delete reaction | `DELETE` | `/v1/files/{file_key}/comments/{comment_id}/reactions` | `?emoji=` shortcode to remove |
+
+All endpoints are [Tier 2](https://developers.figma.com/docs/rest-api/rate-limits/) and require `file_comments:read` or `file_comments:write` scopes.
+
+### Reading comments
+
+Fetch all comments on a file:
+
+```bash
+curl -s -H "X-Figma-Token: $FIGMA_PAT" \
+  "https://api.figma.com/v1/files/$FILE_KEY/comments?as_md=true"
+```
+
+The response contains a flat `comments` array. Thread structure is encoded via `parent_id` — top-level comments have `parent_id: null`, replies have the root comment's ID.
+
+**Comment object fields:**
+
+| Field | Type | Notes |
+|-------|------|-------|
+| `id` | string | Unique comment ID |
+| `message` | string | Comment text (markdown if `as_md=true`) |
+| `user` | object | `{ id, handle, img_url }` |
+| `parent_id` | string \| null | Non-null for replies |
+| `created_at` | string | UTC ISO 8601 timestamp |
+| `resolved_at` | string \| null | UTC ISO 8601 when resolved (read-only) |
+| `client_meta` | object | Pin position — `node_id`, `x`, `y` (varies by type) |
+| `order_id` | number | Display order (top-level comments only) |
+| `reactions` | array | `[{ user, emoji, created_at }]` |
+
+To reconstruct threads: group by `parent_id`, sort replies by `created_at`.
+
+### Posting a comment
+
+**New comment pinned to a node:**
+
+```bash
+curl -s -X POST -H "X-Figma-Token: $FIGMA_PAT" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "message": "This spacing looks off — should match the 8px grid.",
+    "client_meta": { "node_id": "1:42", "x": 100, "y": 200 }
+  }' \
+  "https://api.figma.com/v1/files/$FILE_KEY/comments"
+```
+
+- `message` — the comment text (required)
+- `client_meta` — where to pin the comment; `node_id` identifies the node, `x`/`y` position the pin within it
+
+**Reply to an existing comment:**
+
+```bash
+curl -s -X POST -H "X-Figma-Token: $FIGMA_PAT" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "message": "Fixed — updated padding to 8px in the component.",
+    "comment_id": "123456"
+  }' \
+  "https://api.figma.com/v1/files/$FILE_KEY/comments"
+```
+
+- `comment_id` — the root comment ID to reply to (this is a request body field, not the `parent_id` from the response object)
+- Replies cannot be nested — you can only reply to root comments, not to other replies
+
+### Deleting a comment
+
+```bash
+curl -s -X DELETE -H "X-Figma-Token: $FIGMA_PAT" \
+  "https://api.figma.com/v1/files/$FILE_KEY/comments/$COMMENT_ID"
+```
+
+Only the comment author can delete their own comments.
+
+### Limitations
+
+- **No resolve endpoint.** `resolved_at` is read-only in the API — comments can only be resolved through the Figma UI. Agents should note unresolved comments and ask the user to resolve them manually, or use a reply convention (e.g. "Addressed in commit `abc123`") to signal resolution.
+- **Flat reply threading.** Replies can only target root comments. You cannot reply to a reply — all replies in a thread share the same `parent_id`.
+- **No pagination on comments.** `GET /v1/files/{file_key}/comments` returns all comments at once. Reactions use cursor-based pagination.
+- **Author-only deletion.** Only the user who posted a comment or reaction can delete it.
+
 ## Enforcement phases
 
 Not all conventions carry equal weight at every stage of work. Use this priority framework to decide what to enforce now vs defer:
