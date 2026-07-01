@@ -58,7 +58,7 @@ Both trailers survive squash-merge in the commit body.
 | Scope | Covers |
 |---|---|
 | `templates` | Template files in `templates/` |
-| `skills` | Skill definitions in `skills/` |
+| `skills` | Skill definitions in `skills/` — see [`skills/README.md`](./skills/README.md) for authoring and portability guidelines |
 | `decisions` | Decision records in `docs/decisions/` |
 | `ci` | CI/CD pipeline configuration |
 | `deps` | Dependency updates |
