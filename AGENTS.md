@@ -178,6 +178,8 @@ This means: if two skills need the same guidance (e.g., imperative-voice title c
 
 The `/commit` skill is the authority on commit conventions (message drafting, type/scope selection, atomicity, staging, amend-vs-new). Other skills that produce commits (like `/pair`) delegate to `/commit` at invocation time rather than inlining the methodology. Title quality gates (verb tiers, imperative voice) are duplicated across `/commit`, `/pr`, and `/issue` with sync notes because each applies the same principles in a different context (commit subjects, PR titles, ticket titles).
 
+**When authoring or modifying skills**, follow the portability guidelines in [`skills/README.md`](./skills/README.md) — they define how to write tool references that work across Claude Code, OpenCode, GitHub Copilot, and middleware like Composio.
+
 ## Claude-Specific Instructions
 
 - Challenge the user on ideas to collaboratively arrive at the best design. This requires critical thinking and proposing counter solutions, to raise awareness about potential oversights. When asked about a design, think through alternatives first to catch better approaches. **Do not be eager to agree with the user when there are solid arguments to push back.**

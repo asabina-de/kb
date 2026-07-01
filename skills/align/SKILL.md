@@ -79,7 +79,7 @@ For each migration step, check whether the target repo has already applied it:
 
 **Files:**
 - Does the file exist? Does its content match the expected pattern?
-- Use `Grep` for pattern matching (e.g. "does CONTRIBUTING.md have an 'AI Co-authorship' section?")
+- Search file contents for pattern matches (e.g. "does CONTRIBUTING.md have an 'AI Co-authorship' section?")
 - Compare against the KB template version for drift
 
 **Repo settings:**
@@ -88,7 +88,7 @@ For each migration step, check whether the target repo has already applied it:
 - Check observable settings via `gh api repos/{owner}/{repo}` if `gh` is available
 
 **Tickets:**
-- Fetch open issues from Linear (`list_issues` filtered by project/team)
+- Fetch open issues from Linear (e.g. `list_issues` filtered by project/team)
 - Run each title through the quality gate: imperative voice, verb tiers, statement detection, truncation check
 - Check descriptions for DoD presence
 - Flag scope issues: overly broad tickets, missing breakdown
@@ -192,7 +192,7 @@ Migration plan ({N} steps)
 Execute all auto steps? (manual/destructive steps are always individual)
 ```
 
-Use `AskUserQuestion` with options:
+Confirm with the user, offering these options:
 - **Execute all auto steps** — run all non-destructive automated steps, then present manual/destructive ones individually
 - **Step through one by one** — present each step for individual approval
 - **Skip to specific step** — jump to a numbered step
@@ -204,7 +204,7 @@ For each approved step:
 
 1. **Announce** what's about to happen and which resource type it affects.
 2. **Execute** the change:
-   - **File changes:** `Edit` / `Write` / `Bash` (for `git mv`, `git rm`)
+   - **File changes:** edit files in-place, write new files, or run shell commands (for `git mv`, `git rm`)
    - **Repo settings:** surface `gh` CLI commands for the operator. On explicit approval ("go ahead"), execute them. Never auto-execute external changes.
    - **Ticket changes:** delegate to the `/issue` skill for title rewrites and scope fixes. Present proposed changes and get approval before applying.
    - **Manual steps:** print instructions clearly. Mark as done only when the operator confirms they've completed it.

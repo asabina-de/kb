@@ -62,7 +62,7 @@ The goal is to surface these issues once so the operator can fix them — not to
 
 ### Step 2 — Read the diff and check staging
 
-Run via `Bash`:
+Run in the shell:
 
 - `git status` — to see what's staged vs unstaged, untracked files
 - `git diff --cached` — staged changes (this is what `git commit` will include)
@@ -207,12 +207,12 @@ Base this on what the git history actually shows, reconciled with the org kb if 
 
 ### Step 3 — Confirm and write
 
-Use `AskUserQuestion` to confirm:
+Confirm with the user:
 
 - **Where to write:** CONTRIBUTING.md (create or append section) / AGENTS.md (append section) / README.md (append section) / Other
 - **Content looks good?** with the drafted section shown in chat
 
-On confirmation, write or append the section to the chosen file via `Write` or `Edit`.
+On confirmation, write or append the section to the chosen file.
 
 ### Step 4 — Done
 

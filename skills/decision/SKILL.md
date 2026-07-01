@@ -31,7 +31,7 @@ decision skill  →  decision record (with action items in canonical sections)  
 [HITL gate: human reviews, edits, greenlights the record]
   │
   ▼
-issue       →  proposes tickets in chat → confirms via AskUserQuestion → creates tickets
+issue       →  proposes tickets in chat → confirms with the user → creates tickets
   │
   ▼
 Linear: LIN-NNN annotations written back into the record
@@ -65,13 +65,13 @@ Heuristic: extract the 2–4 most distinguishing nouns/noun-phrases from the pro
 
 ## Tools declared in allowed-tools
 
-- `Task` — spawn parallel subagents for independent web research
-- `WebSearch`, `WebFetch` — direct research from the main agent when needed
-- `AskUserQuestion` — the one-shot batched-clarification tool
-- `Glob`, `Grep`, `Read` — scope discovery across `docs/decisions/**`, `docs/TODO.md`, `CLAUDE.md`
-- `Write`, `Edit` — creating new records and extending existing ones
+- Parallel subagents — investigate independent web research questions concurrently
+- Web search and page fetching — direct research from the main agent when needed
+- User clarification — the one-shot batched-clarification mechanism
+- File search and reading — scope discovery across `docs/decisions/**`, `docs/TODO.md`, `CLAUDE.md`
+- File writing and editing — creating new records and extending existing ones
 - Linear MCP read tools — discovering related tickets and existing Linear docs
-- `mcp__claude_ai_Linear__save_document` — for the strategy/process routing path
+- Linear document saving (e.g. `save_document`) — for the strategy/process routing path
 
 The `allowed-tools` declaration pre-approves tool *categories*. For scoped file writes, the user should configure Claude Code settings to pre-approve paths (see **Required grants** at the bottom).
 
@@ -104,11 +104,11 @@ Check `permissions.allow` for entries matching `Write(docs/decisions/**)` and `E
 > { "permissions": { "allow": ["Write(docs/decisions/**)", "Edit(docs/decisions/**)"] } }
 > ```
 
-Offer two options via `AskUserQuestion`: **Proceed with prompts** / **Bail — I'll configure first**. If the grants are present, skip this entirely.
+Offer two options to the user: **Proceed with prompts** / **Bail — I'll configure first**. If the grants are present, skip this entirely.
 
 ### Tool availability
 
-If `WebSearch`, `WebFetch`, `Task`, or the Linear MCP tools are unavailable for policy or environment reasons, degrade gracefully: produce a note based on existing context only, and flag in the Status Log that web/Linear/subagent research was skipped.
+If web search, page fetching, parallel subagents, or the Linear MCP tools are unavailable for policy or environment reasons, degrade gracefully: produce a note based on existing context only, and flag in the Status Log that web/Linear/subagent research was skipped.
 
 ## Phase 1 — Interpret and route
 
@@ -117,7 +117,7 @@ Restate the prompt in one or two sentences. Be explicit about the kind of design
 Then apply the **routing test** from the asabina kb framework:
 
 - **Code-adjacent** — architecture, implementation, tech stack, APIs, deployment, testing, tooling, developer experience, data model, security patterns → **repo** (`docs/decisions/`)
-- **Strategy / process / team** — business strategy, positioning, marketing/GTM, team process, product prioritization rationale, cross-project org decisions → **Linear document** (via `save_document`)
+- **Strategy / process / team** — business strategy, positioning, marketing/GTM, team process, product prioritization rationale, cross-project org decisions → **Linear document** (saved via Linear's document API, e.g. `save_document`)
 - **Ambiguous** → flag explicitly; ask in Phase 2 rather than silently defaulting
 
 The kb's key test: *"Does this decision affect how code is written, deployed, or maintained?"* → repo. *"Is this about what to build or how to operate as a team?"* → Linear.
@@ -136,8 +136,8 @@ Fan out read-only queries to discover what already exists. These can run in para
 
 1. **Tag-based note match.** Grep front matter `tags:` lines across `docs/decisions/**/*.md`. Derive candidate tags from the prompt's semantic core. Find notes whose tags overlap. Respect the **too-general guard** (below).
 2. **Content match.** Grep note titles and bodies for load-bearing keywords from the prompt.
-3. **Linear tickets.** `list_issues` filtered by keyword(s). Capture ticket IDs, titles, state, and project.
-4. **Linear documents** (only if Phase 1 leaned Linear-routed). `list_documents` filtered by keyword(s).
+3. **Linear tickets.** Search for related Linear issues (e.g. `list_issues`) filtered by keyword(s). Capture ticket IDs, titles, state, and project.
+4. **Linear documents** (only if Phase 1 leaned Linear-routed). Search for related Linear documents (e.g. `list_documents`) filtered by keyword(s).
 5. **TODO.md stubs.** Read `docs/TODO.md` and grep for related lines (look for existing stubs that link to design notes).
 6. **Related notes cross-graph.** For each candidate match, check its `## Related Design Notes` section for transitive matches.
 
@@ -164,9 +164,9 @@ For each choice: **ask** or **assume**?
 - **Ask** only when (a) the answer would materially change the research or output, AND (b) a reasonable default has a real chance of being wrong.
 - **Assume** everything else.
 
-Issue **all questions in a single `AskUserQuestion` call**. Prefer 0–3 questions; **4 is the hard cap**.
+Issue **all questions in a single clarification round**. Prefer 0–3 questions; **4 is the hard cap**.
 
-If you have zero questions, skip the tool call and write `**No clarification needed — proceeding directly.**` This is the walk-away contract: one interruption max.
+If you have zero questions, skip the clarification and write `**No clarification needed — proceeding directly.**` This is the walk-away contract: one interruption max.
 
 ### Typical Phase 2 question shapes
 
@@ -184,7 +184,7 @@ Write out the locked decisions explicitly. Format:
 > - **D4 (tags):** `layouts`, `abstraction`, `flutter` — *reused from vocabulary*
 > - **D5 (shape):** Add new `## Proposed Solutions` subsections; extend `## Open Questions` — *assumed*
 
-Aim for 4–8 decisions total. **After Phase 4 closes, no more questions for the rest of the run.** Anything that surfaces mid-research goes into the note's `## Open Questions` section, not into a new `AskUserQuestion` call.
+Aim for 4–8 decisions total. **After Phase 4 closes, no more questions for the rest of the run.** Anything that surfaces mid-research goes into the note's `## Open Questions` section, not into a new clarification round.
 
 ## Phase 5 — Research execution
 
@@ -310,7 +310,7 @@ If a claim genuinely has no linkable source (e.g. a conclusion you reasoned to, 
 
 ### Linear doc mode (routing test sent this to Linear)
 
-1. Use `save_document` to create or update a Linear document in the workspace.
+1. Save the document to Linear (e.g. `save_document`) to create or update a Linear document in the workspace.
 2. Content structure mirrors the repo template adapted for Linear's markdown:
    - `# Title`
    - Inline metadata block (tags, date, author) — Linear docs don't support front matter
@@ -367,6 +367,6 @@ The skill's `allowed-tools` declaration pre-approves the tool categories it need
 }
 ```
 
-Linear MCP tools are declared in `allowed-tools` and should not require per-call approval. The strategy-routing path uses `save_document` which needs Linear write access — same grant.
+Linear MCP tools are declared in `allowed-tools` and should not require per-call approval. The strategy-routing path saves documents to Linear which needs Linear write access — same grant.
 
 If these paths aren't pre-approved, the skill will still work but will prompt on each write, breaking the walk-away UX. Configure them before running the skill for the first time.
