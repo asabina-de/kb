@@ -13,7 +13,7 @@ The defining design principles of this skill are:
 
 > **The design note is the single source of truth. The skill reads it, derives tickets, and writes Linear ticket IDs back into it. No parallel work-plan file. No re-modeling.**
 >
-> **Confirm in chat, not via files.** The skill prints proposed tickets in the conversation, confirms with one `AskUserQuestion`, and creates on approval. One invocation, one session.
+> **Confirm in chat, not via files.** The skill prints proposed tickets in the conversation, confirms with the user in one shot, and creates on approval. One invocation, one session.
 >
 > **Idempotent re-runs.** A note that's already been linearized has inline `Linear: LIN-NNN` annotations. The skill detects them and updates instead of duplicating.
 >
@@ -34,7 +34,7 @@ decision skill  →  design note (with action items in canonical sections)
 issue       →  prints proposed tickets in chat
   │
   ▼
-[HITL gate: AskUserQuestion confirmation]
+[HITL gate: user confirmation]
   │
   ▼
 creates tickets + writes Linear: LIN-NNN annotations back into the note
@@ -44,13 +44,13 @@ The human gate on the design note itself is where the real review happens. By th
 
 ## Tools declared in allowed-tools
 
-- `Glob`, `Grep`, `Read` — discover and parse the design note
-- `Edit` — append cross-references and Status Log rows back to the note
-- `WebFetch` — follow URLs referenced in the note when enriching ticket descriptions
-- `AskUserQuestion` — the confirmation gate (and batched clarification if needed)
+- File discovery and reading tools (`Glob`, `Grep`, `Read`) — discover and parse the design note
+- File editing tool (`Edit`) — append cross-references and Status Log rows back to the note
+- URL fetching (`WebFetch`) — follow URLs referenced in the note when enriching ticket descriptions
+- User confirmation (`AskUserQuestion`) — the confirmation gate (and batched clarification if needed)
 - Linear MCP read tools — search for existing tickets, resolve teams/projects, look up statuses and labels
 - `Skill` — invoke the `comment` skill for posting comments to Linear issues
-- Linear MCP write tools — `save_issue`
+- Linear MCP write tools — create or update the issue on Linear (e.g. `save_issue`)
 
 The skill does not declare `Task` — there is no parallel research phase. Ticket derivation is deterministic and serial.
 
@@ -76,7 +76,7 @@ If a tool or command is available to rename the session programmatically, use it
 
 ### Triage: check for duplicates and scope overlap
 
-Before creating any new issue — whether from a design note or freeform — run a tiered check to avoid duplicates, scope overlap, and contradictions in the backlog. This applies in both filing mode and when other skills (pair, freeform conversation) route through `save_issue` to create a ticket.
+Before creating any new issue — whether from a design note or freeform — run a tiered check to avoid duplicates, scope overlap, and contradictions in the backlog. This applies in both filing mode and when other skills (pair, freeform conversation) route through issue creation to create a ticket.
 
 **Tier 0 — Project fit (always run, before anything else):**
 
@@ -92,19 +92,19 @@ When filing a batch, run the check per ticket — different items may route to d
 
 **Tier 1 — Current work (always run, lightweight):**
 - Check the current branch and the last 2 branches worked on (`git branch --sort=-committerdate | head -3`).
-- Cross-reference with GitHub (`mcp__github__list_pull_requests`, `mcp__github__pull_request_read`) to confirm merge state — local state may be stale.
+- Cross-reference with GitHub — list pull requests and read PR details (e.g. `list_pull_requests`, `pull_request_read`) to confirm merge state — local state may be stale.
 - If an in-progress branch covers this scope, surface it: "This looks like it fits in VID-XYZ which is still on branch X — want me to fold it in?"
 
 **Tier 2 — Related issues (always run):**
-- If a ticket ID is known (from the branch name, the design note, or the user's prompt), fetch it and check its related issues (`get_issue` with `includeRelations: true`).
+- If a ticket ID is known (from the branch name, the design note, or the user's prompt), fetch the issue from Linear (e.g. `get_issue`) with relations included and check its related issues.
 - Scan the related issues for scope overlap or contradictions with the proposed new ticket.
 
 **Tier 3 — Backlog scan (run when the issue is complex or duplicates seem likely):**
-- Search the project backlog (`list_issues` filtered by project and team) for tickets with similar titles or keywords.
+- Search for related issues on Linear (e.g. `list_issues`, filtered by project and team) for tickets with similar titles or keywords.
 - If matches are found, present them: "These existing tickets look related — should we extend one of them, or is this genuinely new?"
 - Propose resolution: merge scopes, re-prioritize an existing ticket, mark as duplicate, or confirm isolation.
 
-If the triage surfaces a match, present options via `AskUserQuestion`:
+If the triage surfaces a match, ask the user to choose:
 - **Fold into VID-XYZ** — add scope to the existing ticket (comment the new context)
 - **Stack on VID-XYZ** — create as a sub-issue or related issue
 - **Mark as duplicate** — set `duplicateOf` on the old ticket, transition to Cancelled, and **comment why** on the cancelled ticket (see cancellation rule below)
@@ -148,7 +148,7 @@ Check `permissions.allow` for entries matching `Edit(docs/decisions/**)`. If the
 >
 > Proceed anyway, or bail and configure first?
 
-Offer two options via `AskUserQuestion`: **Proceed with prompts** / **Bail — I'll configure first**. If the grant is present, skip this entirely.
+Ask the user to choose: **Proceed with prompts** / **Bail — I'll configure first**. If the grant is present, skip this entirely.
 
 ### Verify the note
 
@@ -253,13 +253,13 @@ Skipped:
 
 ### Confirm
 
-Issue one `AskUserQuestion` call. Combine the confirmation with any unresolved routing questions from Phase 2 into a single batch:
+Confirm with the user. Combine the confirmation with any unresolved routing questions from Phase 2 into a single batch:
 
 - **Always ask:** "Create these {N} tickets?" with options: **Yes, create all** / **Exclude some — let me pick** / **Bail**
 - **Only if team/project is unresolved:** include a question for team and/or project selection
 - **Only if candidate count is large (>10):** include a question about narrowing scope
 
-If the user chooses "Exclude some", issue one follow-up `AskUserQuestion` with multiSelect listing the candidates so the user can deselect. This is the only case where a second question is permitted.
+If the user chooses "Exclude some", ask one follow-up question with multiSelect listing the candidates so the user can deselect. This is the only case where a second question is permitted.
 
 If the user bails, stop. Print nothing further.
 
@@ -268,7 +268,7 @@ If the user bails, stop. Print nothing further.
 For each confirmed ticket:
 
 1. **Existing detection.** If the note's source-anchor area already has an inline `Linear: LIN-NNN` annotation, or if a Linear search by source anchor URL in the description footer finds an existing ticket, treat as **update**. Otherwise **create**.
-2. **Create:** call `save_issue` with team, project, title, description (including the source-anchor footer), priority, parent (if dependency-hinted as a sub-task — but default to flat unless the note structure clearly implies sub-tasking). Keep the description to 2–5 sentences of context followed by a **"Done when:" checklist** — a markdown checkbox list where each item is a concrete, verifiable condition. Use checklist style (`- [ ] condition`) not prose style ("Done when X is true"). Checklist items can be checked off as they're completed, giving visibility into partial progress. Each item should be specific enough that someone can check it without reading the full context. Example:
+2. **Create:** create the issue on Linear (e.g. `save_issue`) with team, project, title, description (including the source-anchor footer), priority, parent (if dependency-hinted as a sub-task — but default to flat unless the note structure clearly implies sub-tasking). Keep the description to 2–5 sentences of context followed by a **"Done when:" checklist** — a markdown checkbox list where each item is a concrete, verifiable condition. Use checklist style (`- [ ] condition`) not prose style ("Done when X is true"). Checklist items can be checked off as they're completed, giving visibility into partial progress. Each item should be specific enough that someone can check it without reading the full context. Example:
    ```
    **Done when:**
    - [ ] Export existing data as CSV
@@ -276,21 +276,21 @@ For each confirmed ticket:
    - [ ] Document migration steps in README
    ```
    Prepend `*[ai:claude-code]*` as the first line of the description so authorship is visible before the content. Do not copy prose, context, or reasoning from the design note into the description — the backlink is the bridge. If there is important context that should accompany the ticket, post it as a comment after creation instead.
-3. **Update:** call `save_issue` with `id` set to the existing `LIN-NNN`, updating only fields that have meaningfully changed (description content, priority). Don't touch state, assignee, or labels unless explicitly indicated.
+3. **Update:** update the issue on Linear (e.g. `save_issue`) with `id` set to the existing `LIN-NNN`, updating only fields that have meaningfully changed (description content, priority). Don't touch state, assignee, or labels unless explicitly indicated.
 4. **Capture** the returned ticket ID and URL.
 
 ### Write back to the note
 
-After all `save_issue` calls succeed:
+After all issue creation calls succeed:
 
 5. **Re-read the note** (in case of any concurrent edits, though unlikely).
 6. **Append `Linear: LIN-NNN` cross-references.** For each newly-created ticket, find the source action item line in the note and append ` (Linear: [LIN-NNN]({url}))` immediately after the item text. For multi-line items, append on a new line indented to the item's level.
 7. **Append a Status Log row** to the note: today's date, `claude` as author, the comma-separated list of created/updated ticket IDs in the Related Tickets column, and a Notes column summary like "Filed N tickets via issue (M new, K updated)".
-8. **Save the note** via `Edit`.
+8. **Save the note** by editing the file in place.
 
 ### Partial failure
 
-If any `save_issue` call fails partway through:
+If any issue creation call fails partway through:
 
 - Stop the loop. Do not roll back successful tickets.
 - Print which tickets succeeded and which failed.
@@ -312,8 +312,8 @@ Entered when Phase 0 detects a Linear URL or issue ID. The filing-mode phases (1
 ### Load the issue
 
 Fetch in parallel:
-- `get_issue` — title, description, status, labels, priority
-- `list_comments` — full comment thread, ordered by `createdAt`
+- Fetch the issue from Linear (e.g. `get_issue`) — title, description, status, labels, priority
+- Fetch existing comments (e.g. `list_comments`) — full comment thread, ordered by `createdAt`
 
 Print a compact header so the user can confirm you're looking at the right thing:
 
@@ -345,16 +345,16 @@ Print both drafts in chat before asking for confirmation. Make it easy to scan.
 
 ### Confirm and write
 
-Issue one `AskUserQuestion` with:
+Confirm with the user:
 - **Always:** "Post this comment?" — **Yes** / **Edit first** / **Skip**
 - **Only if an anchor update was drafted:** "Apply the title/description update?" — **Yes** / **Edit first** / **Skip**
 
-Both questions can be batched into a single `AskUserQuestion` call.
+Both questions can be batched into a single confirmation.
 
 On "Edit first": ask what to change, revise, re-present, confirm again.
 
 On approval, write in this order:
-1. `save_issue` for any title/description changes (only if confirmed)
+1. Update the issue on Linear (e.g. `save_issue`) for any title/description changes (only if confirmed)
 2. `Skill("comment", ...)` to delegate the comment to the comment skill (only if confirmed) — describe the issue ID, comment title (e.g. "Assessment", "Context", "Scope refinement"), the originating skill name ("issue"), and the comment body. The comment skill handles formatting, provenance, and threading.
 
 ### Summary
@@ -418,14 +418,14 @@ If any title triggered the quality gate, show both versions:
            Warning: mechanism verb 'Implement' leading
 ```
 
-Issue one `AskUserQuestion`: "Create these {N} issues?" with options: **Yes, create all** / **Exclude some** / **Edit titles** / **Bail**
+Ask the user: "Create these {N} issues?" with options: **Yes, create all** / **Exclude some** / **Edit titles** / **Bail**
 
 - **Edit titles** — the user provides corrections; revise and re-present.
-- **Exclude some** — one follow-up `AskUserQuestion` with multiSelect.
+- **Exclude some** — one follow-up question with multiSelect.
 
 ### Create tickets
 
-For each confirmed ticket, call `save_issue` with team, project, title, description, priority, and labels. The same rules as filing mode apply:
+For each confirmed ticket, create the issue on Linear (e.g. `save_issue`) with team, project, title, description, priority, and labels. The same rules as filing mode apply:
 
 - Descriptions are minimal anchors (2–4 sentences max)
 - Prepend `*[ai:claude-code]*` to the description
@@ -581,11 +581,11 @@ Warning:   <what triggered — e.g. "mechanism verb 'Implement' leading", "78 ch
 - **Don't skip the DoD.** Every ticket needs a "Done when:" checklist in the description — markdown checkboxes (`- [ ] condition`), not a prose sentence. Each item should be concrete and verifiable — not "done when implemented" but specific observable conditions. Checklist style enables partial-progress tracking (items can be checked off as completed). If the source material doesn't imply clear DoD items, draft them from the action item's intent and surface them in the confirmation gate for the user to refine.
 - **Don't default to description updates in iteration mode.** The user's intent is almost always to add a comment. Only propose a title/description change when the prompt explicitly targets the anchor (e.g. "the title is wrong", "rewrite the description"). When in doubt, put it in a comment.
 - **Don't run filing-mode phases in iteration mode.** If a Linear URL or issue ID was detected, skip straight to the iteration phase. Do not look for design notes, parse action items, or propose ticket creation.
-- **Don't silently rewrite comment history.** The skill can only add new comments via `save_comment`. It cannot edit or delete existing comments. If a prior comment is wrong, post a follow-up — don't attempt to alter the record.
+- **Don't silently rewrite comment history.** The skill can only post new comments on the issue (e.g. `save_comment`). It cannot edit or delete existing comments. If a prior comment is wrong, post a follow-up — don't attempt to alter the record.
 - **Don't ask more than one round of clarification** (the "Exclude some" follow-up is the only permitted second question). If something surfaces during creation that should have been asked, note it in the summary and stop.
-- **Don't follow URLs unbounded.** Use `WebFetch` only to enrich descriptions for URLs *already referenced in the note*, not to search the web. This skill is deterministic; research belongs in `decision`.
+- **Don't follow URLs unbounded.** Only fetch URLs to enrich descriptions for URLs *already referenced in the note*, not to search the web. This skill is deterministic; research belongs in `decision`.
 - **Don't cancel or duplicate tickets without commenting why.** Every state change that removes a ticket from the active backlog must carry a comment explaining the reason. A cancelled ticket with no explanation is a dead end for backlog reviewers. See the cancellation rule in Phase 0.
-- **Don't move issues across teams without setting team and project together.** Always set both in a single `save_issue` call to avoid transient inconsistency where the issue sits in a team that doesn't own the target project.
+- **Don't move issues across teams without setting team and project together.** Always set both in a single issue update call to avoid transient inconsistency where the issue sits in a team that doesn't own the target project.
 
 ## Required grants
 
@@ -603,4 +603,4 @@ The skill's `allowed-tools` declaration pre-approves the tool categories. For sc
 
 The skill checks for this grant in Phase 0 and warns if it's missing.
 
-Linear MCP write tool (`save_issue`) is declared in `allowed-tools` and should not require per-call approval. If it does, the walk-away UX breaks — configure pre-approval before first use. Comments are posted via `Skill("comment", ...)`, which requires the `Skill` tool to be allowed so the comment skill can be invoked.
+The Linear MCP write tool for issue creation (e.g. `save_issue`) is declared in `allowed-tools` and should not require per-call approval. If it does, the walk-away UX breaks — configure pre-approval before first use. Comments are posted via `Skill("comment", ...)`, which requires the `Skill` tool to be allowed so the comment skill can be invoked.

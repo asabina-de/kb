@@ -23,7 +23,7 @@ Run in parallel:
 - **Branch:** `git branch --show-current`
 - **Commits on branch:** `git log --oneline main..HEAD` (or `git log --oneline HEAD ^origin/main` if on remote)
 - **Push state:** `git status -sb` — is the branch already pushed to origin?
-- **Remote default branch:** use `mcp__github__get_file_contents` or `mcp__github__list_branches` to determine the default branch — don't hardcode `main`
+- **Remote default branch:** read the file from GitHub (e.g. `get_file_contents`) or list branches (e.g. `list_branches`) to determine the default branch — don't hardcode `main`
 - **Repo merge conventions:** Read `AGENTS.md` and `CONTRIBUTING.md` at the repo root (if they exist) for merge strategy guidance — e.g. squash vs merge commit, stack handling, branch cleanup. Store any findings for use in Phase 6.
 - **Repo config:** Check for `.github-settings.yaml` at the repo root (see Phase 1.1 below).
 
@@ -41,7 +41,7 @@ Check for `.github-settings.yaml` at the repo root. This file declares the repo'
 
 **If `.github-settings.yaml` exists:**
 
-Read it and store the declared settings for use in Phase 6 (merge strategy). Compare against what's observable from the GitHub API (e.g. allowed merge methods via `mcp__github__search_repositories`). If a mismatch is detected, surface it as a warning in the Phase 4 pitch:
+Read it and store the declared settings for use in Phase 6 (merge strategy). Compare against what's observable from the GitHub API (e.g. allowed merge methods by querying repository settings from GitHub (e.g. `search_repositories`)). If a mismatch is detected, surface it as a warning in the Phase 4 pitch:
 
 ```
 ⚠️  Repo config drift detected:
@@ -102,7 +102,7 @@ Fields:
    Fix:
      gh api repos/{owner}/{repo} -X PATCH -f squash_merge_commit_title=PR_TITLE
    ```
-2. **On operator request: run the commands directly.** If the operator says "go ahead" or "fix it", the skill executes the `gh` commands itself. Use `AskUserQuestion` to gate — never auto-fix drift without explicit approval.
+2. **On operator request: run the commands directly.** If the operator says "go ahead" or "fix it", the skill executes the `gh` commands itself. Confirm with the user to gate — never auto-fix drift without explicit approval.
 3. **Never silently modify.** Even in yolo mode, repo settings changes require an explicit gate. These are org-wide side effects, not branch-scoped changes.
 
 ## Phase 2 — Detect base branch
@@ -253,7 +253,7 @@ Create this PR? yes / edit / cancel
 
 If the title quality gate fired, the `Suggested:` and `Warning:` lines appear. The operator can accept the original, use the suggestion, or type their own via the `edit` flow. If no issues were detected, omit those lines.
 
-Use `AskUserQuestion` to get the response. Options:
+Ask the user for their response. Options:
 - **yes** → proceed to Phase 5
 - **edit** → the operator pastes corrections; apply them and re-pitch
 - **cancel** → stop, no PR created
@@ -270,7 +270,7 @@ Use `AskUserQuestion` to get the response. Options:
    ```
    **Do NOT use `mcp__github__create_pull_request` for PR creation.** The MCP tool escapes newlines as literal `\n` in the body parameter, producing a single-line wall of text on GitHub. This was observed on multiple PRs (yo-convo-bot#50, ivos-trades#4) and is a known limitation of how the MCP tool serializes multi-line strings. The `gh` CLI with heredocs preserves actual newlines. Other GitHub MCP tools (read, update, merge) are fine — the issue is specific to the `body` field on `create_pull_request`.
 3. **Print the PR URL** from the `gh` output.
-4. **Transition the ticket:** if a ticket ID was extracted from the branch name in Phase 1, call `save_issue` with `id: {ticket-id}` and `state: "In Review"`. This is unconditional — a PR being open means the work is ready for review.
+4. **Transition the ticket:** if a ticket ID was extracted from the branch name in Phase 1, update the issue on Linear (e.g. `save_issue`) with `id: {ticket-id}` and `state: "In Review"`. This is unconditional — a PR being open means the work is ready for review.
 
 ## Phase 6 — Monitor CI
 
@@ -278,7 +278,7 @@ After the PR is created, launch a **background subagent** to monitor CI status. 
 
 The subagent should:
 
-1. **Poll CI checks** using `mcp__github__pull_request_read` periodically or `Bash` with `gh pr checks <pr-number> --watch` until all checks complete or a timeout (10 minutes) is reached.
+1. **Poll CI checks** by reading the PR details from GitHub (e.g. `pull_request_read`) periodically or `Bash` with `gh pr checks <pr-number> --watch` until all checks complete or a timeout (10 minutes) is reached.
 2. **On all checks green:**
    - Report to the user: "CI passed on PR #N. Ready to merge."
    - Determine the merge strategy (see **Merge strategy** below).
@@ -290,7 +290,7 @@ The subagent should:
      4. Transition linked tickets to Done.
 3. **On any check red:**
    - Report the failure: which check failed, link to the logs.
-   - Fetch the failure details via `mcp__github__pull_request_read` and `Bash` with `gh run view <run-id> --log-failed` for actionable output.
+   - Fetch the failure details by reading the PR from GitHub (e.g. `pull_request_read`) and `Bash` with `gh run view <run-id> --log-failed` for actionable output.
    - Summarize what went wrong and suggest next steps (e.g. "lint failure in X — fixable here" or "test timeout — needs investigation").
    - Ask the user how to proceed: fix it now (resume pair), investigate further, or leave it for later.
 4. **On timeout (no checks appear within 2 minutes):**
@@ -330,12 +330,12 @@ The skill must determine *how* to merge before offering the merge action. The de
    NO  → continue to step 2
 
 2. Can the repo's merge method be detected from GitHub settings?
-   (e.g. via mcp__github__search_repositories → allowed merge types)
+   (e.g. by querying repository settings from GitHub (e.g. `search_repositories`) → allowed merge types)
    YES → use it as the default, but still surface to operator
    NO  → ask the operator: "No merge strategy documented. Squash, merge commit, or rebase?"
 ```
 
-**When repo convention conflicts with best-practices** (e.g. convention says squash but the PR is part of a stack that would lose traceability), surface the conflict to the operator via `AskUserQuestion`. Never silently override the repo convention — and never silently follow it when it would cause harm. Present the trade-off and let the operator decide.
+**When repo convention conflicts with best-practices** (e.g. convention says squash but the PR is part of a stack that would lose traceability), surface the conflict to the operator by asking the user. Never silently override the repo convention — and never silently follow it when it would cause harm. Present the trade-off and let the operator decide.
 
 ### Stack-aware merging
 
@@ -391,7 +391,7 @@ Group by platform on separate lines for readability. GitHub parses `#N` (numeric
 - **Don't create the PR without pitching.** The operator must see and approve the draft.
 - **Don't fabricate the test plan.** Derive it from the diff or say "verify manually" — don't invent test steps that don't exist.
 - **Don't push without noting it.** If a push is needed, say so before running it.
-- **Don't ask more than one round of questions.** All clarification happens in the pitch → edit loop, not via separate `AskUserQuestion` calls before Phase 4.
+- **Don't ask more than one round of questions.** All clarification happens in the pitch → edit loop, not via separate user prompts before Phase 4.
 - **Don't suggest merging before CI is green.** A freshly created PR has no check data. Wait for the CI monitor subagent to report results before offering merge options.
 - **Don't merge a stack tip with squash.** Squash-merging only the tip of a linear stack collapses N PRs into 1 commit — intermediate ticket IDs, PR boundaries, and review context are lost. For squash repos, always merge each PR individually, bottom-up.
 - **Don't merge without surfacing the strategy.** Always tell the operator what merge method and stack handling you're about to use, and wait for confirmation. Never silently default.

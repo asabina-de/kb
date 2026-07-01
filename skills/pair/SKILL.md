@@ -81,10 +81,10 @@ If the user passed a branch name directly rather than a ticket ID, check it out 
 
 Once the ticket ID is known and the branch is checked out, fetch all of these in parallel:
 
-- **Linear ticket:** `get_issue` with the ticket ID. Capture title, description, state, priority, labels, project, parent issue.
-- **Linear comments:** `list_comments` — read existing comments. If a previous pair session left assessment/plan/spike comments, note them. This is the resumption path.
+- **Linear ticket:** fetch the Linear issue (e.g. `get_issue`) with the ticket ID. Capture title, description, state, priority, labels, project, parent issue.
+- **Linear comments:** fetch existing comments (e.g. `list_comments`) — read existing comments. If a previous pair session left assessment/plan/spike comments, note them. This is the resumption path.
 - **Branch state:** `git log --oneline -10`, `git status`, `git diff main...HEAD` (or appropriate base branch) to understand what's already been done on this branch.
-- **Codebase orientation:** Use `Task` with `subagent_type: Explore` to understand the areas of the codebase most likely relevant to the ticket (based on ticket title/description keywords).
+- **Codebase orientation:** Use a subagent to understand the areas of the codebase most likely relevant to the ticket (based on ticket title/description keywords).
 - **Repo conventions:** Read `CLAUDE.md` / `AGENTS.md` / `CONTRIBUTING.md` at the repo root for development workflow, testing, and quality requirements.
 
 ### Branch fit check
@@ -95,7 +95,7 @@ After loading context, compare the files the planned work will touch against the
 
 Detected when a planned change touches files unrelated to the current branch's purpose (e.g. fixing an unrelated bug, adding a feature that belongs on a different ticket).
 
-- **Checkpoint mode:** Surface to the navigator before doing anything. Present three options via `AskUserQuestion`: (a) continue on the current branch, (b) navigator cuts a new branch, (c) file a ticket and defer. Wait for the answer before proceeding.
+- **Checkpoint mode:** Surface to the navigator before doing anything. Present three options and ask the user: (a) continue on the current branch, (b) navigator cuts a new branch, (c) file a ticket and defer. Wait for the answer before proceeding.
 - **Yolo mode:** Create a local `tmp/<slugified-title>` branch and continue work there. Do **not** push it. At session wrap-up, surface it: "I branched off `tmp/<slug>` for this out-of-scope work — file a ticket and rename it, or drop it?" On drop: run `git branch -D tmp/<slug>` and log what was discarded.
 
 Guards: never push a `tmp/` branch. Never cut a named branch or file a ticket autonomously — both are HITL actions.
@@ -113,7 +113,7 @@ If no mismatch is detected, proceed without comment.
 
 ### Transition to In Progress
 
-After the branch is checked out and the ticket is loaded, call `save_issue` with `id: {ticket-id}` and `state: "In Progress"`. Do this unconditionally — picking up the branch is the signal that work has started. No comment needed; the state change speaks for itself.
+After the branch is checked out and the ticket is loaded, update the issue on Linear (e.g. `save_issue`) with `id: {ticket-id}` and `state: "In Progress"`. Do this unconditionally — picking up the branch is the signal that work has started. No comment needed; the state change speaks for itself.
 
 ### Rename the session
 
@@ -182,7 +182,7 @@ Store the returned anchor comment ID — spike findings and other assessment fol
 
 ### Spike on feasibility (parallel)
 
-For each feasibility unknown, spawn a `Task` subagent to investigate:
+For each feasibility unknown, spawn a subagent to investigate:
 
 - Read relevant source code, docs, or external references
 - Try small proof-of-concept explorations (read-only or in scratch space)
@@ -260,7 +260,7 @@ Blocked:
  (none)
 ```
 
-Use `AskUserQuestion` for the items that need input. In pair programming, asking questions as they arise is expected. Batch questions that are ready at the same time rather than asking them one by one.
+Ask the user for the items that need input. In pair programming, asking questions as they arise is expected. Batch questions that are ready at the same time rather than asking them one by one.
 
 ## Phase 2 — Plan the work
 
@@ -329,9 +329,9 @@ For each step:
 
 1. **Announce** what you're about to do. "Starting Step 1 — adding the OAuth callback route."
 2. **Branch fit check.** Before touching any files, verify this step's files fit the branch purpose. Apply the Category A / Category B protocols from the Phase 0 branch fit check if a mismatch is detected.
-3. **Implement** the change. Use `Edit` / `Write` for code changes.
+3. **Implement** the change. Make the code changes.
 4. **Decision record maintenance.** If the step touches a file in `docs/decisions/`, append a Status Log row: today's date, `claude` as author, the ticket ID in Related Tickets, and a concise note stating *what changed and why* — not just that an edit happened. Bake the purpose in so the row is scannable on its own (e.g. "Added disclosure-provider pricing comparison via pair KB-9", not a bare "Updated via pair KB-9"). This keeps the record's audit trail intact. If the step writes research or spike findings into the record (or any doc), apply the **Source-linking** rule from Phase 1 — every finding links inline to its source.
-5. **Run quality checks** if the repo has them (lint, typecheck, test). Use `Bash` for this. If a check fails, fix it before presenting.
+5. **Run quality checks** if the repo has them (lint, typecheck, test). Run these in the shell. If a check fails, fix it before presenting.
 6. **Present the change.** Print a concise summary of what changed and why. Don't dump the full diff — describe the intent and highlight non-obvious decisions.
 7. **Draft commit message.** In both modes, delegate to the `/commit` skill for message drafting. The `/commit` skill handles convention lookup, type/scope selection, atomicity checks, and message formatting. Never draft commit messages freehand.
 8. **Checkpoint.**
@@ -355,7 +355,7 @@ Commit: `a1b2c3d`")
 
 ### Parallel execution
 
-When the plan has independent steps, use `Task` subagents to work on them concurrently:
+When the plan has independent steps, use subagents to work on them concurrently:
 
 - Each subagent receives the full plan context and its assigned step
 - Each subagent writes its changes and runs its tests
@@ -415,7 +415,7 @@ If there are uncommitted changes (checkpoint mode only):
 
 ### PR creation
 
-If the branch looks complete relative to the ticket scope, **delegate to the `/pr` skill.** Do not duplicate PR creation logic here — invoke it via the `Skill` tool with `skill: "pr"`.
+If the branch looks complete relative to the ticket scope, **delegate to the `/pr` skill.** Do not duplicate PR creation logic here — invoke it via the skill system with `skill: "pr"`.
 
 The `/pr` skill handles: base branch detection (including stacked PRs), drafting the title and body from commits and the Linear ticket, pitching in chat for approval, pushing, creating via `gh`, transitioning the ticket to In Review, launching a background CI monitor, and **merge strategy** (convention reading, stack-aware merging, closing keyword bookkeeping). Do not duplicate merge logic here.
 
