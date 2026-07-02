@@ -144,6 +144,27 @@ Branch work so far:
 
 If prior pair comments indicate the session was interrupted, note what was completed and what remains.
 
+### Design ticket detection
+
+After presenting the ticket, check whether the work is primarily **visual design** rather than code implementation. Signals:
+
+- **Labels:** `Design`, `Brand`, `Visual`, `UI Design` (not just `UI` which may be frontend code)
+- **Title/description keywords:** "design in Figma", "brand graphic", "visual concept", "design exploration", "mockup", "layout in Figma", "Figma Slides", "design system", "cover art", "logo"
+- **Files touched:** exclusively Figma work (no code changes expected), DESIGN.md, `.imagegen-output/`
+- **Prior session comments:** references to `/imagegen`, `figma-conventions`, design directions, visual iterations
+
+If the ticket is design-focused, delegate to the `/design` skill:
+
+> "This looks like a design ticket — delegating to `/design` which orchestrates the visual design workflow (imagegen → direction selection → Figma implementation). You can switch back to `/pair` anytime if code work comes up."
+
+Invoke `Skill("design", "{ticket-id}")` and stop — do not continue with pair's Phase 1. The `/design` skill handles its own assessment, planning, and execution phases tailored to visual work.
+
+If the signals are ambiguous (e.g. a ticket that involves both UI code and Figma design), ask the navigator:
+
+> "This ticket has both code and design aspects. Start with `/design` for the visual work, or `/pair` straight through?"
+
+If the `/design` skill is not available (not yet implemented), continue with the standard pair workflow and note the limitation.
+
 ## Phase 1 — Assess and derisk
 
 ### Identify unknowns
