@@ -361,13 +361,15 @@ For each step:
 
    **Yolo commit discipline:** Commit immediately after each step passes quality checks — before starting the next step. Do not batch changes across steps and commit at the end. Committing on the go preserves the cleanest atomic boundary: each step's files haven't yet been mixed with the next step's. When a step spans multiple files (implementation + its tests), include all of them in the same commit. If the step also updates docs/config (env var examples, changelogs), bundle those in the same commit too — one logical concern, one commit.
 
+9. **Push immediately.** After each commit (checkpoint or yolo), push to remote without asking. Pushing is not a HITL gate — the merge is. Pushing keeps the remote branch current, enables GitHub review of individual commits, and prevents work loss. Never ask "shall I push?" — just push.
+
 ### Open the PR early
 
 After the first commit is pushed (Step 1), **immediately delegate to the `/pr` skill** to open the PR. Don't wait for all steps to complete — the PR is a visibility and review surface, not a completion gate. The PR title and body can reference the plan; subsequent commits appear as incremental diffs reviewable from the GitHub UI or mobile app.
 
 This means the PR opens while work is still in progress. That's intentional — the navigator (and teammates) can review each commit as it lands, provide feedback on GitHub, and track progress without needing the CLI session open.
 
-If the PR already exists (resuming a prior session), skip this step.
+If the PR already exists (resuming a prior session), skip this step — just push.
 
 ### Comment step completions to Linear
 
