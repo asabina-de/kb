@@ -44,6 +44,13 @@ The skill supports two commit modes. The navigator can switch between them at an
 
 This prevents atomic steps (like adding a dependency) from being tangled with subsequent implementation changes in the same uncommitted working tree. The hook fires on: package.json, package-lock.json, pnpm-lock.yaml, yarn.lock, Cargo.toml, Cargo.lock, flake.nix, flake.lock, pyproject.toml, poetry.lock, uv.lock, go.mod, go.sum, Gemfile, Gemfile.lock, mix.exs, mix.lock, and *.cabal files.
 
+**Signed vs unsigned commits.** Default to `git commit` / `git push` — these produce signed, verified commits via the user's SSH key and 1Password. Fall back to `git mcommit` / `git mpush` (unsigned, HTTPS-based) only when:
+
+- The navigator has explicitly said they're leaving the computer ("I'm stepping away", "walk-away mode", "keep going while I'm out"), OR
+- The navigator has urged the agent to plow through something and signing fails (missed Touch ID prompt)
+
+If a session has used `mcommit`/`mpush`, the PR contains unsigned commits — which is the intended signal for AI-produced work. **The merge gate is harder for unsigned PRs:** do not merge without explicit human approval, because the entire commit chain lacked interactive verification. The merge is where the human-in-the-loop catches up.
+
 **System-scope commands are always HITL, even in yolo mode.** Commands that modify system state (`brew install`, `npm install -g`, `pip install`, `cargo install`, etc.) are never auto-approved. When a tool is missing, surface it to the navigator with context (e.g. "gitleaks is required by the pre-commit hook — install via `nix develop` or approve `brew install gitleaks`?") rather than resolving it silently. Imperative installs bypass version control and can't be reviewed or rolled back.
 
 At the start of the session, if the skill detects this is a fresh ticket with no prior work, ask:

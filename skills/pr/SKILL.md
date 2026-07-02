@@ -322,6 +322,23 @@ gh pr list --base <branch-being-merged> --state open --json number,title
 
 **Never use `--delete-branch` when the branch is another PR's base.** GitHub auto-closes child PRs when their base branch is deleted, requiring a rebase and new PR to recover.
 
+### Unsigned commit safety gate
+
+Before offering to merge, check whether the PR contains unsigned commits (produced via `git mcommit` / `git mpush` during walk-away or fallback sessions). Unsigned commits show as "Unverified" on GitHub — this is the intended signal for AI-produced work that lacked interactive human verification.
+
+**If the PR contains any unsigned commits:** the merge requires explicit human approval. Surface it clearly:
+
+```
+⚠️  This PR contains unsigned commits — produced without interactive verification.
+    Merge requires explicit human approval.
+    
+    Review the full diff before approving: gh pr diff <number>
+```
+
+Do not merge unsigned PRs on the agent's own initiative, even if CI is green and the navigator previously said "go ahead" in a different context. The merge is where the human-in-the-loop catches up on unverified work.
+
+**If all commits are signed:** proceed normally — the human was interactively present for each commit.
+
 ### Merge strategy
 
 The skill must determine *how* to merge before offering the merge action. The decision tree:
