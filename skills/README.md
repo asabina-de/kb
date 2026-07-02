@@ -15,6 +15,7 @@ Claude Code skills that operate on KB-defined artifacts (decision records, TODO.
 | **pr** | Create pull requests with smart base branch detection | Reads Linear tickets |
 | **align** | Bring a repo's conventions into alignment with KB standards | Reads/compares KB templates |
 | **figma-conventions** | Opinionated Figma workflow conventions for file organization and editing | None (conventions only) |
+| **imagegen** | Generate design concept images for rapid visual ideation before Figma vector work | None (outputs to `.imagegen-output/`) |
 
 ## Skills that stay in dotfiles
 
