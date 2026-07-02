@@ -139,6 +139,28 @@ echo "$RESPONSE" | jq -r '.candidates[0].content.parts[] | select(.inlineData) |
 
 Name output files descriptively: `concept-staircase-v1.png`, `cover-dark-angular-v2.png`, etc. Include a version number to track iterations.
 
+### Prompt provenance
+
+**Always** save the prompt alongside the image as a sidecar file with the same base name but ending in `.instruct.txt` (not `.prompt.txt` — avoids tab-completion collision with `.png`):
+
+```
+.imagegen-output/
+  brockmann-v1.png
+  brockmann-v1.instruct.txt
+  brockmann-v2.png
+  brockmann-v2.instruct.txt
+```
+
+Write the sidecar **before** making the API call — if generation fails, the prompt is still on record. The sidecar contains the raw prompt text, nothing else.
+
+### Presenting results to the navigator
+
+After saving the image:
+
+- **Graphical system (macOS, Linux desktop):** auto-open the image for the navigator. On macOS, run `open <path>`. On Linux with a display server, run `xdg-open <path>`. This lets the navigator see the result immediately without hunting for the file.
+- **Headless system (SSH, CI, managed agent):** do not attempt to open. Instead, print the absolute path and suggest how the navigator can retrieve it (e.g. "Image saved to `/abs/path/concept-v1.png` — view it locally or fetch via `scp`").
+- **Always** also read the image via the agent's built-in file reader to display it inline in the conversation, so the navigator can review without leaving the terminal.
+
 ## Prompting best practices
 
 ### Composition and style
