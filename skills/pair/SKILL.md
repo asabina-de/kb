@@ -19,7 +19,7 @@ The defining design principles are:
 >
 > **Atomic steps with checkpoints.** Each change is small enough to steer in one pass. The human sees the change, gives design feedback, and the session continues. Checkpoints are for steering, not code review.
 >
-> **PR-always.** Code review happens on GitHub, not in the CLI chat. Every session that produces code ends with a PR. GitHub has line comments, a mobile app, and formal review flows — it's a better review surface than chat. If a PR turns out wrong, close it or drop commits — PRs are cheap.
+> **PR-early.** Open the PR after the first commit, not when the branch is "done." The PR is a living review surface — each subsequent commit shows up as a reviewable increment in the GitHub UI, which is a better modality for review than CLI chat. The author and teammates can review from the GitHub mobile app between sessions. A PR with one commit signals "work started, visibility for the team"; it doesn't mean "ready to merge." PRs are cheap; delayed visibility is expensive.
 >
 > **Parallel where possible.** Use subagents for independent exploration and implementation tasks. Don't serialize work that can run concurrently. But always reconvene with the navigator before acting on findings.
 >
@@ -361,6 +361,14 @@ For each step:
 
    **Yolo commit discipline:** Commit immediately after each step passes quality checks — before starting the next step. Do not batch changes across steps and commit at the end. Committing on the go preserves the cleanest atomic boundary: each step's files haven't yet been mixed with the next step's. When a step spans multiple files (implementation + its tests), include all of them in the same commit. If the step also updates docs/config (env var examples, changelogs), bundle those in the same commit too — one logical concern, one commit.
 
+### Open the PR early
+
+After the first commit is pushed (Step 1), **immediately delegate to the `/pr` skill** to open the PR. Don't wait for all steps to complete — the PR is a visibility and review surface, not a completion gate. The PR title and body can reference the plan; subsequent commits appear as incremental diffs reviewable from the GitHub UI or mobile app.
+
+This means the PR opens while work is still in progress. That's intentional — the navigator (and teammates) can review each commit as it lands, provide feedback on GitHub, and track progress without needing the CLI session open.
+
+If the PR already exists (resuming a prior session), skip this step.
+
 ### Comment step completions to Linear
 
 After each step is committed (by the navigator in checkpoint mode, or auto-committed in yolo mode), post a reply threaded under the plan anchor via the comment skill:
@@ -434,13 +442,11 @@ If there are uncommitted changes (checkpoint mode only):
 - If multiple logical changes are uncommitted, suggest breaking them into separate commits and provide a message for each
 - The navigator decides what to stage and commit
 
-### PR creation
+### PR check
 
-If the branch looks complete relative to the ticket scope, **delegate to the `/pr` skill.** Do not duplicate PR creation logic here — invoke it via the skill system with `skill: "pr"`.
+The PR should already exist (opened after Step 1 in Phase 3). If it doesn't (e.g. the session skipped imagegen and went straight to one commit), create it now via the `/pr` skill.
 
-The `/pr` skill handles: base branch detection (including stacked PRs), drafting the title and body from commits and the Linear ticket, pitching in chat for approval, pushing, creating via `gh`, transitioning the ticket to In Review, launching a background CI monitor, and **merge strategy** (convention reading, stack-aware merging, closing keyword bookkeeping). Do not duplicate merge logic here.
-
-If the navigator says "not yet" or "more work needed," skip. The navigator will create it when ready.
+If the branch is complete, the PR is already the review surface — no additional action needed beyond ensuring the last commit is pushed.
 
 ### Comment wrap-up to Linear
 

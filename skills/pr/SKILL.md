@@ -10,6 +10,8 @@ Create a pull request. **Fast, good defaults, operator confirms before anything 
 
 The defining design principles:
 
+> **PR early.** Open the PR after the first commit, not when the branch is "done." A PR with one commit signals "work started" and gives the team visibility. Subsequent commits show up as reviewable increments in the GitHub UI — the author can self-review from the mobile app between sessions, and teammates see progress without needing CLI access. PRs are cheap; delayed visibility is expensive.
+>
 > **DX-first.** Derive as much as possible automatically — base branch, title, body. The operator should need to type as little as possible.
 >
 > **Pitch before creating.** Always show the full draft in chat and get explicit approval. Never run `gh pr create` without confirmation.
