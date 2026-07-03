@@ -18,6 +18,18 @@ The defining design principles:
 > **Generate fast, implement slow.** Image generation is cheap (~2 min/variant). Figma vector work is expensive (~15-30 min/direction). Exhaust the ideation space with imagegen before committing to Figma implementation.
 >
 > **References, not assets.** Generated images are compositional references — layout, mood, tension. They are never imported into Figma as final artwork. The Figma implementation is built from components, variables, and vectors.
+>
+> **Eyes on every artifact.** The agent must actually view every design output — read generated images, capture Figma screenshots — and process the visual content before presenting to the navigator. Design review requires seeing, not just describing.
+
+## Model quality for design work
+
+Design tasks — especially visual review, composition analysis, and nuanced aesthetic judgment — benefit from higher-quality models. When the design skill is active:
+
+1. **Detect the current model.** If the session is running on a fast/lite model (e.g. Haiku, Sonnet), note that design review quality may be limited.
+2. **Suggest escalation for tricky work.** When the task involves reviewing generated images for compositional quality, comparing reference vs implementation, or making subtle aesthetic judgments, suggest the navigator switch to a higher-grade model:
+   > "This comparison needs careful visual judgment. Consider switching to a higher-quality model (`/model opus` or similar) for this review phase — you can switch back after."
+3. **Self-select when possible.** If the agent platform supports per-task model selection (e.g. spawning a subagent at a higher tier), prefer that over asking the navigator to reconfigure. The design review subagent runs at higher quality; the mechanical work stays on the current model.
+4. **Don't nag.** Suggest once per session. If the navigator declines, proceed on the current model without further mention.
 
 ## Phase 0 — Load the design context
 
@@ -233,7 +245,7 @@ When the navigator is satisfied (or the session ends):
 ## Anti-patterns
 
 - **Don't skip DESIGN.md.** If it exists, read it. Brand tokens are not optional context — they're the constraint space the design lives in.
-- **Don't auto-advance past visual checkpoints.** Every generated image and every Figma change needs navigator review. Design is subjective — the agent cannot evaluate aesthetic quality.
+- **Don't auto-advance past visual checkpoints.** Every generated image and every Figma change needs navigator review. Design is subjective — the agent cannot evaluate aesthetic quality. Crucially, the agent must **actually view** every design artifact: read generated PNG files inline, capture Figma screenshots via `get_screenshot` or `await node.screenshot()`, and process the visual content before presenting it to the navigator. "I saved the image to X" without viewing it is insufficient — the agent should describe what it sees and flag any obvious issues (wrong colors, empty frame, clipped content) before the navigator even looks.
 - **Don't import generated images into Figma.** They are references, not assets. Build from components and vectors.
 - **Don't hardcode colors.** Always use DESIGN.md tokens → Figma variables. If a color isn't in DESIGN.md, flag it to the navigator rather than inventing one.
 - **Don't over-generate.** 2-3 variants per round is enough. 10 variants overwhelm the navigator and waste API calls. If the direction is clear, one variant is fine.
