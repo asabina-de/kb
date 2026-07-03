@@ -10,6 +10,8 @@ Create a pull request. **Fast, good defaults, operator confirms before anything 
 
 The defining design principles:
 
+> **PR early.** Open the PR after the first commit, not when the branch is "done." A PR with one commit signals "work started" and gives the team visibility. Subsequent commits show up as reviewable increments in the GitHub UI — the author can self-review from the mobile app between sessions, and teammates see progress without needing CLI access. PRs are cheap; delayed visibility is expensive.
+>
 > **DX-first.** Derive as much as possible automatically — base branch, title, body. The operator should need to type as little as possible.
 >
 > **Pitch before creating.** Always show the full draft in chat and get explicit approval. Never run `gh pr create` without confirmation.
@@ -319,6 +321,23 @@ gh pr list --base <branch-being-merged> --state open --json number,title
 - **If no child PRs exist:** proceed with `--delete-branch` as normal.
 
 **Never use `--delete-branch` when the branch is another PR's base.** GitHub auto-closes child PRs when their base branch is deleted, requiring a rebase and new PR to recover.
+
+### Unsigned commit safety gate
+
+Before offering to merge, check whether the PR contains unsigned commits (produced via `git mcommit` / `git mpush` during walk-away or fallback sessions). Unsigned commits show as "Unverified" on GitHub — this is the intended signal for AI-produced work that lacked interactive human verification.
+
+**If the PR contains any unsigned commits:** the merge requires explicit human approval. Surface it clearly:
+
+```
+⚠️  This PR contains unsigned commits — produced without interactive verification.
+    Merge requires explicit human approval.
+    
+    Review the full diff before approving: gh pr diff <number>
+```
+
+Do not merge unsigned PRs on the agent's own initiative, even if CI is green and the navigator previously said "go ahead" in a different context. The merge is where the human-in-the-loop catches up on unverified work.
+
+**If all commits are signed:** proceed normally — the human was interactively present for each commit.
 
 ### Merge strategy
 
