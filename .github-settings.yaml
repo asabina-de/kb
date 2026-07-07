@@ -1,24 +1,39 @@
 # Intended GitHub repo settings for asabina-de/kb.
 # Read by the /pr skill (Phase 1.1) to detect configuration drift.
 # Not consumed by CI or GitHub directly.
+#
+# Norm levels (see templates/github-settings.yaml for full definitions):
+#   REQUIRED   — binding org norm; matching a misconfigured live setting
+#                is not compliance. Fix the live setting, never the spec.
+#   PREFERENCE — repo-level choice.
 
 merge:
+  # PREFERENCE: squash-merge is the only allowed method for this repo.
+  # One clean commit per PR in git log, carrying the PR title format:
+  #   type(scope): subject [TICKET-ID] (#N)
   allowed_methods:
     - squash
 
-  # Squash-merge is the only allowed method for this repo.
-  # One clean commit per PR in git log, carrying the PR title format:
-  #   type(scope): subject [TICKET-ID] (#N)
+  # PREFERENCE: org convention is squash (CONTRIBUTING.md "PR Merge
+  # Strategy").
   default_method: squash
 
-  # CRITICAL: must be "pr_title" — GitHub's factory default uses the
-  # commit message for single-commit PRs, silently breaking conventions.
-  # Configure in GitHub Settings > Pull Requests > "Allow squash merging".
+  # REQUIRED: must be "pr_title" — GitHub's factory default uses the
+  # head commit's message for single-commit PRs, silently dropping the
+  # [TICKET-ID] from git log.
+  # Live setting: gh api repos/asabina-de/kb -X PATCH -f squash_merge_commit_title=PR_TITLE
   squash_title: pr_title
 
+  # REQUIRED: must be "commit_messages" so Co-authored-by/Assisted-by
+  # provenance trailers from individual commits survive the squash.
+  # Live setting: gh api repos/asabina-de/kb -X PATCH -f squash_merge_commit_message=COMMIT_MESSAGES
+  squash_message: commit_messages
+
+  # PREFERENCE: auto-delete head branch after merge.
   delete_branch_on_merge: true
 
 branch_protection:
+  # PREFERENCE
   default_branch: main
   require_pr_reviews: true
   require_status_checks: true
