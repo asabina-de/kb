@@ -186,8 +186,7 @@ Individual commits and merged PRs serve different audiences in `git log`:
 | Layer | Format | Ticket ID? | When visible |
 |---|---|---|---|
 | Individual commit | `type(scope): subject [ai:agent]` | No — branch encodes it | Always |
-| Merged PR (squash) | `type(scope): subject [TICKET-ID] (#N)` | Yes — for traceability | After squash-merge |
-| Merged PR (merge commit) | `type(scope): subject [TICKET-ID] (#N)` | Yes — on merge commit | After merge-commit |
+| Squash-merged PR | `type(scope): subject [TICKET-ID] (#N)` | Yes — for traceability | After squash-merge |
 
 The ticket ID suffix is the visual signal that distinguishes a squash-merged PR from an individual commit when scanning `git log`. It also makes every merged PR traceable back to its Linear ticket without opening GitHub.
 
@@ -197,18 +196,20 @@ Repos using this convention should add the `amannn/action-semantic-pull-request`
 
 ## PR Merge Strategy
 
-**Always use merge commits** — never squash unless explicitly requested by the reviewer.
+**Always use squash-merge** with "Pull request title" as the commit message source.
 
 **Rationale:**
 
-- Squash loses per-commit provenance — you can no longer see which commits were `[ai:claude]` vs human-authored
-- Squash collapses the atomic commit history that was carefully structured during development
-- Merge commits preserve the full trail for `git bisect`, `git blame`, and audit
+- Squash produces one clean commit per PR in `git log`, carrying the PR title format `type(scope): subject [TICKET-ID] (#N)`
+- Every merged PR is traceable to its Linear ticket via the `[TICKET-ID]` suffix
+- The PR title is the traceability surface — individual commits within a PR are development noise in the mainline history
+- AI provenance survives: the `Co-authored-by:`/`Assisted-by:` trailers from individual commits are preserved in the squash commit body, provided GitHub's squash commit *message* source is "commit messages" — see `.github-settings.yaml`
+- GitHub must be configured to use "Pull request title" (not the factory default) as the squash commit *title* source — the default silently uses the head commit's subject for single-commit PRs, dropping the `[TICKET-ID]`. See `.github-settings.yaml`.
 
 When merging:
 
-- Use the default merge commit strategy (`git merge --no-ff` / GitHub's "Create a merge commit")
-- The PR title becomes the merge commit subject — keep it clean
+- Use squash-merge (GitHub's "Squash and merge")
+- The PR title becomes the squash commit subject — keep it clean
 - Delete the branch after merge
 
 <!-- OPTIONAL APPENDIX: Uncomment if your project uses milestone-based development
