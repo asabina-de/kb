@@ -1,38 +1,64 @@
 # Declares intended GitHub repo settings so the /pr skill can detect
 # configuration drift. Copy to your repo root as `.github-settings.yaml`
-# and customize.
+# and customize the PREFERENCE fields.
 #
 # This file is read by LLMs (the /pr skill's Phase 1.1 repo config
-# check), not by CI or GitHub directly. Comments here give the LLM
-# context for why each setting matters.
+# check and /align's template comparison), not by CI or GitHub directly.
+# Comments here give the LLM context for why each setting matters.
+#
+# Norm levels — every field carries one:
+#
+#   REQUIRED   — binding org norm. The declared value is the only valid
+#                value. /align treats any deviation as a gap and /pr
+#                flags violations EVEN WHEN the repo's spec file and its
+#                live GitHub settings agree with each other — matching a
+#                misconfigured reality is not compliance. Never adopt a
+#                live setting into a REQUIRED field; fix the live setting
+#                instead. Changing a REQUIRED value is an org-level
+#                decision that belongs in the KB, not in one repo's copy.
+#   PREFERENCE — repo-level choice. The value here is a sane default;
+#                customize freely per repo.
 
 merge:
-  # Which merge buttons are enabled in GitHub Settings > Pull Requests.
+  # PREFERENCE: which merge buttons are enabled in GitHub Settings >
+  # Pull Requests.
   allowed_methods:
     - merge
     - squash
     - rebase
 
-  # Which method is selected by default when merging a PR.
-  default_method: merge
+  # PREFERENCE: which method is selected by default when merging a PR.
+  # Org convention is squash-merge (see CONTRIBUTING.md "PR Merge
+  # Strategy") — deviate only with a documented reason.
+  default_method: squash
 
-  # Squash-merge commit title source. GitHub's factory default uses the
-  # commit message for single-commit PRs but the PR title for multi-commit
-  # PRs — this inconsistency silently breaks commit conventions.
-  # Set to "pr_title" so squash-merged commits always use the PR title,
-  # producing consistent `type(scope): subject [TICKET-ID] (#N)` entries
-  # in git log.
+  # REQUIRED: squash-merge commit TITLE source. GitHub's factory default
+  # uses the head commit's message for single-commit PRs but the PR
+  # title for multi-commit PRs — this inconsistency silently drops the
+  # `[TICKET-ID]` from single-commit PRs and breaks git-log
+  # traceability (the ivos-trades incident: correct PR titles landed as
+  # ID-less squash commits). Must be "pr_title" so squash-merged
+  # commits always use the PR title, producing consistent
+  # `type(scope): subject [TICKET-ID] (#N)` entries in git log.
+  # Live setting: gh api repos/{owner}/{repo} -X PATCH -f squash_merge_commit_title=PR_TITLE
   squash_title: pr_title
 
-  # Auto-delete head branch after merge.
+  # REQUIRED: squash-merge commit MESSAGE (body) source. Must be
+  # "commit_messages" so the Co-authored-by/Assisted-by provenance
+  # trailers from individual commits survive the squash in the commit
+  # body — the AI-provenance model in CONTRIBUTING.md depends on this.
+  # Live setting: gh api repos/{owner}/{repo} -X PATCH -f squash_merge_commit_message=COMMIT_MESSAGES
+  squash_message: commit_messages
+
+  # PREFERENCE: auto-delete head branch after merge.
   delete_branch_on_merge: true
 
 branch_protection:
-  # The branch these rules apply to.
+  # PREFERENCE: the branch these rules apply to.
   default_branch: main
 
-  # Require PR review before merge.
+  # PREFERENCE: require PR review before merge.
   require_pr_reviews: true
 
-  # Require CI status checks to pass before merge.
+  # PREFERENCE: require CI status checks to pass before merge.
   require_status_checks: true
