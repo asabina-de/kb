@@ -39,7 +39,23 @@ Tag manual-only steps with **(manual)** so readers know an agent can't automate 
 ### Fixed
 - **`.github/workflows/lint-pr.yaml` — ticket-ID check was a no-op** — the previous `subjectPattern` (`^.+(\s\[[A-Z]+-\d+\])?$`) put the ticket-ID group behind an optional quantifier after `^.+`, so every non-empty subject passed. The [2026-06-11] claim that the workflow "validates `type(scope): subject [TICKET-ID]`" was never true (KB-81; observed downstream as ivos-trades PRs merging with no ticket ID and nothing firing). The pattern now requires the subject to end with `[TICKET-ID]`. **Escape hatch:** a PR that legitimately has no ticket declares `[noticket]` (or `[noissue]`) in the PR *description body* — the ID requirement is lifted while type/scope validation still applies. The marker lives in the body, not the title, to keep titles short. Red case demonstrated on the introducing PR (#66): an ID-less title failed CI, the corrected title passed, and the body-marker escape hatch was verified live.
 
+### Changed
+- **`templates/github-settings.yaml` — norm levels** — every field now carries **REQUIRED** (binding org norm) or **PREFERENCE** (repo-level choice). `squash_title: pr_title` is REQUIRED, and a new REQUIRED field `squash_message: commit_messages` keeps `Co-authored-by`/`Assisted-by` provenance trailers in squash commit bodies. REQUIRED semantics: the declared value is the only valid one — a spec matching a misconfigured live setting is not compliance; fix the live setting, never adopt the footgun into the spec (KB-82; observed downstream when a generate-from-live flow laundered GitHub's `commit_or_pr_title` footgun into a repo's spec).
+- **`templates/CONTRIBUTING.md` — PR merge strategy switched to squash-merge** — the template said "always merge commits — never squash", contradicting the root `CONTRIBUTING.md` and actual practice across repos (KB-59). Now: always squash-merge with the PR title as commit title source; per-commit AI provenance survives in the squash body via `squash_message: commit_messages`.
+- **`/pr` skill Phase 1.1** — the generate-from-live path now validates generated values against the KB template's norm levels: REQUIRED fields always take the norm value, and live deviations are surfaced as drift with ready-to-run `gh` fix commands instead of being adopted.
+- **`/align` skill** — repo-settings comparison treats REQUIRED-field drift as a gap even when the spec matches live settings, and validates REQUIRED fields against the norm value directly via `gh api`.
+
 ### Migration
+
+**Repo settings (manual):**
+- All squash-using repos — set both squash sources (this step was missing from the [2026-06-11] entry, so live repos were never instructed to leave GitHub's factory defaults; misconfigured repos silently drop ticket IDs from single-commit squashes and provenance trailers from all squashes):
+  ```
+  gh api repos/{owner}/{repo} -X PATCH -f squash_merge_commit_title=PR_TITLE -f squash_merge_commit_message=COMMIT_MESSAGES
+  ```
+
+**Files:**
+- Re-sync `.github-settings.yaml` from `templates/github-settings.yaml` to pick up the norm-level markers and the `squash_message` field.
+- If your `CONTRIBUTING.md` carries the "always use merge commits" PR Merge Strategy section, replace it with the squash-merge section from `templates/CONTRIBUTING.md`.
 
 **CI/CD:**
 - Replace your repo's `.github/workflows/lint-pr.yaml` with the fixed KB copy. Any copy synced before this date carries the no-op pattern and enforces nothing — this includes customized copies, so re-apply local customizations (e.g. a different `types` list) on top of the fixed pattern.
