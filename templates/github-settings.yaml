@@ -3,7 +3,10 @@
 # and customize the PREFERENCE fields.
 #
 # This file is read by LLMs (the /pr skill's Phase 1.1 repo config
-# check and /align's template comparison), not by CI or GitHub directly.
+# check and /align's template comparison) and validated in CI against
+# `schemas/github-settings.schema.json` (adopt verbatim, do not edit)
+# by the `lint-settings.yaml` workflow — REQUIRED norms are pinned as
+# `const` there, so a non-norm value fails deterministically.
 # Comments here give the LLM context for why each setting matters.
 #
 # Norm levels — every field carries one:

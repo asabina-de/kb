@@ -17,16 +17,16 @@ on:
     paths:
       - '.github-settings.yaml'
       - 'templates/github-settings.yaml'
-      - 'templates/github-settings.schema.json'
-      - '.github/fixtures/github-settings.bad.yaml'
+      - 'schemas/github-settings.schema.json'
+      - 'schemas/fixtures/github-settings.bad.yaml'
       - '.github/workflows/lint-settings.yaml'
   push:
     branches: [main]
     paths:
       - '.github-settings.yaml'
       - 'templates/github-settings.yaml'
-      - 'templates/github-settings.schema.json'
-      - '.github/fixtures/github-settings.bad.yaml'
+      - 'schemas/github-settings.schema.json'
+      - 'schemas/fixtures/github-settings.bad.yaml'
       - '.github/workflows/lint-settings.yaml'
 
 permissions:
@@ -42,14 +42,14 @@ jobs:
       - name: Validate real specs (must pass)
         run: |
           pipx run check-jsonschema \
-            --schemafile templates/github-settings.schema.json \
+            --schemafile schemas/github-settings.schema.json \
             .github-settings.yaml templates/github-settings.yaml
 
       - name: Red case — bad fixture must be rejected
         run: |
           if pipx run check-jsonschema \
-               --schemafile templates/github-settings.schema.json \
-               .github/fixtures/github-settings.bad.yaml; then
+               --schemafile schemas/github-settings.schema.json \
+               schemas/fixtures/github-settings.bad.yaml; then
             echo "::error::Validator accepted a spec violating REQUIRED norms — enforcement is broken"
             exit 1
           fi

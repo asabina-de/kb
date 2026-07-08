@@ -1,6 +1,7 @@
 # Intended GitHub repo settings for asabina-de/kb.
-# Read by the /pr skill (Phase 1.1) to detect configuration drift.
-# Not consumed by CI or GitHub directly.
+# Read by the /pr skill (Phase 1.1) to detect configuration drift, and
+# validated in CI against schemas/github-settings.schema.json by the
+# lint-settings.yaml workflow. Not consumed by GitHub directly.
 #
 # Norm levels (see templates/github-settings.yaml for full definitions):
 #   REQUIRED   — binding org norm; matching a misconfigured live setting
