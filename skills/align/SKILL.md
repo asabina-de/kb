@@ -86,6 +86,7 @@ For each migration step, check whether the target repo has already applied it:
 - Read `.github-settings.yaml` if present — compare declared settings against the KB template (`templates/github-settings.yaml`), respecting its norm levels:
   - **REQUIRED fields** (`squash_title: pr_title`, `squash_message: commit_messages`): the KB template's value is the only valid one. A deviating spec is a gap **even when the spec matches the repo's live GitHub settings** — matching a misconfigured reality is not compliance; it usually means a generate-from-live flow laundered a footgun into the spec. The fix direction is always spec-and-live → norm, never norm → spec.
   - **PREFERENCE fields**: repo-level choices — only flag when the spec and live settings disagree with each other.
+- **Never overwrite an existing `.github-settings.yaml`.** Reconcile field-wise: REQUIRED fields converge to the KB norm (propose the spec edit plus the matching live-settings `gh` fix), PREFERENCE fields keep the downstream repo's value, and fields that are new upstream are proposed as additive edits. Regenerating the file from the template or from live settings discards project-specific configuration — edit in place, never replace.
 - If no `.github-settings.yaml`, flag as "repo settings not declared — unknown compliance"
 - Check observable settings via `gh api repos/{owner}/{repo}` if `gh` is available — validate REQUIRED fields against the norm value directly, not just against the local spec
 
