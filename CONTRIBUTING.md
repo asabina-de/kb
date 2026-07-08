@@ -84,7 +84,7 @@ These patterns are **never valid** as scopes. AI agents in particular tend to in
 1. **Imperative mood:** "add feature" not "added feature" or "adding feature"
 2. **Lowercase:** no capital first letter
 3. **No period** at the end
-4. **≤80 characters** (enforced — see self-check below)
+4. **≤80 characters** (hard rule — run the self-check below; discipline-backed, no CI gate yet)
 5. **No ticket IDs** in the subject line — the branch name already encodes the ticket
 6. **Describe the change**, not the task: "add OAuth callback route" not "work on KB-123"
 
