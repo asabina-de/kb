@@ -34,6 +34,21 @@ Tag manual-only steps with **(manual)** so readers know an agent can't automate 
 
 ---
 
+## [2026-07-08]
+
+### Fixed
+- **`.github/workflows/lint-pr.yaml` — ticket-ID check was a no-op** — the previous `subjectPattern` (`^.+(\s\[[A-Z]+-\d+\])?$`) put the ticket-ID group behind an optional quantifier after `^.+`, so every non-empty subject passed. The [2026-06-11] claim that the workflow "validates `type(scope): subject [TICKET-ID]`" was never true (KB-81; observed downstream as ivos-trades PRs merging with no ticket ID and nothing firing). The pattern now requires the subject to end with `[TICKET-ID]`. **Escape hatch:** a PR that legitimately has no ticket declares `[noticket]` (or `[noissue]`) in the PR *description body* — the ID requirement is lifted while type/scope validation still applies. The marker lives in the body, not the title, to keep titles short. Red case demonstrated on the introducing PR (#66): an ID-less title failed CI, the corrected title passed, and the body-marker escape hatch was verified live.
+
+### Migration
+
+**CI/CD:**
+- Replace your repo's `.github/workflows/lint-pr.yaml` with the fixed KB copy. Any copy synced before this date carries the no-op pattern and enforces nothing — this includes customized copies, so re-apply local customizations (e.g. a different `types` list) on top of the fixed pattern.
+- Repos without a lint-pr workflow: add it now. This check is what keeps squash-merged commits traceable to tickets in `git log`.
+- After adopting, prove the red case once: open (or retitle) a PR without a ticket ID and confirm the check fails, then restore the title. An enforcement mechanism that has never been seen failing cannot be trusted (KB-84).
+
+**Tooling / habits:**
+- Ticket-less PRs now need `[noticket]` (or `[noissue]`) in the PR description body to pass CI.
+
 ## [2026-06-25]
 
 ### Added

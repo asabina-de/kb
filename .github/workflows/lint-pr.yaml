@@ -58,16 +58,29 @@ jobs:
             chore
             style
             perf
-          # Ticket ID suffix is recommended but not required —
-          # ad-hoc branches without a ticket are valid.
-          subjectPattern: ^.+(\s\[[A-Z]+-\d+\])?$
+          # Ticket ID suffix is REQUIRED. The previous pattern
+          # (^.+(\s\[[A-Z]+-\d+\])?$) made the ID group optional behind
+          # ^.+ — it accepted every non-empty subject, so the check was
+          # a no-op (KB-81). Traceability lives in git log via the
+          # squash-merge PR title, so the ID must be in the title.
+          #
+          # Escape hatch: a PR that legitimately has no ticket declares
+          # [noticket] (or [noissue]) in the PR *description body* — the
+          # ID requirement is lifted while type/scope validation still
+          # applies. The marker lives in the body, not the title, to keep
+          # titles short. The `edited` trigger above re-runs this check
+          # when the body changes, so adding the marker un-blocks the PR
+          # without a new push.
+          subjectPattern: ${{ (contains(github.event.pull_request.body, '[noticket]') || contains(github.event.pull_request.body, '[noissue]')) && '^.+$' || '^.+\s\[[A-Z]+-\d+\]$' }}
           subjectPatternError: |
             The subject "{subject}" doesn't look right.
             Expected format: type(scope): description [TICKET-ID]
             Examples:
               feat(auth): add OAuth callback [KB-31]
               fix: handle null response [KB-45]
-              doc: update contributing guide
-            Ticket ID suffix is optional for branches without a ticket.
+            The ticket ID suffix is required so the squash-merged commit
+            stays traceable in git log. If this PR legitimately has no
+            ticket, add [noticket] (or [noissue]) to the PR description
+            body — the ID requirement is lifted, type/scope still checked.
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

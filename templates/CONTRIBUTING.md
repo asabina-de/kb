@@ -168,7 +168,7 @@ PR titles follow the same conventional-commit format as individual commits, with
 
 - **type** and **scope** — same rules as commits (see tables above)
 - **subject** — imperative mood, value-oriented, distinguishing phrase first. Same imperative voice convention as commits and ticket titles.
-- **`[TICKET-ID]`** — the Linear ticket ID in square brackets, e.g. `[KB-31]`. Auto-injected from the branch name by the `/pr` skill. Omit only for ad-hoc branches without a ticket.
+- **`[TICKET-ID]`** — the Linear ticket ID in square brackets, e.g. `[KB-31]`. Auto-injected from the branch name by the `/pr` skill. Required by CI (`lint-pr.yaml`). For an ad-hoc branch without a ticket, declare `[noticket]` (or `[noissue]`) in the PR *description body* — CI lifts the ID requirement while still validating type/scope. The marker lives in the body, not the title, to keep titles short.
 
 ### Examples
 
