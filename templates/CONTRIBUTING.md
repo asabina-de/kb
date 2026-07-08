@@ -158,6 +158,16 @@ Detected when a correction needs to be made to `AGENTS.md`, `CONTRIBUTING.md`, o
 
 **Why the distinction matters:** Category B corrections must take effect immediately — deferring them means working with broken instructions for the rest of the session. Category A has no such urgency and should always be routed properly.
 
+## Enforcement Mechanisms
+
+**No enforcement mechanism merges without a demonstrated red case.**
+
+Anything that claims to enforce a convention — a CI workflow, a lint pattern, a quality gate, a drift check, a pre-commit hook — is held to this standard:
+
+1. **Prove the red case before merging.** Show the mechanism failing on bad input: a CI run that went red on a bad title, a gate that fired on a bad draft. Link the proof (CI run, PR) in the PR body or changelog entry. A mechanism that has never been seen failing must be assumed to enforce nothing — and the *claim* of enforcement is what makes everyone stop double-checking.
+2. **Watch the outcome, not just the artifact.** Artifact-level checks (file exists, section present, spec declared) verify that enforcement is *configured*; outcome-level checks (git log actually carries ticket IDs, live settings actually match norms) verify that it *works*. Every protected invariant needs at least one outcome-level check somewhere in its loop.
+3. **Re-prove after edits.** Changing a pattern or gate invalidates its old red case — demonstrate a new one.
+
 ## PR Title Convention
 
 PR titles follow the same conventional-commit format as individual commits, with a ticket ID suffix for traceability:
