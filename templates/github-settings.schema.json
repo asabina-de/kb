@@ -1,0 +1,42 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "github-settings",
+  "description": "Schema for .github-settings.yaml repo settings specs. REQUIRED org norms (KB-82) are pinned as const — a spec declaring any other value is invalid by construction, deterministically, independent of any LLM reading the file. Keep the const values in sync with the norm comments in templates/github-settings.yaml.",
+  "type": "object",
+  "required": ["merge"],
+  "additionalProperties": false,
+  "properties": {
+    "merge": {
+      "type": "object",
+      "required": ["squash_title", "squash_message"],
+      "additionalProperties": false,
+      "properties": {
+        "allowed_methods": {
+          "type": "array",
+          "items": { "enum": ["merge", "squash", "rebase"] },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "default_method": { "enum": ["merge", "squash", "rebase"] },
+        "squash_title": {
+          "const": "pr_title",
+          "$comment": "REQUIRED org norm (KB-82): any other value drops [TICKET-ID] from single-commit squashes"
+        },
+        "squash_message": {
+          "const": "commit_messages",
+          "$comment": "REQUIRED org norm (KB-82): any other value drops provenance trailers from squash bodies"
+        },
+        "delete_branch_on_merge": { "type": "boolean" }
+      }
+    },
+    "branch_protection": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "default_branch": { "type": "string", "minLength": 1 },
+        "require_pr_reviews": { "type": "boolean" },
+        "require_status_checks": { "type": "boolean" }
+      }
+    }
+  }
+}

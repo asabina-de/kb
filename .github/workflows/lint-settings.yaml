@@ -1,0 +1,56 @@
+name: Lint settings spec
+
+# Deterministic schema validation of the repo-settings specs (KB-82).
+# The REQUIRED org norms (squash_title: pr_title, squash_message:
+# commit_messages) are pinned as `const` in the schema, so a spec that
+# launders a live footgun into the file fails CI — no LLM judgment
+# involved.
+#
+# The second step is a permanent red case (KB-84 principle: no
+# enforcement mechanism without a demonstrated red case): a deliberately
+# invalid fixture MUST fail validation on every run. If the validator
+# ever accepts it, this workflow fails — the mechanism re-proves on
+# every run that it can still reject bad input.
+
+on:
+  pull_request:
+    paths:
+      - '.github-settings.yaml'
+      - 'templates/github-settings.yaml'
+      - 'templates/github-settings.schema.json'
+      - '.github/fixtures/github-settings.bad.yaml'
+      - '.github/workflows/lint-settings.yaml'
+  push:
+    branches: [main]
+    paths:
+      - '.github-settings.yaml'
+      - 'templates/github-settings.yaml'
+      - 'templates/github-settings.schema.json'
+      - '.github/fixtures/github-settings.bad.yaml'
+      - '.github/workflows/lint-settings.yaml'
+
+permissions:
+  contents: read
+
+jobs:
+  validate-settings:
+    name: Validate settings specs against schema
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate real specs (must pass)
+        run: |
+          pipx run check-jsonschema \
+            --schemafile templates/github-settings.schema.json \
+            .github-settings.yaml templates/github-settings.yaml
+
+      - name: Red case — bad fixture must be rejected
+        run: |
+          if pipx run check-jsonschema \
+               --schemafile templates/github-settings.schema.json \
+               .github/fixtures/github-settings.bad.yaml; then
+            echo "::error::Validator accepted a spec violating REQUIRED norms — enforcement is broken"
+            exit 1
+          fi
+          echo "Red case holds: bad fixture rejected."
