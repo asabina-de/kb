@@ -68,27 +68,31 @@ Surface a one-time setup prompt after the PR is created (Phase 5), not before �
    (c) Skip — not now
 ```
 
-On (a): read the repo's current settings via the GitHub API, generate a `.github-settings.yaml` matching what's configured, and present it for approval. On (b): point to `templates/github-settings.yaml` in the kb repo. On (c): skip silently. Don't ask again in the same session.
+On (a): read the repo's current settings via the GitHub API and draft a `.github-settings.yaml` — but validate every generated value against the KB template's norm levels before presenting (read `templates/github-settings.yaml` via the `./kb` or `./knowledge-base` symlink if present; otherwise fall back to the schema reference below). **Never launder a live footgun into the spec:** for fields the KB template marks REQUIRED (`squash_title: pr_title`, `squash_message: commit_messages`), write the norm value into the generated file regardless of what the live setting says, and flag the live deviation as drift with a ready-to-run `gh` fix command (HITL guardrail below). Only PREFERENCE fields adopt live values. Generate-from-live without this validation turns a misconfigured repo into a "compliant" spec — that's how GitHub's title-source footgun got written into a downstream repo's spec, and `/align` then had no basis to flag it. On (b): point to `templates/github-settings.yaml` in the kb repo. On (c): skip silently. Don't ask again in the same session.
 
 **Schema reference (`templates/github-settings.yaml`):**
 
 ```yaml
 merge:
-  allowed_methods: [merge, squash, rebase]
-  default_method: merge
-  squash_title: pr_title
-  delete_branch_on_merge: true
+  allowed_methods: [merge, squash, rebase]   # PREFERENCE
+  default_method: squash                     # PREFERENCE
+  squash_title: pr_title                     # REQUIRED
+  squash_message: commit_messages            # REQUIRED
+  delete_branch_on_merge: true               # PREFERENCE
 
-branch_protection:
+branch_protection:                           # PREFERENCE (all fields)
   default_branch: main
   require_pr_reviews: true
   require_status_checks: true
 ```
 
+Norm levels: **REQUIRED** fields are binding org norms — the declared value is the only valid one. Drift in live settings gets fixed live (surface the `gh` command), never adopted into the spec; a spec that matches a misconfigured reality is not compliant. **PREFERENCE** fields are repo-level choices.
+
 Fields:
 - `merge.allowed_methods` — which merge buttons are enabled on GitHub
 - `merge.default_method` — which method is selected by default
-- `merge.squash_title` — squash-merge commit title source: `"pr_title"` (recommended) or `"commit_message"` (GitHub's footgun default)
+- `merge.squash_title` — squash-merge commit title source: `"pr_title"` (REQUIRED) — GitHub's `"commit_message"` factory default uses the head commit's subject for single-commit PRs, silently dropping the `[TICKET-ID]` from git log
+- `merge.squash_message` — squash-merge commit message (body) source: `"commit_messages"` (REQUIRED) — keeps `Co-authored-by`/`Assisted-by` provenance trailers from individual commits in the squash commit body
 - `merge.delete_branch_on_merge` — auto-delete head branch after merge
 - `branch_protection.default_branch` — the branch protection rules apply to
 - `branch_protection.require_pr_reviews` — require PR review before merge
