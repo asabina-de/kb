@@ -349,6 +349,8 @@ Do not merge unsigned PRs on the agent's own initiative, even if CI is green and
 
 At merge time, four facts the skill already has deterministically predict the subject that will land on the default branch: the merge method, the repo's **live** squash title source, the PR's commit count, and the PR title. Connect them *before* offering the merge — never discover a dropped ID after it's in history. (Incident class: a single-commit PR with a correct `[IDT-78]` title merged under GitHub's factory `COMMIT_OR_PR_TITLE` source and landed as an ID-less commit.)
 
+**Enforcement boundary:** this check is the interactive convenience layer — an early warning at merge time — not the enforcement itself. Skill-level checks run only when this skill runs, and only as faithfully as the executing agent follows them; harnesses differ and instructions can be skipped. The deterministic gates live in CI and standing watchers: `lint-pr.yaml` (title carries an ID on every PR), the settings-spec schema validation (a spec cannot declare a footgun title source), and the live-drift / main-history watchers. Treat a firing here as a courtesy catch ahead of the deterministic layers — never as a reason those layers don't need to exist.
+
 **Predict the landed subject:**
 
 ```
