@@ -46,7 +46,14 @@ Tag manual-only steps with **(manual)** so readers know an agent can't automate 
 - **`/align` skill** — repo-settings comparison treats REQUIRED-field drift as a gap even when the spec matches live settings, and validates REQUIRED fields against the norm value directly via `gh api`.
 - **`/pr` skill Phase 6 — ticket-ID survival check** — before offering any merge, the skill now predicts the exact subject that will land on the default branch (merge method × live squash title source × commit count × PR title) and warns with fix options when the ticket ID would drop — the single-commit-PR + `COMMIT_OR_PR_TITLE` factory-footgun combination that produced ID-less commits downstream is now caught pre-merge. After the merge, an outcome-level verification reads the landed commit subject and reports loudly if the ID didn't survive. Both checks honor the `[noticket]`/`[noissue]` PR-body escape hatch (KB-83).
 
+### Added
+- **Enforcement Mechanisms principle** in `CONTRIBUTING.md` and `templates/CONTRIBUTING.md` — **no enforcement mechanism merges without a demonstrated red case** (KB-84). A mechanism never seen failing must be assumed to enforce nothing, and the claim of enforcement is what makes everyone stop double-checking. Three rules: prove the red case before merging (link the failing run in the PR/CHANGELOG), watch the outcome not just the artifact, re-prove after edits. Backed by a full audit of the KB's ~70 enforcement mechanisms (inventory on KB-84); structural gaps ticketed as KB-85 (main-history ticket-ID watcher), KB-86 (REQUIRED-settings drift watcher), KB-87 (red cases for homegrown CI). Also fixed en passant: the "≤80 characters (enforced — …)" claim in both CONTRIBUTING files was discipline presented as automation — reworded honestly.
+
 ### Migration
+
+**Files:**
+- Add the "Enforcement Mechanisms" section from `templates/CONTRIBUTING.md` to your repo's `CONTRIBUTING.md`.
+- Grep your docs for enforcement claims ("enforced", "validates", "CI checks") and verify each names a real mechanism with a demonstrated red case — reword any that describe discipline as automation.
 
 **Repo settings (manual):**
 - All squash-using repos — set both squash sources (this step was missing from the [2026-06-11] entry, so live repos were never instructed to leave GitHub's factory defaults; misconfigured repos silently drop ticket IDs from single-commit squashes and provenance trailers from all squashes):
