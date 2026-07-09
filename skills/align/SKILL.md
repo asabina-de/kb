@@ -83,9 +83,11 @@ For each migration step, check whether the target repo has already applied it:
 - Compare against the KB template version for drift
 
 **Repo settings:**
-- Read `.github-settings.yaml` if present — compare declared settings against the KB template
+- Read `.github-settings.yaml` if present — compare declared settings against the KB template (`templates/github-settings.yaml`), respecting its norm levels:
+  - **REQUIRED fields** (`squash_title: pr_title`, `squash_message: commit_messages`): the KB template's value is the only valid one. A deviating spec is a gap **even when the spec matches the repo's live GitHub settings** — matching a misconfigured reality is not compliance; it usually means a generate-from-live flow laundered a footgun into the spec. The fix direction is always spec-and-live → norm, never norm → spec.
+  - **PREFERENCE fields**: repo-level choices — only flag when the spec and live settings disagree with each other.
 - If no `.github-settings.yaml`, flag as "repo settings not declared — unknown compliance"
-- Check observable settings via `gh api repos/{owner}/{repo}` if `gh` is available
+- Check observable settings via `gh api repos/{owner}/{repo}` if `gh` is available — validate REQUIRED fields against the norm value directly, not just against the local spec
 
 **Tickets:**
 - Fetch open issues from Linear (e.g. `list_issues` filtered by project/team)
