@@ -1,0 +1,24 @@
+# Deliberately INVALID settings spec — permanent red-case fixture (KB-82/KB-84).
+#
+# The lint-settings workflow asserts that schema validation REJECTS this
+# file on every run. If validation ever accepts it, the workflow fails —
+# proving continuously that the enforcement mechanism can still fail on
+# bad input (see CONTRIBUTING.md "Enforcement Mechanisms").
+#
+# The violation below is the exact footgun from the ivos-trades incident:
+# GitHub's factory squash title source laundered into a spec file.
+
+merge:
+  allowed_methods:
+    - squash
+  default_method: squash
+  # VIOLATION: REQUIRED norm is "pr_title"
+  squash_title: commit_message
+  # VIOLATION: REQUIRED norm is "commit_messages"
+  squash_message: pr_body
+  delete_branch_on_merge: true
+
+branch_protection:
+  default_branch: main
+  require_pr_reviews: true
+  require_status_checks: true
