@@ -288,12 +288,14 @@ The subagent should:
 2. **On all checks green:**
    - Report to the user: "CI passed on PR #N. Ready to merge."
    - Determine the merge strategy (see **Merge strategy** below).
+   - Run the **ticket-ID survival check** (see below) — predict the subject that will land on the default branch and warn before offering the merge if the ticket ID would drop.
    - Surface the strategy to the operator before executing. Never merge silently.
    - **After merge:** clean up and return to ready position:
      1. `git checkout main && git pull --ff-only`
-     2. `git fetch --prune` — remove stale remote tracking refs
-     3. `git branch -D <merged-branch>` — delete the local branch that was just merged. This is safe by construction (the skill just merged it). Use `-D` not `-d` because squash merges create new SHAs that git can't trace back to the original branch commits.
-     4. Transition linked tickets to Done.
+     2. **Verify ticket-ID survival** — read the landed commit subject and confirm the ticket ID actually survived (see the survival check's post-merge verification). Prediction is not proof; this is the outcome-level check.
+     3. `git fetch --prune` — remove stale remote tracking refs
+     4. `git branch -D <merged-branch>` — delete the local branch that was just merged. This is safe by construction (the skill just merged it). Use `-D` not `-d` because squash merges create new SHAs that git can't trace back to the original branch commits.
+     5. Transition linked tickets to Done.
 3. **On any check red:**
    - Report the failure: which check failed, link to the logs.
    - Fetch the failure details by reading the PR from GitHub (e.g. `pull_request_read`) and `Bash` with `gh run view <run-id> --log-failed` for actionable output.
@@ -342,6 +344,67 @@ Before offering to merge, check whether the PR contains unsigned commits (produc
 Do not merge unsigned PRs on the agent's own initiative, even if CI is green and the navigator previously said "go ahead" in a different context. The merge is where the human-in-the-loop catches up on unverified work.
 
 **If all commits are signed:** proceed normally — the human was interactively present for each commit.
+
+### Ticket-ID survival check
+
+At merge time, four facts the skill already has deterministically predict the subject that will land on the default branch: the merge method, the repo's **live** squash title source, the PR's commit count, and the PR title. Connect them *before* offering the merge — never discover a dropped ID after it's in history. (Incident class: a single-commit PR with a correct `[IDT-78]` title merged under GitHub's factory `COMMIT_OR_PR_TITLE` source and landed as an ID-less commit.)
+
+**Enforcement boundary:** this check is the interactive convenience layer — an early warning at merge time — not the enforcement itself. Skill-level checks run only when this skill runs, and only as faithfully as the executing agent follows them; harnesses differ and instructions can be skipped. The deterministic gates live in CI and standing watchers: `lint-pr.yaml` (title carries an ID on every PR), the settings-spec schema validation (a spec cannot declare a footgun title source), and the live-drift / main-history watchers. Treat a firing here as a courtesy catch ahead of the deterministic layers — never as a reason those layers don't need to exist.
+
+**Predict the landed subject:**
+
+```
+squash → live title source? (gh api repos/{owner}/{repo} --jq .squash_merge_commit_title)
+  ├── PR_TITLE → predicted subject = PR title
+  └── COMMIT_OR_PR_TITLE (factory footgun)
+      ├── 1 commit → predicted subject = head commit subject   ⚠ ID drops here
+      │   (count: gh pr view <n> --json commits --jq '.commits|length')
+      └── >1 commits → predicted subject = PR title
+merge commit → subject = "Merge pull request #N …"; the PR title lands on the
+  body's first line — the ID survives there
+rebase → predicted subjects = each branch commit's own subject — the PR title
+  lands nowhere ⚠
+```
+
+Read the title source from the **live API**, not `.github-settings.yaml` — the spec declares intent; the live setting decides what actually lands.
+
+**Evaluate:** does every predicted subject carry a `[TICKET-ID]`?
+
+- **Yes** → offer the merge normally.
+- **No, but the PR body declares `[noticket]` (or `[noissue]`)** — the escape hatch from `lint-pr.yaml` — → offer the merge, noting the exemption.
+- **No** → warn before offering, with the prediction and fix options:
+
+  ```
+  ⚠️  TICKET ID WILL DROP: merging now lands
+      "add oauth callback route [ai:claude]"
+      on main — the PR title's [KB-31] does not survive.
+      Cause: single-commit PR + squash title source COMMIT_OR_PR_TITLE.
+
+      Fix before merging:
+      (a) fix the repo setting (REQUIRED norm — also fixes every future PR):
+          gh api repos/{owner}/{repo} -X PATCH -f squash_merge_commit_title=PR_TITLE
+      (b) reword the head commit subject to carry [KB-31]
+      (c) merge anyway — explicit operator override; traceability breaks
+  ```
+
+**Post-merge verification (outcome-level):** prediction is not proof. After the merge, read what actually landed:
+
+```bash
+gh pr view <n> --json mergeCommit --jq .mergeCommit.oid
+git log -1 --format=%s <sha>    # after the pull in cleanup step 1
+```
+
+If the landed subject carries the ticket ID (or the escape hatch applied), report normally. If not, report loudly and immediately:
+
+```
+🚨 TICKET ID DROPPED: PR #N landed on main as
+   "<subject>" — no [TICKET-ID]; git-log traceability to KB-31 is broken.
+   Do not rewrite main to fix this. Instead:
+   1. Fix the repo setting so it can't recur:
+      gh api repos/{owner}/{repo} -X PATCH -f squash_merge_commit_title=PR_TITLE
+   2. Record the commit-sha ↔ ticket mapping in a comment on the Linear
+      issue so the trace survives out-of-band.
+```
 
 ### Merge strategy
 
@@ -416,6 +479,7 @@ Group by platform on separate lines for readability. GitHub parses `#N` (numeric
 - **Don't push without noting it.** If a push is needed, say so before running it.
 - **Don't ask more than one round of questions.** All clarification happens in the pitch → edit loop, not via separate user prompts before Phase 4.
 - **Don't suggest merging before CI is green.** A freshly created PR has no check data. Wait for the CI monitor subagent to report results before offering merge options.
+- **Don't offer a merge without predicting the landed subject.** The merge method, live squash title source, commit count, and PR title are all known pre-merge — connect them (see Ticket-ID survival check). A correct PR title is not sufficient: a single-commit squash under the factory title source lands the head commit's subject instead.
 - **Don't merge a stack tip with squash.** Squash-merging only the tip of a linear stack collapses N PRs into 1 commit — intermediate ticket IDs, PR boundaries, and review context are lost. For squash repos, always merge each PR individually, bottom-up.
 - **Don't merge without surfacing the strategy.** Always tell the operator what merge method and stack handling you're about to use, and wait for confirmation. Never silently default.
 - **Don't `--delete-branch` when child PRs exist.** Always check `gh pr list --base <branch> --state open` before deleting. Retarget children first, then delete. Violating this auto-closes child PRs on GitHub.
