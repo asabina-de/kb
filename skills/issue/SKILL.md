@@ -7,7 +7,7 @@ allowed-tools: Bash Glob Grep Read Edit WebFetch AskUserQuestion Skill mcp__clau
 
 # issue
 
-Create Linear issues — from a design note's action items, from an existing ticket (iteration), or freeform from a prompt. All modes enforce value-oriented titles via a quality gate, use an in-chat confirmation gate, and support idempotent re-runs.
+Create Linear issues — from a design note's action items, from an existing ticket (iteration), or freeform from a prompt. All modes enforce value-oriented titles via a quality gate and flag well-formed but premature tickets via an advisory scope gate, use an in-chat confirmation gate, and support idempotent re-runs.
 
 The defining design principles of this skill are:
 
@@ -171,6 +171,7 @@ Parse the note for action items. Canonical sources, in priority order:
 For each candidate, capture:
 
 - **Title:** the first line of the item, cleaned up (strip checklist markers, leading "TODO:", trailing punctuation). Run through the **title quality gate pre-presentation checklist** — imperative `[VERB] [NOUN] [CONTEXT]`, verb from tier list, cold-reader check. If the gate fires, store both the original and suggested rewrite for presentation in Phase 3.
+- **Scope:** run the candidate through the **scope gate** (pull-not-push lead check — see the **Scope gate** section). If it fires, store the warning and the suggested downgrade/park for presentation in Phase 3. Filing mode is advisory — the note was greenlit, so flag, don't interrogate.
 - **Description:** the item's body content + the parent section heading + up to ~10 lines of preceding contextual prose from the section. Quote rather than paraphrase.
 - **Source anchor:** `{relative-note-path}#{slugified-section-heading}` so the Linear ticket can deep-link back.
 - **Tags from the note's front matter** — these may inform Linear labels.
@@ -251,6 +252,8 @@ Skipped:
 
 **Batch overlap detection:** When proposing multiple tickets (filing or freeform), compare the first 25 characters of all titles. If any pair shares >50% of those characters, flag it with a `⚠ Overlap` line and suggest reordering so the differentiator leads. Render the truncated titles side-by-side to make the problem visible.
 
+**Scope gate surfacing:** Run each candidate through the scope gate (see the **Scope gate** section). When it fires, add a `Scope:` line beneath the title (format in the Scope gate's output block) naming what tripped, plus a suggested action — downgrade the commitment verb to a provisional one, or park as not-yet-implementable. Advisory: the operator still decides in the confirmation.
+
 ### Confirm
 
 Confirm with the user. Combine the confirmation with any unresolved routing questions from Phase 2 into a single batch:
@@ -258,6 +261,7 @@ Confirm with the user. Combine the confirmation with any unresolved routing ques
 - **Always ask:** "Create these {N} tickets?" with options: **Yes, create all** / **Exclude some — let me pick** / **Bail**
 - **Only if team/project is unresolved:** include a question for team and/or project selection
 - **Only if candidate count is large (>10):** include a question about narrowing scope
+- **Only if the scope gate fired on a candidate:** offer its outcome in the same batch — **File as-is** / **Park as not-yet-implementable** (closest existing readiness signal; representation per KB-96) / **Defer**. Filing mode stays advisory — surface the option, don't interrogate.
 
 If the user chooses "Exclude some", ask one follow-up question with multiSelect listing the candidates so the user can deselect. This is the only case where a second question is permitted.
 
@@ -377,6 +381,7 @@ Read the user's prompt and extract:
 For each item, draft:
 
 - **Title** — derive from the user's description, then run the **title quality gate pre-presentation checklist**: imperative `[VERB] [NOUN] [CONTEXT]`, verb from tier list, cold-reader check. If the gate fires, present the original and suggested rewrite.
+- **Scope** — run the **scope gate** (see the **Scope gate** section). Freeform mode is interactive: if it fires, fold the scoping questions into the confirmation batch rather than just flagging (the operator is present).
 - **Description** — 2–5 sentences of context followed by a **"Done when:" checklist** — markdown checkboxes (`- [ ] condition`) for each verifiable completion criterion. Prepend `*[ai:claude-code]*` as the first line. Keep it minimal — the anchor principle applies just as in filing mode.
 - **Priority** — infer from the user's language (urgent, blocker, nice-to-have, etc.). Default Normal.
 - **Labels** — infer from context (e.g. "bug" → Bug label, "research" → Research label). Only apply if confident.
@@ -422,6 +427,7 @@ Ask the user: "Create these {N} issues?" with options: **Yes, create all** / **E
 
 - **Edit titles** — the user provides corrections; revise and re-present.
 - **Exclude some** — one follow-up question with multiSelect.
+- **If the scope gate fired** — fold its scoping questions into _this_ batch (don't open a separate round; the one-clarification-round rule still holds). For each flagged item add per-item outcomes: **Create as-is** / **Park as not-yet-implementable** / **Defer**. On Park, apply the closest existing readiness signal (e.g. an `Idea` / `Needs Scoping` label; offer to create one only if none fits — representation per KB-96).
 
 ### Create tickets
 
@@ -449,6 +455,7 @@ Print:
 | Commit suggestion | Yes (note was modified) | No (no files touched) |
 | Title derivation | From action item text | From user's description |
 | Title quality gate | Applied | Applied |
+| Scope gate | Advisory (flag + suggest) | Conversational (folded into confirm batch) |
 | Triage | Applied | Applied |
 
 ## Title quality gate
@@ -639,6 +646,9 @@ All five fire. The gate would have flagged IDT-2 at drafting time and suggested 
 - **Don't bundle unrelated action items into a single ticket.** One action item = one ticket. If items are tightly coupled, the note should reflect that and the skill can model them as parent/sub-tasks — but only if the note is structured that way. Crucially, don't model items as sub-issues when they're actually dependencies: if two items would be assigned to different people doing different work, they're flat peers with a `blocks`/`blockedBy` relation, not a parent/child decomposition. See **Phase 2 → Work breakdown** for the full rule.
 - **Don't over-fill descriptions.** A description is a minimal anchor — 2–5 sentences max (what, why, DoD, backlink). Do not copy prose, reasoning, or context from the design note into it. The backlink to the note is the bridge; if extra context is needed, post it as a comment after creation. Stuffing descriptions creates maintenance debt and obscures the signal.
 - **Don't skip the DoD.** Every ticket needs a "Done when:" checklist in the description — markdown checkboxes (`- [ ] condition`), not a prose sentence. Each item should be concrete and verifiable — not "done when implemented" but specific observable conditions. Checklist style enables partial-progress tracking (items can be checked off as completed). If the source material doesn't imply clear DoD items, draft them from the action item's intent and surface them in the confirmation gate for the user to refine.
+- **Don't let the scope gate block.** It's advisory like the title gate — surface the fire and the suggested downgrade/park, but the operator always decides. Never refuse to file on scope grounds.
+- **Don't interrogate in filing mode.** A scope fire on a note-derived candidate is a flag + suggestion, not a new question round — the note was greenlit. Conversational scoping is freeform-only, and even there it folds into the single confirmation batch.
+- **Don't invent a readiness scheme when parking.** Discover the most suitable existing label/status first; offer to create one only if none fits. How readiness is represented is decided in KB-96 — until then, use the closest existing signal and note the ambiguity.
 - **Don't default to description updates in iteration mode.** The user's intent is almost always to add a comment. Only propose a title/description change when the prompt explicitly targets the anchor (e.g. "the title is wrong", "rewrite the description"). When in doubt, put it in a comment.
 - **Don't run filing-mode phases in iteration mode.** If a Linear URL or issue ID was detected, skip straight to the iteration phase. Do not look for design notes, parse action items, or propose ticket creation.
 - **Don't silently rewrite comment history.** The skill can only post new comments on the issue (e.g. `save_comment`). It cannot edit or delete existing comments. If a prior comment is wrong, post a follow-up — don't attempt to alter the record.
