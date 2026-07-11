@@ -34,6 +34,19 @@ Tag manual-only steps with **(manual)** so readers know an agent can't automate 
 
 ---
 
+## [2026-07-11]
+
+### Added
+
+- **`/issue` skill — scope gate** (KB-92) — an advisory gate that flags _well-formed but premature_ tickets: the class the title gate and DoD-presence check both miss (a crisp title with a testable-_looking_ DoD can still be premature — IDT-2 "Lock the report function contract" is the worked case: its DoD was satisfiable only with fabricated payloads because no consumer existed). Five checks keyed on **dependency clarity, not domain clarity** — the signal you reliably have while drafting: pull-not-push (lead), testable-with-real-inputs, verb honesty, dependency direction, blast radius. Grounded in YAGNI / Last Responsible Moment / INVEST / tracer-bullet. Advisory like the title gate — it never blocks. **Freeform mode** resolves it conversationally (scoping questions fold into the single existing confirmation batch, no extra round); **filing mode** stays advisory (the note was greenlit — flag, don't interrogate). On a fire, offers three outcomes: file · park as not-yet-implementable · defer. **Red case (per KB-84):** the section walks IDT-2 through all five checks and confirms each fires — the gate would have flagged it at drafting time. How a parked ticket's readiness is _represented_ (label vs status) is deferred to KB-96; the pickup-time (`/pair`, KB-97) and graduation-time (`/decision`, KB-98) analogues are separate tickets, kept at parity via the section's sync note.
+
+### Migration
+
+**Files:**
+
+- Re-sync `skills/issue/SKILL.md` if your repo vendors the KB skills — the new `## Scope gate` section and its flow wiring (Phase 1, freeform parse, confirmation, differences table, anti-patterns) are additive; no other skill behavior changed.
+- Optional — for the "park as not-yet-implementable" outcome to land somewhere, ensure a readiness label exists (e.g. `Idea` or `Needs Scoping`). Not required: the gate discovers the closest existing signal and only offers to create one if none fits. The canonical readiness model is still being decided (KB-96).
+
 ## [2026-07-08]
 
 ### Fixed
