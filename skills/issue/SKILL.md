@@ -565,6 +565,66 @@ Warning:   <what triggered — e.g. "mechanism verb 'Implement' leading", "78 ch
 - "Fix duplicate disclosures on concurrent polls" — imperative, bug framing, specific
 - "Trial Unusual Whales for congress disclosures" — imperative, spike framing, differentiator at position 7
 
+## Scope gate
+
+> **ADVISORY. Weighted toward decision/spec tickets** ("lock/define/standardize"). Every candidate ticket passes through this gate before presentation. It warns and suggests — it never blocks. A title can be crisp and its DoD testable-_looking_, and the ticket still be premature: this gate catches the _well-formed but premature_ ticket that the title gate and the DoD-presence check both miss.
+
+The gate keys on **dependency clarity, not domain clarity** — the thing you reliably have while drafting. In the moment you rarely know the domain, but you do know whether anything concrete is waiting on this work. IDT-2 ("Lock the report function contract") is the canonical miss: crisp title, testable-_looking_ DoD ("typed schema + example payloads + invariant test stub"), yet satisfiable only with fabricated payloads because no consumer existed to constrain the shape. It was cancelled and folded into the ticket that actually revealed the contract (IDT-12).
+
+> **Sync note:** The same readiness judgment applies at three lifecycle points — ticket _creation_ (this skill), ticket _pickup_ (`/pair`, tracked as KB-97), and record _graduation_ `exploring → decided` (`/decision`, tracked as KB-98). Skills are self-contained (see CLAUDE.md "Skill Architecture Constraints") — when the checklist changes here, check the `/pair` and `/decision` copies and keep the shared checks at parity. Those copies are downstream tickets, not yet written; until they land, this is the source of the shared checklist. How a parked ticket's readiness is _represented_ (label vs status) is decided separately in KB-96.
+
+### Pre-presentation checklist
+
+Run this mechanically for each candidate ticket before presenting it. The gate fires if any check trips — weight the first heaviest.
+
+1. **Pull, not push (lead check).** Is a concrete, existing thing blocked _now_, waiting on this? Or is the justification "so future work has something to build against"? The second is the smell. Keys on dependency — answerable in the moment — not on domain knowledge you may lack.
+2. **Testable with real inputs.** Can the DoD be met with data that exists today, or only with fabricated examples? A crisp DoD is not a well-scoped ticket — IDT-2 is the proof.
+3. **Verb honesty.** Does the title verb claim commitment (Lock / Define / Standardize / Finalize) while the actual work is discovery? If so, downgrade to a discovery verb + provisional output, or don't ticket yet.
+4. **Dependency direction.** Is the artifact's shape _discovered_ by building something downstream? Then this should be `blocked-by` that work, not blocking it. Feed this into Phase 2 work-breakdown — model the relation, don't just warn.
+5. **Blast radius if wrong (Last Responsible Moment).** High re-litigation cost + thin evidence today → defer to the last responsible moment.
+
+**Grounding (name it, don't reinvent):** YAGNI, the Last Responsible Moment (Lean), INVEST's _Valuable_ + _Testable_, and the walking-skeleton / tracer-bullet principle. The gate is a re-derivation of these — reach for the established name when explaining a fire.
+
+### Behavior when the gate fires
+
+The gate is advisory and mode-sensitive:
+
+- **Freeform mode** — the operator is present, so resolve it _conversationally_: fold the scoping questions (Who is the consumer waiting on this? Can the DoD be met with data that exists today? Is this pull or push?) into `/issue`'s **single existing confirmation batch**. Do not open a new clarification round — the one-question-round rule (see Anti-patterns) still holds.
+- **Filing mode** — the design note was already greenlit and the operator may have stepped away, so stay **advisory**: flag the smell and suggest a downgrade; do not interrogate.
+
+In both modes, when the gate fires, offer three outcomes alongside the confirmation:
+
+1. **File as a normal ticket** — the operator judges it ready; proceed.
+2. **Park as not-yet-implementable** — the idea is worth capturing but has no consumer yet. Apply the workspace's readiness signal for this: discover the most suitable _existing_ signal first (e.g. an `Idea` / `Needs Scoping` label, or a Backlog-type status), and offer to create one only if nothing suitable exists. How readiness is represented is being decided in KB-96 — until it lands, use the closest existing signal and note the ambiguity rather than inventing a scheme.
+3. **Defer / don't file** — the blast radius is high and the evidence thin; revisit at the last responsible moment.
+
+### When the gate fires (output)
+
+Surface the fire in the confirmation proposal, on its own line beneath the title:
+
+```
+Scope:     ⚠ push, not pull — no existing consumer; DoD ("example payloads") only satisfiable with fabricated data
+Suggested: downgrade "Lock report contract" → "Trial report contract shape" (provisional), or park as not-yet-implementable
+```
+
+### Worked example — IDT-2 (red case)
+
+Running the checklist against IDT-2 "Lock the report function contract":
+
+1. **Pull, not push** — ✗ fires. The justification was "so the report function has a contract to build against" — no consumer existed.
+2. **Testable with real inputs** — ✗ fires. The "example payloads" could only be fabricated; no disclosures existed yet to constrain the shape.
+3. **Verb honesty** — ✗ fires. "Lock" claims commitment; the work was discovery.
+4. **Dependency direction** — ✗ fires. The contract's shape was actually _discovered_ by IDT-12 (extract trade-report items); IDT-2 should have been `blocked-by` IDT-12, not blocking it.
+5. **Blast radius** — ✗ fires. Locking an interface with no implementation is high re-litigation cost on thin evidence.
+
+All five fire. The gate would have flagged IDT-2 at drafting time and suggested either a provisional `Trial` downgrade or parking it — instead of the cancel-and-fold that actually happened. This is the red-case proof (per KB-84).
+
+### Tickets that pass (no fire)
+
+- "Fix duplicate disclosures on concurrent polls" — a concrete bug is blocking now (pull); DoD testable against real polls.
+- "Add CI for agents test suite" — the test suite already exists (consumer present); DoD met with the real suite.
+- "Survey disclosure data providers" — discovery framed honestly as discovery; no commitment verb claiming premature closure.
+
 ## Anti-patterns
 
 - **Don't run on `decided`/`superseded`/`deprecated` records** or anything in `ARCHIVE/`. Settled records are read-only.
