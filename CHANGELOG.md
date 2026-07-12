@@ -34,6 +34,18 @@ Tag manual-only steps with **(manual)** so readers know an agent can't automate 
 
 ---
 
+## [2026-07-11]
+
+### Added
+
+- **`/issue` skill — scope gate** (KB-92) — an advisory gate (never blocks) that flags _well-formed but premature_ tickets, which the title and DoD-presence checks miss. Five checks keyed on dependency clarity (pull-not-push lead); on a fire, offers file · park · defer. Rationale, the checklist, and the IDT-2 red case live in the skill's `## Scope gate` section.
+
+### Migration
+
+**Files:**
+
+- Re-sync `skills/issue/SKILL.md` if your repo vendors the KB skills — additive; no other skill behavior changed.
+
 ## [2026-07-08]
 
 ### Fixed

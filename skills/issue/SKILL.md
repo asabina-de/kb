@@ -7,7 +7,7 @@ allowed-tools: Bash Glob Grep Read Edit WebFetch AskUserQuestion Skill mcp__clau
 
 # issue
 
-Create Linear issues — from a design note's action items, from an existing ticket (iteration), or freeform from a prompt. All modes enforce value-oriented titles via a quality gate, use an in-chat confirmation gate, and support idempotent re-runs.
+Create Linear issues — from a design note's action items, from an existing ticket (iteration), or freeform from a prompt. All modes enforce value-oriented titles via a quality gate and flag well-formed but premature tickets via an advisory scope gate, use an in-chat confirmation gate, and support idempotent re-runs.
 
 The defining design principles of this skill are:
 
@@ -171,6 +171,7 @@ Parse the note for action items. Canonical sources, in priority order:
 For each candidate, capture:
 
 - **Title:** the first line of the item, cleaned up (strip checklist markers, leading "TODO:", trailing punctuation). Run through the **title quality gate pre-presentation checklist** — imperative `[VERB] [NOUN] [CONTEXT]`, verb from tier list, cold-reader check. If the gate fires, store both the original and suggested rewrite for presentation in Phase 3.
+- **Scope:** run the candidate through the **scope gate** (pull-not-push lead check — see the **Scope gate** section). If it fires, store the warning and the suggested downgrade/park for presentation in Phase 3. Filing mode is advisory — the note was greenlit, so flag, don't interrogate.
 - **Description:** the item's body content + the parent section heading + up to ~10 lines of preceding contextual prose from the section. Quote rather than paraphrase.
 - **Source anchor:** `{relative-note-path}#{slugified-section-heading}` so the Linear ticket can deep-link back.
 - **Tags from the note's front matter** — these may inform Linear labels.
@@ -251,6 +252,8 @@ Skipped:
 
 **Batch overlap detection:** When proposing multiple tickets (filing or freeform), compare the first 25 characters of all titles. If any pair shares >50% of those characters, flag it with a `⚠ Overlap` line and suggest reordering so the differentiator leads. Render the truncated titles side-by-side to make the problem visible.
 
+**Scope gate surfacing:** Run each candidate through the scope gate (see the **Scope gate** section). When it fires, add a `Scope:` line beneath the title (format in the Scope gate's output block) naming what tripped, plus a suggested action — downgrade the commitment verb to a provisional one, or park as not-yet-implementable. Advisory: the operator still decides in the confirmation.
+
 ### Confirm
 
 Confirm with the user. Combine the confirmation with any unresolved routing questions from Phase 2 into a single batch:
@@ -258,6 +261,7 @@ Confirm with the user. Combine the confirmation with any unresolved routing ques
 - **Always ask:** "Create these {N} tickets?" with options: **Yes, create all** / **Exclude some — let me pick** / **Bail**
 - **Only if team/project is unresolved:** include a question for team and/or project selection
 - **Only if candidate count is large (>10):** include a question about narrowing scope
+- **Only if the scope gate fired on a candidate:** offer its outcome in the same batch — **File as-is** / **Park as not-yet-implementable** (closest existing readiness signal; representation per KB-96) / **Defer**. Filing mode stays advisory — surface the option, don't interrogate.
 
 If the user chooses "Exclude some", ask one follow-up question with multiSelect listing the candidates so the user can deselect. This is the only case where a second question is permitted.
 
@@ -377,6 +381,7 @@ Read the user's prompt and extract:
 For each item, draft:
 
 - **Title** — derive from the user's description, then run the **title quality gate pre-presentation checklist**: imperative `[VERB] [NOUN] [CONTEXT]`, verb from tier list, cold-reader check. If the gate fires, present the original and suggested rewrite.
+- **Scope** — run the **scope gate** (see the **Scope gate** section). Freeform mode is interactive: if it fires, fold the scoping questions into the confirmation batch rather than just flagging (the operator is present).
 - **Description** — 2–5 sentences of context followed by a **"Done when:" checklist** — markdown checkboxes (`- [ ] condition`) for each verifiable completion criterion. Prepend `*[ai:claude-code]*` as the first line. Keep it minimal — the anchor principle applies just as in filing mode.
 - **Priority** — infer from the user's language (urgent, blocker, nice-to-have, etc.). Default Normal.
 - **Labels** — infer from context (e.g. "bug" → Bug label, "research" → Research label). Only apply if confident.
@@ -422,6 +427,7 @@ Ask the user: "Create these {N} issues?" with options: **Yes, create all** / **E
 
 - **Edit titles** — the user provides corrections; revise and re-present.
 - **Exclude some** — one follow-up question with multiSelect.
+- **If the scope gate fired** — fold its scoping questions into _this_ batch (don't open a separate round; the one-clarification-round rule still holds). For each flagged item add per-item outcomes: **Create as-is** / **Park as not-yet-implementable** / **Defer**. On Park, apply the closest existing readiness signal (e.g. an `Idea` / `Needs Scoping` label; offer to create one only if none fits — representation per KB-96).
 
 ### Create tickets
 
@@ -449,6 +455,7 @@ Print:
 | Commit suggestion | Yes (note was modified) | No (no files touched) |
 | Title derivation | From action item text | From user's description |
 | Title quality gate | Applied | Applied |
+| Scope gate | Advisory (flag + suggest) | Conversational (folded into confirm batch) |
 | Triage | Applied | Applied |
 
 ## Title quality gate
@@ -565,6 +572,66 @@ Warning:   <what triggered — e.g. "mechanism verb 'Implement' leading", "78 ch
 - "Fix duplicate disclosures on concurrent polls" — imperative, bug framing, specific
 - "Trial Unusual Whales for congress disclosures" — imperative, spike framing, differentiator at position 7
 
+## Scope gate
+
+> **ADVISORY. Weighted toward decision/spec tickets** ("lock/define/standardize"). Every candidate ticket passes through this gate before presentation. It warns and suggests — it never blocks. A title can be crisp and its DoD testable-_looking_, and the ticket still be premature: this gate catches the _well-formed but premature_ ticket that the title gate and the DoD-presence check both miss.
+
+The gate keys on **dependency clarity, not domain clarity** — the thing you reliably have while drafting. In the moment you rarely know the domain, but you do know whether anything concrete is waiting on this work. IDT-2 ("Lock the report function contract") is the canonical miss: crisp title, testable-_looking_ DoD ("typed schema + example payloads + invariant test stub"), yet satisfiable only with fabricated payloads because no consumer existed to constrain the shape. It was cancelled and folded into the ticket that actually revealed the contract (IDT-12).
+
+> **Sync note:** The same readiness judgment applies at three lifecycle points — ticket _creation_ (this skill), ticket _pickup_ (`/pair`, tracked as KB-97), and record _graduation_ `exploring → decided` (`/decision`, tracked as KB-98). Skills are self-contained (see CLAUDE.md "Skill Architecture Constraints") — when the checklist changes here, check the `/pair` and `/decision` copies and keep the shared checks at parity. Those copies are downstream tickets, not yet written; until they land, this is the source of the shared checklist. How a parked ticket's readiness is _represented_ (label vs status) is decided separately in KB-96.
+
+### Pre-presentation checklist
+
+Run this mechanically for each candidate ticket before presenting it. The gate fires if any check trips — weight the first heaviest.
+
+1. **Pull, not push (lead check).** Is a concrete, existing thing blocked _now_, waiting on this? Or is the justification "so future work has something to build against"? The second is the smell. Keys on dependency — answerable in the moment — not on domain knowledge you may lack.
+2. **Testable with real inputs.** Can the DoD be met with data that exists today, or only with fabricated examples? A crisp DoD is not a well-scoped ticket — IDT-2 is the proof.
+3. **Verb honesty.** Does the title verb claim commitment (Lock / Define / Standardize / Finalize) while the actual work is discovery? If so, downgrade to a discovery verb + provisional output, or don't ticket yet.
+4. **Dependency direction.** Is the artifact's shape _discovered_ by building something downstream? Then this should be `blocked-by` that work, not blocking it. Feed this into Phase 2 work-breakdown — model the relation, don't just warn.
+5. **Blast radius if wrong (Last Responsible Moment).** High re-litigation cost + thin evidence today → defer to the last responsible moment.
+
+**Grounding (name it, don't reinvent):** YAGNI, the Last Responsible Moment (Lean), INVEST's _Valuable_ + _Testable_, and the walking-skeleton / tracer-bullet principle. The gate is a re-derivation of these — reach for the established name when explaining a fire.
+
+### Behavior when the gate fires
+
+The gate is advisory and mode-sensitive:
+
+- **Freeform mode** — the operator is present, so resolve it _conversationally_: fold the scoping questions (Who is the consumer waiting on this? Can the DoD be met with data that exists today? Is this pull or push?) into `/issue`'s **single existing confirmation batch**. Do not open a new clarification round — the one-question-round rule (see Anti-patterns) still holds.
+- **Filing mode** — the design note was already greenlit and the operator may have stepped away, so stay **advisory**: flag the smell and suggest a downgrade; do not interrogate.
+
+In both modes, when the gate fires, offer three outcomes alongside the confirmation:
+
+1. **File as a normal ticket** — the operator judges it ready; proceed.
+2. **Park as not-yet-implementable** — the idea is worth capturing but has no consumer yet. Apply the workspace's readiness signal for this: discover the most suitable _existing_ signal first (e.g. an `Idea` / `Needs Scoping` label, or a Backlog-type status), and offer to create one only if nothing suitable exists. How readiness is represented is being decided in KB-96 — until it lands, use the closest existing signal and note the ambiguity rather than inventing a scheme.
+3. **Defer / don't file** — the blast radius is high and the evidence thin; revisit at the last responsible moment.
+
+### When the gate fires (output)
+
+Surface the fire in the confirmation proposal, on its own line beneath the title:
+
+```
+Scope:     ⚠ push, not pull — no existing consumer; DoD ("example payloads") only satisfiable with fabricated data
+Suggested: downgrade "Lock report contract" → "Trial report contract shape" (provisional), or park as not-yet-implementable
+```
+
+### Worked example — IDT-2 (red case)
+
+Running the checklist against IDT-2 "Lock the report function contract":
+
+1. **Pull, not push** — ✗ fires. The justification was "so the report function has a contract to build against" — no consumer existed.
+2. **Testable with real inputs** — ✗ fires. The "example payloads" could only be fabricated; no disclosures existed yet to constrain the shape.
+3. **Verb honesty** — ✗ fires. "Lock" claims commitment; the work was discovery.
+4. **Dependency direction** — ✗ fires. The contract's shape was actually _discovered_ by IDT-12 (extract trade-report items); IDT-2 should have been `blocked-by` IDT-12, not blocking it.
+5. **Blast radius** — ✗ fires. Locking an interface with no implementation is high re-litigation cost on thin evidence.
+
+All five fire. The gate would have flagged IDT-2 at drafting time and suggested either a provisional `Trial` downgrade or parking it — instead of the cancel-and-fold that actually happened. This is the red-case proof (per KB-84).
+
+### Tickets that pass (no fire)
+
+- "Fix duplicate disclosures on concurrent polls" — a concrete bug is blocking now (pull); DoD testable against real polls.
+- "Add CI for agents test suite" — the test suite already exists (consumer present); DoD met with the real suite.
+- "Survey disclosure data providers" — discovery framed honestly as discovery; no commitment verb claiming premature closure.
+
 ## Anti-patterns
 
 - **Don't run on `decided`/`superseded`/`deprecated` records** or anything in `ARCHIVE/`. Settled records are read-only.
@@ -579,6 +646,9 @@ Warning:   <what triggered — e.g. "mechanism verb 'Implement' leading", "78 ch
 - **Don't bundle unrelated action items into a single ticket.** One action item = one ticket. If items are tightly coupled, the note should reflect that and the skill can model them as parent/sub-tasks — but only if the note is structured that way. Crucially, don't model items as sub-issues when they're actually dependencies: if two items would be assigned to different people doing different work, they're flat peers with a `blocks`/`blockedBy` relation, not a parent/child decomposition. See **Phase 2 → Work breakdown** for the full rule.
 - **Don't over-fill descriptions.** A description is a minimal anchor — 2–5 sentences max (what, why, DoD, backlink). Do not copy prose, reasoning, or context from the design note into it. The backlink to the note is the bridge; if extra context is needed, post it as a comment after creation. Stuffing descriptions creates maintenance debt and obscures the signal.
 - **Don't skip the DoD.** Every ticket needs a "Done when:" checklist in the description — markdown checkboxes (`- [ ] condition`), not a prose sentence. Each item should be concrete and verifiable — not "done when implemented" but specific observable conditions. Checklist style enables partial-progress tracking (items can be checked off as completed). If the source material doesn't imply clear DoD items, draft them from the action item's intent and surface them in the confirmation gate for the user to refine.
+- **Don't let the scope gate block.** It's advisory like the title gate — surface the fire and the suggested downgrade/park, but the operator always decides. Never refuse to file on scope grounds.
+- **Don't interrogate in filing mode.** A scope fire on a note-derived candidate is a flag + suggestion, not a new question round — the note was greenlit. Conversational scoping is freeform-only, and even there it folds into the single confirmation batch.
+- **Don't invent a readiness scheme when parking.** Discover the most suitable existing label/status first; offer to create one only if none fits. How readiness is represented is decided in KB-96 — until then, use the closest existing signal and note the ambiguity.
 - **Don't default to description updates in iteration mode.** The user's intent is almost always to add a comment. Only propose a title/description change when the prompt explicitly targets the anchor (e.g. "the title is wrong", "rewrite the description"). When in doubt, put it in a comment.
 - **Don't run filing-mode phases in iteration mode.** If a Linear URL or issue ID was detected, skip straight to the iteration phase. Do not look for design notes, parse action items, or propose ticket creation.
 - **Don't silently rewrite comment history.** The skill can only post new comments on the issue (e.g. `save_comment`). It cannot edit or delete existing comments. If a prior comment is wrong, post a follow-up — don't attempt to alter the record.
