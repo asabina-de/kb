@@ -18,6 +18,7 @@ supersedes: ""
 | :-------- | :--------- | :----- | :-------------------------------------------------------------------------- | :----------------------------------------------------------------------- |
 | exploring | 2026-07-12 | claude | [KB-96](https://linear.app/asabina/issue/KB-96/select-ticket-readiness-taxonomy-and-graduation-gate) | Initial creation via `/decision`; integrates the KB-96 research spike (cited). |
 | exploring | 2026-07-12 | claude | [KB-96](https://linear.app/asabina/issue/KB-96/select-ticket-readiness-taxonomy-and-graduation-gate) | David resolved all 5 open questions in-session (Icebox naming; drop `Idea` label; Todo = Ready; no generic Backlog; count semantics). Decision folded in; formal graduation to `decided` deferred until action-item tickets are filed (exploring → `/issue` → decided). |
+| exploring | 2026-07-12 | claude | KB-103, KB-104, KB-105 | Filed 3 action-item tickets via `/issue` (KB-103 workspace config, KB-104 canonical-setup doc, KB-105 `/issue` updates); DoR-wiring covered by KB-97/KB-98. Ready to graduate to `decided` (pending HITL). |
 
 ## Context
 
@@ -121,12 +122,12 @@ _All resolved 2026-07-12 (David)._
 
 ## Action items
 
-- [ ] Create the workflow statuses in Linear (manual workspace change): `Icebox` and `Needs Scoping` in the Backlog type; remove the default generic `Backlog` status; treat Unstarted `Todo` as the Ready line.
-- [ ] Migrate any `Idea` / `Needs Scoping`-labelled tickets to the new statuses, then delete both labels. — _blocked by status creation_
-- [ ] **Document the canonical Linear workspace status + label setup** as a reusable reference, so new workspaces can be provisioned consistently. _(distinct deliverable — candidate for its own ticket)_
-- [ ] Update the `/issue` scope-gate park outcome to target the `Icebox` status (replacing the interim "closest existing label" language from KB-92).
-- [ ] Wire the Definition of Ready (the five checks) as the graduation gate in `/pair` pickup (KB-97) and `/decision` graduation (KB-98).
-- [ ] Update `/issue` triage + "ready backlog" counting to treat Icebox / Needs Scoping as not-ready.
+- [ ] Create the workflow statuses in Linear (manual workspace change): `Icebox` and `Needs Scoping` in the Backlog type; remove the default generic `Backlog` status; treat Unstarted `Todo` as the Ready line. (Linear: [KB-103](https://linear.app/asabina/issue/KB-103/configure-readiness-statuses-in-linear-workspace))
+- [ ] Migrate any `Idea` / `Needs Scoping`-labelled tickets to the new statuses, then delete both labels. — _blocked by status creation_ (Linear: [KB-103](https://linear.app/asabina/issue/KB-103/configure-readiness-statuses-in-linear-workspace) — bundled)
+- [ ] **Document the canonical Linear workspace status + label setup** as a reusable reference, so new workspaces can be provisioned consistently. (Linear: [KB-104](https://linear.app/asabina/issue/KB-104/document-canonical-linear-workspace-setup))
+- [ ] Update the `/issue` scope-gate park outcome to target the `Icebox` status (replacing the interim "closest existing label" language from KB-92). (Linear: [KB-105](https://linear.app/asabina/issue/KB-105/teach-issue-the-readiness-statuses))
+- [ ] Wire the Definition of Ready (the five checks) as the graduation gate in `/pair` pickup (KB-97) and `/decision` graduation (KB-98). (Linear: [KB-97](https://linear.app/asabina/issue/KB-97/gate-premature-pickup-in-pair), [KB-98](https://linear.app/asabina/issue/KB-98/gate-premature-graduation-in-decision))
+- [ ] Update `/issue` triage + "ready backlog" counting to treat Icebox / Needs Scoping as not-ready. (Linear: [KB-105](https://linear.app/asabina/issue/KB-105/teach-issue-the-readiness-statuses) — bundled)
 
 ## Upstream References
 
