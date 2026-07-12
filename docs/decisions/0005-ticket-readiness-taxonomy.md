@@ -1,7 +1,7 @@
 ---
 title: "Ticket Readiness Taxonomy and Graduation Gate"
 tags: [workflow, backlog, linear, process]
-status: exploring
+status: decided
 decision: "Model readiness as workflow statuses (Icebox → Needs Scoping → Todo), not labels; DoR = KB-92's five checks. Drop the Idea/Needs Scoping labels."
 review_date: 2026-10-12
 related_to: []
@@ -19,6 +19,7 @@ supersedes: ""
 | exploring | 2026-07-12 | claude | [KB-96](https://linear.app/asabina/issue/KB-96/select-ticket-readiness-taxonomy-and-graduation-gate) | Initial creation via `/decision`; integrates the KB-96 research spike (cited). |
 | exploring | 2026-07-12 | claude | [KB-96](https://linear.app/asabina/issue/KB-96/select-ticket-readiness-taxonomy-and-graduation-gate) | David resolved all 5 open questions in-session (Icebox naming; drop `Idea` label; Todo = Ready; no generic Backlog; count semantics). Decision folded in; formal graduation to `decided` deferred until action-item tickets are filed (exploring → `/issue` → decided). |
 | exploring | 2026-07-12 | claude | KB-103, KB-104, KB-105 | Filed 3 action-item tickets via `/issue` (KB-103 workspace config, KB-104 canonical-setup doc, KB-105 `/issue` updates); DoR-wiring covered by KB-97/KB-98. Ready to graduate to `decided` (pending HITL). |
+| decided   | 2026-07-13 | claude | KB-96 | Graduated to `decided` (David). Action items filed as KB-103 / KB-104 / KB-105; DoR-wiring in KB-97 / KB-98. |
 
 ## Context
 
@@ -86,7 +87,7 @@ Migrate the `Idea` and `Needs Scoping` **labels** to **statuses** and drop the l
 
 ## Decision
 
-**Resolved 2026-07-12** (David; graduation to `decided` pending action-item ticket filing). Model ticket readiness as **workflow statuses, not labels** (Option B):
+**Resolved 2026-07-12; graduated to `decided` 2026-07-13** (David). Model ticket readiness as **workflow statuses, not labels** (Option B):
 
 - **Two Backlog-type statuses, and no generic "Backlog":** every not-yet-ready ticket is either **`Icebox`** (no concrete consumer) or **`Needs Scoping`** (consumer exists, fails DoR). The default generic `Backlog` status is removed — a ticket must be one of these two.
 - **"Ready" is the existing `Todo` (Unstarted type)** — no separate `Ready` status. Crossing the Backlog→Unstarted boundary is the Definition-of-Ready line.
