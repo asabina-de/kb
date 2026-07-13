@@ -174,6 +174,32 @@ If the `/design` skill is not available (not yet implemented), continue with the
 
 ## Phase 1 — Assess and derisk
 
+### Readiness gate (Definition of Ready)
+
+> **ADVISORY — run at pickup, before assessing unknowns.** Before committing effort, check the ticket is actually _ready to implement_. This is the same readiness judgment `/issue` applies at ticket **creation** (its scope gate) and `/decision` at record **graduation** — here it runs at **pickup**. Warn and suggest; never hard-block. The navigator can always proceed.
+
+If the ticket sits in a not-ready workflow status — `Icebox` (no concrete consumer) or `Needs Scoping` (consumer exists, scope unclear) — it is by definition **not** ready to pick up; surface that immediately. Otherwise, run the five checks:
+
+**Definition of Ready — the five checks** (weight the first heaviest):
+
+1. **Pull, not push** — is a concrete, existing thing blocked _now_, waiting on this? "So future work has something to build against" is the smell.
+2. **Testable with real inputs** — can the DoD be met with data that exists today, or only fabricated examples?
+3. **Verb honesty** — does the title verb claim commitment (Lock/Define/Standardize/Finalize) while the work is actually discovery?
+4. **Dependency direction** — is the artifact's shape _discovered_ by building something downstream? Then it should be `blocked-by` that work — this ticket may be premature.
+5. **Blast radius** — high re-litigation cost + thin evidence today → defer to the Last Responsible Moment.
+
+Grounding: YAGNI, the Last Responsible Moment (Lean), INVEST's _Valuable_ + _Testable_, walking-skeleton / tracer-bullet.
+
+**When the gate fires** (any check trips, or the ticket is in a not-ready status), surface it to the navigator before going deeper, and offer:
+
+- **Proceed anyway** — the navigator judges it ready; continue to _Identify unknowns_.
+- **Bounce to `Needs Scoping`** — move the ticket back and note what's missing, rather than building on an unready spec.
+- **Defer** — high blast radius, thin evidence; revisit later.
+
+Fold the readiness finding into the Phase 1 Assessment comment (below) — don't open a separate round.
+
+> **Sync note:** These five checks are the shared **Definition of Ready**, mirrored as the `/issue` scope gate (`skills/issue/SKILL.md`, applied at creation) and the `/decision` graduation gate (tracked as KB-98). Skills are self-contained (see CLAUDE.md "Skill Architecture Constraints") — if the checklist changes, update the copies and keep them at parity.
+
 ### Identify unknowns
 
 Read the ticket and existing branch work. Categorize what remains:
@@ -481,6 +507,7 @@ Skill("comment", "Reply to anchor {plan-comment-id} on {ticket-id} titled \"✅ 
 - **Don't work silently for long stretches.** This is pairing, not autonomous mode. Check in after each atomic step. If exploration takes a while, print progress notes.
 - **Don't commit in checkpoint mode.** All git write operations are HITL unless the navigator explicitly switched to yolo mode.
 - **Don't skip the derisk phase.** Feasibility unknowns caught early save time. Don't jump to implementation because "it's probably fine."
+- **Don't hard-block on the readiness gate.** It's advisory like `/issue`'s scope gate — surface a not-ready ticket (failing the Definition of Ready, or sitting in `Icebox`/`Needs Scoping`) and offer to bounce it to `Needs Scoping`, but the navigator always decides. Never refuse to pick up work.
 - **Don't serialize parallelizable work.** If two steps are independent, use subagents. The navigator's time is valuable.
 - **Don't make large changes without checkpoints.** If a step turns out bigger than expected, break it down further and checkpoint mid-step.
 - **Don't assume the plan is fixed.** The navigator can redirect at any checkpoint. Accommodate without pushback.
