@@ -41,6 +41,10 @@ Prefer to merge stacks (multiple successive branches and their PRs) by merging t
 
 Use Linear for work tracking and planning.
 
+#### Workspace Setup
+
+To provision a new Linear workspace or team to convention — the canonical readiness statuses (`Icebox → Needs Scoping → Todo`), the Definition-of-Ready gate, and label conventions — follow the **[Linear Workspace Setup guide](./docs/linear-workspace-setup.md)**.
+
 #### Issue and Task Management
 
 **Preferred: Use Linear for all tickets and tasks**
