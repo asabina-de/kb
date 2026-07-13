@@ -34,6 +34,18 @@ Tag manual-only steps with **(manual)** so readers know an agent can't automate 
 
 ---
 
+## [2026-07-13]
+
+### Added
+
+- **`/pair` skill — readiness gate at pickup** (KB-97) — an advisory Definition-of-Ready check (the same five checks as the `/issue` scope gate) run when `/pair` picks up a ticket: it flags a not-ready ticket — or one in the `Icebox` / `Needs Scoping` status — before work starts, and offers to bounce it to `Needs Scoping`. Never blocks. Part of the readiness family (`docs/decisions/0005`).
+
+### Migration
+
+**Files:**
+
+- Re-sync `skills/pair/SKILL.md` if your repo vendors the KB skills — additive (new Phase 1 subsection + one anti-pattern); no other behavior changed.
+
 ## [2026-07-11]
 
 ### Added
