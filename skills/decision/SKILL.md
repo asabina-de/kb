@@ -327,14 +327,31 @@ Print a concise summary:
 - **Tags used:** with reuse-or-mint justification for each
 - **Related discovered:** Linear tickets, related notes, TODO.md stubs that informed the work
 - **Open questions captured:** count and pointer to the section
+- **Graduation readiness:** whether the record looks ready to graduate to `decided`, or which checks it fails (see **Graduation gate** below)
 - **Suggested next step:** e.g., "Review the note, edit as needed, then run `/issue` on this path to file tickets from the action items."
 - **Suggested commit message** following the repo's convention (if the repo's `CLAUDE.md` documents one). Include an `[ai:claude]` tag if that's the repo convention. **Do not commit** — git is HITL.
 
 If any research step failed or was skipped (e.g., web unavailable, Linear MCP absent), flag it clearly in both the wrap-up and the note's Status Log.
 
+### Graduation gate (advisory)
+
+> **ADVISORY. The skill never graduates a record itself** — `exploring → decided` is HITL (see Anti-patterns). But at wrap-up, assess whether the record is _ready to graduate_ and tell the human, so a decision isn't locked prematurely. This is the `/decision` member of the readiness family — the same premature-commitment / Last-Responsible-Moment judgment `/issue` applies at ticket creation and `/pair` at pickup, adapted for **decidedness** rather than implementability. It advises; it never blocks.
+
+Run these four checks against the record before recommending graduation:
+
+1. **Open questions resolved or deferred?** — Every item in `## Open Questions` is either answered or explicitly parked with a rationale. A record graduating with live, load-bearing open questions is premature.
+2. **Pull, not push** — is a concrete decision actually needed _now_ (something is blocked waiting on it), or are we locking "to have a decision"? The second is the smell — leave it `exploring`.
+3. **Evidence sufficient** — is the chosen option grounded in evidence that exists today (sourced findings in `## Exploration`), not speculation about the future?
+4. **Blast radius / Last Responsible Moment** — high re-litigation cost + thin evidence today → defer. Decide at the last responsible moment, not the first convenient one.
+
+**When the gate fires** (any check trips), say so in the wrap-up and recommend the record stay `exploring`, naming what's missing — rather than nudging the human to lock it. If all four pass, note that the record looks ready to graduate (the human still makes the call and performs the transition).
+
+> **Sync note:** This is the decision-adapted member of the shared **premature-commitment** gate, mirrored as the `/issue` scope gate (`skills/issue/SKILL.md`, ticket creation) and the `/pair` readiness gate (`skills/pair/SKILL.md`, ticket pickup). Those apply the Definition of Ready to _tickets_ (implementability); this applies the same _spirit_ to _decision records_ (decidedness), so the checks differ deliberately — keep the shared Last-Responsible-Moment / pull-not-push principle at parity, not the literal wording. Skills are self-contained (see CLAUDE.md "Skill Architecture Constraints").
+
 ## Anti-patterns
 
 - **Don't transition frontmatter status.** The `status: exploring → decided` transition is HITL. The skill only creates records in `status: exploring` or extends existing ones.
+- **Don't nudge premature graduation.** The graduation gate is advisory — if the record fails a check (live open questions, push-not-pull, thin evidence, high blast radius), recommend it stay `exploring` and say why. Never pressure the human to lock a decision that isn't ready.
 - **Don't rename files.** Serial-numbered filenames are permanent. The skill only creates new files or edits existing ones in place.
 - **Don't commit or stage.** All git operations are HITL per the repo's `CLAUDE.md`.
 - **Don't skip scope discovery.** Prefer extending an existing note. Duplication erodes the knowledge base and fragments context.
