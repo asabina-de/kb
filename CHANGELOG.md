@@ -39,12 +39,14 @@ Tag manual-only steps with **(manual)** so readers know an agent can't automate 
 ### Added
 
 - **`/pair` skill — readiness gate at pickup** (KB-97) — an advisory Definition-of-Ready check (the same five checks as the `/issue` scope gate) run when `/pair` picks up a ticket: it flags a not-ready ticket — or one in the `Icebox` / `Needs Scoping` status — before work starts, and offers to bounce it to `Needs Scoping`. Never blocks. Part of the readiness family (`docs/decisions/0005`).
+- **`/decision` skill — graduation gate at wrap-up** (KB-98) — an advisory readiness check surfaced when `/decision` wraps up, flagging a record that would graduate `exploring → decided` prematurely. Decision-adapted (open-questions-resolved · pull-not-push · evidence-sufficient · blast-radius/LRM) — the decidedness sibling of the `/issue` and `/pair` gates. The skill never graduates records itself (HITL); it only advises.
 
 ### Migration
 
 **Files:**
 
 - Re-sync `skills/pair/SKILL.md` if your repo vendors the KB skills — additive (new Phase 1 subsection + one anti-pattern); no other behavior changed.
+- Re-sync `skills/decision/SKILL.md` — additive (Phase 7 graduation gate + one anti-pattern).
 
 ## [2026-07-11]
 
