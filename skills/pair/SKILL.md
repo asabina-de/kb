@@ -481,7 +481,13 @@ If there are uncommitted changes (checkpoint mode only):
 
 The PR should already exist (opened after Step 1 in Phase 3). If it doesn't (e.g. the session skipped imagegen and went straight to one commit), create it now via the `/pr` skill.
 
-If the branch is complete, the PR is already the review surface — no additional action needed beyond ensuring the last commit is pushed.
+When the branch work is complete, promote the PR out of draft and hand it off for review:
+
+1. **Ensure the last commit is pushed.**
+2. **Flip the draft to ready** — if the PR is still a draft (opened PR-early in Phase 3), run `gh pr ready <n>` now that the work is done. A completed PR left in `Draft` blocks the merge button and signals "still WIP" to the team.
+3. **Transition the ticket to In Review** — this is the moment it moves to In Review (a draft PR deferred it at creation — see `/pr` Phase 5). Update the issue (e.g. `save_issue`, `state: "In Review"`).
+
+The flip is tied to completion, not memory — don't leave a finished branch's PR in draft.
 
 ### Comment wrap-up to Linear
 
@@ -506,6 +512,7 @@ Skill("comment", "Reply to anchor {plan-comment-id} on {ticket-id} titled \"✅ 
 
 - **Don't work silently for long stretches.** This is pairing, not autonomous mode. Check in after each atomic step. If exploration takes a while, print progress notes.
 - **Don't commit in checkpoint mode.** All git write operations are HITL unless the navigator explicitly switched to yolo mode.
+- **Don't leave a finished branch's PR in draft.** When the work is complete, flip the draft to ready (`gh pr ready`) and move the ticket to In Review at wrap-up (Phase 4). A completed PR stuck in draft blocks the merge button and reads as WIP.
 - **Don't skip the derisk phase.** Feasibility unknowns caught early save time. Don't jump to implementation because "it's probably fine."
 - **Don't hard-block on the readiness gate.** It's advisory like `/issue`'s scope gate — surface a not-ready ticket (failing the Definition of Ready, or sitting in `Icebox`/`Needs Scoping`) and offer to bounce it to `Needs Scoping`, but the navigator always decides. Never refuse to pick up work.
 - **Don't serialize parallelizable work.** If two steps are independent, use subagents. The navigator's time is valuable.

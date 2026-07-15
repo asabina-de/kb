@@ -275,8 +275,10 @@ Ask the user for their response. Options:
    )"
    ```
    **Do NOT use `mcp__github__create_pull_request` for PR creation.** The MCP tool escapes newlines as literal `\n` in the body parameter, producing a single-line wall of text on GitHub. This was observed on multiple PRs (yo-convo-bot#50, ivos-trades#4) and is a known limitation of how the MCP tool serializes multi-line strings. The `gh` CLI with heredocs preserves actual newlines. Other GitHub MCP tools (read, update, merge) are fine — the issue is specific to the `body` field on `create_pull_request`.
+
+   **Draft vs ready:** open with `--draft` when the PR is a work-in-progress surface (the PR-early case — e.g. invoked from `/pair` right after the first commit). Open ready (no `--draft`) when the branch work is already complete. A draft defers the In-Review transition in step 4 until it's promoted to ready (see `/pair` Phase 4).
 3. **Print the PR URL** from the `gh` output.
-4. **Transition the ticket:** if a ticket ID was extracted from the branch name in Phase 1, update the issue on Linear (e.g. `save_issue`) with `id: {ticket-id}` and `state: "In Review"`. This is unconditional — a PR being open means the work is ready for review.
+4. **Transition the ticket:** if a ticket ID was extracted from the branch name in Phase 1 **and the PR was opened ready (not a draft)**, update the issue on Linear (e.g. `save_issue`) with `id: {ticket-id}` and `state: "In Review"`. **A draft PR does not transition the ticket** — a draft is work-in-progress, so moving it to In Review would falsely tell reviewers the work is ready. The In-Review transition happens when the draft is promoted to ready (see `/pair` Phase 4 wrap-up).
 
 ## Phase 6 — Monitor CI
 
@@ -473,6 +475,7 @@ Group by platform on separate lines for readability. GitHub parses `#N` (numeric
 
 ## Anti-patterns
 
+- **Don't set In Review on a draft PR.** A draft is work-in-progress; In Review means a reviewer's eyes are actually wanted. Transition the ticket only when the PR is opened ready, or when a draft is promoted to ready (`/pair` Phase 4).
 - **Don't hardcode `main` as base.** Always detect the default branch and check for stacking.
 - **Don't create the PR without pitching.** The operator must see and approve the draft.
 - **Don't fabricate the test plan.** Derive it from the diff or say "verify manually" — don't invent test steps that don't exist.
