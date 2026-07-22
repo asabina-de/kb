@@ -34,6 +34,25 @@ Tag manual-only steps with **(manual)** so readers know an agent can't automate 
 
 ---
 
+## [2026-07-22]
+
+### Changed
+
+- **Env-management docs reconciled to a single mechanism** (KB-110) — the KB documented two conflicting env paths: a `.env.example` → `.env` copy step and the `direnv → devenv` (`.envrc` + `.envrc.local`) pattern. The `.env` path was a dead trap — the committed `.envrc` sources `.envrc.local` and runs devenv but never sources `.env`, so a copied `.env` activated nothing unless the (forbidden) `dotenv.enable = true` was set. Downstream repos inherited broken setups (Z-615). There is now one canonical mechanism: committed `.envrc` + `.envrc.local`, activated by `direnv allow`. `README.md`, `PROJECT_SETUP_GUIDE.md`, and `templates/README.md` now state that `.env` is not part of the pattern (framework-native `.env` stays out of scope) and document the `direnv allow` prerequisite.
+
+### Removed
+
+- **`templates/.env.example`** — deleted. It instructed copying itself to `.env`, which the pattern never loads. Its cross-reference in `.envrc.local.example` and its committed-file entry in `.gitignore.example` were removed too. `.env*` stays gitignored (safety net for frameworks that read `.env` natively), now with a note that direnv does not load it.
+
+### Migration
+
+**Files:**
+
+- If your repo has a committed `.env.example` used as an env-setup step, remove it: `git rm .env.example`. The `direnv → devenv` pattern never loads `.env`. Move any real values into `.envrc.local` (secrets / dynamic values via `$(op read …)`) or `devenv.nix` (shared, non-secret team variables).
+- Confirm `.envrc` is committed (not gitignored) and run `direnv allow` in the project root — without it, the environment does not activate.
+- If you vendor the KB templates, re-sync `templates/.gitignore.example` and `templates/.envrc.local.example` — the `.env.example` committed-file line and the `use .env instead` cross-reference were dropped; `.env*` remains ignored with an explanatory note.
+- If you vendor the KB `README.md` / `PROJECT_SETUP_GUIDE.md` env sections, re-sync them — additive scoping notes clarifying `.env` is not loaded and that `direnv allow` is required.
+
 ## [2026-07-15]
 
 ### Changed
