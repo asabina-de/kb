@@ -165,6 +165,9 @@ We use a **direnv -> devenv** pattern to manage environment variables. This prov
 
 - **`devenv.nix`** defines shared, non-sensitive variables for the team.
 - **`.envrc`** (committed to repo) contains direnv/devenv boilerplate — no secrets. **`.envrc.local`** (gitignored) holds secrets and local overrides, with support for dynamic values from tools like 1Password.
+- **Activation requires `direnv allow`** — direnv loads the environment only after you run `direnv allow` once per clone (and again after any `.envrc` change). Without it, nothing activates.
+
+> **`.env` is not part of this pattern.** direnv does not load `.env` files — the committed `.envrc` sources `.envrc.local`, never `.env`. If a framework reads `.env` natively (Next.js, Vite, docker-compose), manage that per the tool's own docs; it is independent of the direnv/devenv secret injection here.
 
 For a complete, step-by-step guide to setting this up in a new project, see the **[Project Setup Guide](./PROJECT_SETUP_GUIDE.md#1-environment-setup-recommended-first-step)**.
 

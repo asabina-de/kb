@@ -13,6 +13,9 @@ We use a **direnv -> devenv** pattern for environment management. This provides 
 > [!WARNING]
 > Avoid devenv's `dotenv.enable = true` option. It only supports basic `key=value` pairs and will cause frustration. Use `.envrc.local` for full bash support, including variable expansion (`${VAR}`) and command execution (`$(cmd)`).
 
+> [!NOTE]
+> `.env` files are not part of this pattern. The committed `.envrc` loads `.envrc.local`, never `.env`, so copying a `.env.example` → `.env` activates nothing here. If a framework reads `.env` natively (Next.js, Vite, docker-compose), that is independent of this setup.
+
 **A. Copy Environment Files**
 
 Copy the environment files from the knowledge base into your new project's root.
