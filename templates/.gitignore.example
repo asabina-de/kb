@@ -3,6 +3,12 @@
 
 # Local secrets and overrides (never committed)
 .envrc.local
+
+# .env* — kept ignored as a safety net, NOT part of this pattern.
+# direnv/devenv does NOT load these: the committed .envrc sources .envrc.local,
+# never .env. They stay ignored only so a framework that reads .env natively
+# (Next.js, Vite, docker-compose) can't leak secrets. For direnv-loaded secrets,
+# use .envrc.local instead.
 .env
 .env.local
 .env.*.local
@@ -10,4 +16,3 @@
 # Committed files (do NOT gitignore):
 # .envrc              — direnv/devenv boilerplate, no secrets
 # .envrc.local.example — documents required secrets for the project
-# .env.example         — documents required env vars for the project

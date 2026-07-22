@@ -71,6 +71,9 @@ This project uses the **direnv -> devenv loading chain** for environment managem
 > [!WARNING]
 > Avoid devenv's `dotenv.enable = true` option: It only supports basic `key=value` pairs without variable expansion (`${VAR}`) or command execution (`$(cmd)`). This differs from standard dotenv libraries and will frustrate developers. Use `.envrc.local` instead for full bash support.
 
+> [!NOTE]
+> `.env` files are not part of this pattern. The committed `.envrc` loads `.envrc.local`, never `.env`, so a copied `.env` activates nothing here. If a framework reads `.env` natively (Next.js, Vite, docker-compose), that is independent of this setup.
+
 **File Roles:**
 
 - **`.envrc`**: Base configuration (committed to repo — no secrets, pure direnv/devenv boilerplate)
