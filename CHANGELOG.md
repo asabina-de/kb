@@ -34,6 +34,18 @@ Tag manual-only steps with **(manual)** so readers know an agent can't automate 
 
 ---
 
+## [2026-07-15]
+
+### Changed
+
+- **`/pair` + `/pr` skills — honest draft/ready PR lifecycle** (KB-106, KB-12) — the ticket's "In Review" status now tracks the PR's draft state. `/pr` transitions to In Review only when the PR is opened **ready**, not as a draft (KB-12); `/pair` wrap-up **flips a completed draft PR to ready** (`gh pr ready`) and transitions to In Review at that point (KB-106). A finished branch's PR no longer sits stuck in Draft, and a WIP draft no longer falsely signals "ready for review."
+
+### Migration
+
+**Files:**
+
+- Re-sync `skills/pair/SKILL.md` and `skills/pr/SKILL.md` if your repo vendors the KB skills — additive behavior on the draft/ready lifecycle.
+
 ## [2026-07-13]
 
 ### Added
