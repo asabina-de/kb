@@ -8,7 +8,6 @@
 # - Variable expansion: $VAR or ${VAR}
 # - Complex shell operations
 #
-# For simple static values, use .env instead (see .env.example)
 # Note: .envrc.local is automatically loaded by direnv and gitignored for security
 
 # Example: 1Password CLI (single account)
