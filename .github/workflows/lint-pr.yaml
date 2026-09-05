@@ -106,3 +106,17 @@ jobs:
             lifted, type/scope still checked.
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # Permanent red case for the pattern above (KB-116), modelled on
+  # lint-settings.yaml. CONTRIBUTING.md "Enforcement Mechanisms" requires a
+  # mechanism to be demonstrated rejecting bad input, and re-demonstrated
+  # after every edit — running the fixture on every PR makes that continuous
+  # instead of a one-off screenshot at introduction.
+  check-pattern-red-case:
+    name: Red case — PR-title pattern rejects bad subjects
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run fixture table against the pattern
+        run: node .github/scripts/check-pr-title-pattern.mjs
