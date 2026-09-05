@@ -312,7 +312,62 @@ The subagent should:
 - The subagent runs in the background so the user can continue other work.
 - If the user explicitly asks to merge before CI completes, warn them that checks haven't finished and confirm they want to proceed.
 
+### GitHub native stacks
+
+GitHub's stacked-PR feature (public preview, 2026-07) manages the dependency between PRs
+itself. **Establish which kind of stack you are looking at before applying anything below** —
+a *native* stack (registered through GitHub's stack UI, which shows a stack panel on the PR)
+behaves differently from a *manual* stack (a branch cut from another feature branch, which is
+what **Branch deletion safety** below is written for).
+
+**Group merge collapses the stack into ONE merge commit.** A native stack can merge any
+contiguous group bottom-up in a single operation. When it does, every PR in the group reports
+the *same* `mergeCommit.oid`, and only the **topmost** PR's title becomes the merge subject:
+
+```bash
+gh pr view 161 --json mergeCommit --jq .mergeCommit.oid   # fe9e8d98
+gh pr view 162 --json mergeCommit --jq .mergeCommit.oid   # fe9e8d98 — same commit
+```
+
+Nothing is lost from history — every commit lands individually and linearly, provenance
+trailers intact. It is the **merge layer** that under-reports, so anything reading merge
+subjects (release notes, `git log --merges`, changelog generation) silently drops the lower
+PRs. This also means the **ticket-ID survival check above under-reports**: it predicts one
+subject, and a group merge lands work from several tickets beneath it.
+
+**So when group-merging, name every PR and ticket in the merge commit body**, not just the
+top one. The default body lists only the top PR. Offer the operator both options:
+
+- **Group merge** — one commit, faster, requires composing the body yourself.
+- **Bottom-up, one at a time** — one merge commit per PR, so each title becomes a subject and
+  the survival check works per-PR. Costs a wait between merges, *not* manual retargeting:
+  GitHub auto-retargets the next PR to the stack base after each merge.
+
+**Branch deletion safety does not apply to native stacks.** Retargeting and branch cleanup
+are the feature's job. The warning below is about manually-stacked PRs, where deleting a base
+branch still auto-closes its children.
+
+**Check the upper PR's check set before merging a MANUAL stack.** Workflows filtered to the
+default branch — `on: pull_request: branches: [main]` — do not run on a PR whose base is a
+feature branch. A manually-stacked PR can therefore sit at "green" having run only the
+unfiltered checks, with its real quality gates never triggered:
+
+```bash
+# Compare check sets; the upper PR should not have fewer
+gh pr checks <upper-pr> --json name,bucket
+gh pr checks <base-pr>  --json name,bucket
+```
+
+Native stacks fix this — workflows "trigger as if each pull request in the stack targets the
+base of the stack", so filtered CI runs on every PR in the stack. It is a real reason to
+prefer registering a stack over hand-rolling one. (Observed: a manually-stacked PR carrying a
+backend change had run only Chromatic and the title check; registering the stack surfaced
+three previously-skipped required checks.)
+
 ### Branch deletion safety
+
+**Applies to manually-stacked PRs.** For native GitHub stacks see above — retargeting is
+handled for you.
 
 Before using `--delete-branch` on any merge, check whether the branch is the base of another open PR:
 
