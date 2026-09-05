@@ -36,21 +36,30 @@ Tag manual-only steps with **(manual)** so readers know an agent can't automate 
 
 ## [2026-09-05]
 
-### Fixed
-
-- **`lint-pr.yaml` — ticket-ID pattern could not match team keys containing digits** (KB-116) — the `subjectPattern` matched the team key with `[A-Z]+`, which cannot match a key containing a digit. Because KB-81 made the ID **required**, this did not merely skip validation: it **rejected correctly formatted titles**. `feat(ui): add a thing [A1-221]` failed a check it satisfies exactly, leaving any repo with a digit-bearing team key unable to go green short of `[noticket]`. The class is now `[A-Z][A-Z0-9]*`. Observed live in `asabina-de/anyone.work` (team key `A1`), patched locally there in [#173](https://github.com/asabina-de/anyone.work/pull/173) — a patch that should have come from here.
-- **`/issue` skill — digit-bearing IDs missed iteration mode** (KB-116) — the mode router used the same `[A-Z]+-\d+` class, so `/issue A1-221 …` fell through to freeform mode and filed a **new** ticket instead of iterating on the existing one. Same defect, different surface.
-
 ### Added
 
 - **`lint-pr.yaml` — permanent red case for the PR-title pattern** (KB-116) — the pattern moved to `.github/pr-title-pattern.txt` and is loaded into the action via a step output, so `.github/scripts/check-pr-title-pattern.mjs` can test **the same string CI enforces** rather than a copy that drifts. The fixture table (`.github/fixtures/pr-titles.tsv`) runs on every PR, covering digit-bearing keys, wrong brackets, malformed IDs and trailing text; the runner also rejects a table with no failing rows, since an all-pass table goes green against an accept-everything pattern — the KB-81 no-op it exists to catch. KB-81's own red case was a one-off shown by hand on its introducing PR, which is why the char-class bug shipped underneath a green check.
 - **`CONTRIBUTING.md` — permanent-red-case guidance** — "Enforcement Mechanisms" now states the preference for a CI-re-run fixture over a one-off proof, and tabulates the two mechanisms that follow it (`lint-settings.yaml`, `lint-pr.yaml`).
 - **`/pair` skill — closing-block convention for chat check-ins** (KB-114) — every chat-facing check-in now ends with a **closing block**: detail first, then the TL;DR and the ask fused into one unit at the bottom. Wired into the three check-ins that carry the most (Phase 1 assessment, plan-changing spike findings, Phase 4 wrap-up), with three anti-patterns guarding it. The block always carries linked ticket and PR, stating absence explicitly (`no PR yet`) rather than implying it by omission, so the operator never has to fall back on the harness status bar. **Deliberately the inverse of `/troubleshoot`**, which opens with its TL;DR: returning to a chat, the operator lands at the *bottom* of the exchange, so the last paragraph is spotted for free while the top costs a scroll and a visual scan. The rationale is recorded in the skill section and in an anti-pattern specifically so it is not later "corrected" into alignment with `/troubleshoot`.
+- **`lint-pr` template bundle** (KB-64) — `templates/github-workflow-lint-pr/` is the first template that is a **directory rather than a flat file**, because KB-116 made the workflow depend on three siblings: the pattern it reads, and the fixture and runner its red-case job executes. The directory mirrors the exact paths those files take downstream, so adoption is `cp -R templates/github-workflow-lint-pr/. .` with no path reconstruction, and drift is a direct diff. The bundle carries its own `README.md` explaining adoption, customisation, and why it is not flat.
+- **`lint-templates.yaml` — drift guard between templates and the KB's live files** (KB-64) — CI now fails if `templates/github-workflow-lint-pr/` and the KB's own `.github/` copies diverge **in either direction**: editing the live workflow alone ships a stale template downstream, editing the template alone ships a convention the KB does not run. Comparison is bundle-scoped, not a symmetric tree diff, since a repo's `.github/` legitimately holds more than any bundle carries. The runner self-tests before comparing — it mutates and deletes files in a throwaway copy and asserts both are caught — which satisfies the red-case requirement without checking in a permanently-broken fixture, something a tree comparison cannot express.
+
+### Changed
+
+- **Workflow templates are canonical in `templates/`; `lint-pr` is now a bundle** (KB-64) — `/align` instructed agents to "copy `.github/workflows/lint-pr.yaml` from KB template" and to "compare workflow content against KB template version" **against a template that never existed**. An agent either failed that step or silently improvised by reading the KB's own live copy — which is why a downstream copy could rot with nothing able to see it (`anyone.work` ran the pre-KB-81 pattern for two months; see KB-116). The canonical copy now lives at `templates/github-workflow-lint-pr/`, and `/align` is pointed at `templates/` explicitly, with anti-patterns for sourcing a template from the KB's live workflows and for lifting a lone `.yaml` out of a bundle.
+- **`templates/CONTRIBUTING.md` CI-enforcement section** — previously sent readers to `github-workflow-ci.yml` (a different workflow) and to the KB's live `lint-pr.yaml` (not adoptable). Now points at the bundle with the copy command and the required-status-check step.
+
+### Fixed
+
+- **`lint-pr.yaml` — ticket-ID pattern could not match team keys containing digits** (KB-116) — the `subjectPattern` matched the team key with `[A-Z]+`, which cannot match a key containing a digit. Because KB-81 made the ID **required**, this did not merely skip validation: it **rejected correctly formatted titles**. `feat(ui): add a thing [A1-221]` failed a check it satisfies exactly, leaving any repo with a digit-bearing team key unable to go green short of `[noticket]`. The class is now `[A-Z][A-Z0-9]*`. Observed live in `asabina-de/anyone.work` (team key `A1`), patched locally there in [#173](https://github.com/asabina-de/anyone.work/pull/173) — a patch that should have come from here.
+- **`/issue` skill — digit-bearing IDs missed iteration mode** (KB-116) — the mode router used the same `[A-Z]+-\d+` class, so `/issue A1-221 …` fell through to freeform mode and filed a **new** ticket instead of iterating on the existing one. Same defect, different surface.
 
 ### Migration
 
 **Files:**
 
+- Adopt the `lint-pr` bundle as a unit — `cp -R "$KB/templates/github-workflow-lint-pr/." .` from your repo root. Copying only `.github/workflows/lint-pr.yaml` yields a workflow that fails immediately on a missing sibling file.
+- Check your copy for drift with `diff -r "$KB/templates/github-workflow-lint-pr/.github" .github`, comparing only the files the bundle carries — your `.github/` will legitimately contain more.
 - Re-sync `.github/workflows/lint-pr.yaml`. If your copy still contains `[A-Z]+-\d+` **anywhere**, it is stale — and if your team key contains a digit (e.g. `A1`), every conforming PR in your repo is currently red. Check with `grep -n 'A-Z\]+-' .github/workflows/lint-pr.yaml`.
 - If your copy still reads `^.+(\s\[[A-Z]+-\d+\])?$`, you never adopted the [2026-07-08] KB-81 migration either — the ID is optional behind `^.+`, so the check passes everything and enforces nothing. Adopt both changes together.
 - Copy the three files the red case needs, keeping the paths: `.github/pr-title-pattern.txt`, `.github/fixtures/pr-titles.tsv`, `.github/scripts/check-pr-title-pattern.mjs`. The runner is dependency-free — it needs only Node 20+, no `npm ci`.
@@ -65,6 +74,8 @@ Tag manual-only steps with **(manual)** so readers know an agent can't automate 
 **Tickets:**
 
 - If your team key contains a digit, PRs merged before this fix may carry parenthesised or missing IDs in their squash subjects. `git log --merges --oneline` on the default branch will show them; record any commit-sha ↔ ticket mappings on the Linear issues out-of-band rather than rewriting history.
+
+> **Only `lint-pr` is drift-checked.** The other workflow templates (`github-workflow-{ci,design,update-skills}`) have no counterpart in the KB's own `.github/workflows/` — the KB does not run them and has no reason to — so there is nothing to compare and no check is claimed for them. `lint-settings.yaml` is a second bundle candidate (schema + bad fixture) and is tracked separately.
 
 > **Why this needed a second migration entry:** KB-81's entry existed and was correct, and `anyone.work` still never adopted it — the stale copy was invisible because `lint-pr.yaml` is not in `templates/`, so `/align` had nothing to diff a downstream copy against. KB-64 tracks that gap.
 
