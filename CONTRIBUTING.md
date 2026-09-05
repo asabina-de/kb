@@ -162,6 +162,17 @@ Anything that claims to enforce a convention — a CI workflow, a lint pattern, 
 2. **Watch the outcome, not just the artifact.** Artifact-level checks (file exists, section present, spec declared) verify that enforcement is *configured*; outcome-level checks (git log actually carries ticket IDs, live settings actually match norms) verify that it *works*. Every protected invariant needs at least one outcome-level check somewhere in its loop.
 3. **Re-prove after edits.** Changing a pattern or gate invalidates its old red case — demonstrate a new one.
 
+**Prefer a permanent red case to a one-off proof.** A red case shown once, by hand, on the PR that introduced the mechanism satisfies rule 1 but not rule 3 — the next edit silently invalidates it. Where the mechanism is deterministic, encode the red case as a fixture CI re-runs on every PR, so it re-proves itself instead of relying on someone remembering:
+
+| Mechanism | Pattern under test | Fixture | Runner |
+|---|---|---|---|
+| `lint-settings.yaml` | `schemas/github-settings.schema.json` | `schemas/fixtures/github-settings.bad.yaml` | inline step — validator must *reject* it |
+| `lint-pr.yaml` | `.github/pr-title-pattern.txt` | `.github/fixtures/pr-titles.tsv` | `.github/scripts/check-pr-title-pattern.mjs` |
+
+Both share the design that makes them trustworthy: the fixture is checked against the **same artifact CI enforces**, not a copy of it. `check-pr-title-pattern.mjs` reads the very file `lint-pr.yaml` loads into the action, so the enforced and tested patterns cannot drift apart. Copying a pattern into a test reintroduces exactly the gap the test exists to close.
+
+The PR-title fixture is a `<expect>\t<subject>` table; add a row whenever the pattern changes. The runner rejects a table containing no `fail` rows, since an all-pass table goes green against an accept-everything pattern — the KB-81 no-op it exists to catch.
+
 ## PR Title Convention
 
 PR titles follow the same conventional-commit format as individual commits, with a ticket ID suffix for traceability:

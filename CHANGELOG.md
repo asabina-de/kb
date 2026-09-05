@@ -36,17 +36,37 @@ Tag manual-only steps with **(manual)** so readers know an agent can't automate 
 
 ## [2026-09-05]
 
+### Fixed
+
+- **`lint-pr.yaml` — ticket-ID pattern could not match team keys containing digits** (KB-116) — the `subjectPattern` matched the team key with `[A-Z]+`, which cannot match a key containing a digit. Because KB-81 made the ID **required**, this did not merely skip validation: it **rejected correctly formatted titles**. `feat(ui): add a thing [A1-221]` failed a check it satisfies exactly, leaving any repo with a digit-bearing team key unable to go green short of `[noticket]`. The class is now `[A-Z][A-Z0-9]*`. Observed live in `asabina-de/anyone.work` (team key `A1`), patched locally there in [#173](https://github.com/asabina-de/anyone.work/pull/173) — a patch that should have come from here.
+- **`/issue` skill — digit-bearing IDs missed iteration mode** (KB-116) — the mode router used the same `[A-Z]+-\d+` class, so `/issue A1-221 …` fell through to freeform mode and filed a **new** ticket instead of iterating on the existing one. Same defect, different surface.
+
 ### Added
 
+- **`lint-pr.yaml` — permanent red case for the PR-title pattern** (KB-116) — the pattern moved to `.github/pr-title-pattern.txt` and is loaded into the action via a step output, so `.github/scripts/check-pr-title-pattern.mjs` can test **the same string CI enforces** rather than a copy that drifts. The fixture table (`.github/fixtures/pr-titles.tsv`) runs on every PR, covering digit-bearing keys, wrong brackets, malformed IDs and trailing text; the runner also rejects a table with no failing rows, since an all-pass table goes green against an accept-everything pattern — the KB-81 no-op it exists to catch. KB-81's own red case was a one-off shown by hand on its introducing PR, which is why the char-class bug shipped underneath a green check.
+- **`CONTRIBUTING.md` — permanent-red-case guidance** — "Enforcement Mechanisms" now states the preference for a CI-re-run fixture over a one-off proof, and tabulates the two mechanisms that follow it (`lint-settings.yaml`, `lint-pr.yaml`).
 - **`/pair` skill — closing-block convention for chat check-ins** (KB-114) — every chat-facing check-in now ends with a **closing block**: detail first, then the TL;DR and the ask fused into one unit at the bottom. Wired into the three check-ins that carry the most (Phase 1 assessment, plan-changing spike findings, Phase 4 wrap-up), with three anti-patterns guarding it. The block always carries linked ticket and PR, stating absence explicitly (`no PR yet`) rather than implying it by omission, so the operator never has to fall back on the harness status bar. **Deliberately the inverse of `/troubleshoot`**, which opens with its TL;DR: returning to a chat, the operator lands at the *bottom* of the exchange, so the last paragraph is spotted for free while the top costs a scroll and a visual scan. The rationale is recorded in the skill section and in an anti-pattern specifically so it is not later "corrected" into alignment with `/troubleshoot`.
 
 ### Migration
 
 **Files:**
 
-- Re-sync `skills/pair/SKILL.md` if your repo vendors the KB skills — additive (one new section, three call-site pointers, three anti-patterns); no other skill behavior changed.
+- Re-sync `.github/workflows/lint-pr.yaml`. If your copy still contains `[A-Z]+-\d+` **anywhere**, it is stale — and if your team key contains a digit (e.g. `A1`), every conforming PR in your repo is currently red. Check with `grep -n 'A-Z\]+-' .github/workflows/lint-pr.yaml`.
+- If your copy still reads `^.+(\s\[[A-Z]+-\d+\])?$`, you never adopted the [2026-07-08] KB-81 migration either — the ID is optional behind `^.+`, so the check passes everything and enforces nothing. Adopt both changes together.
+- Copy the three files the red case needs, keeping the paths: `.github/pr-title-pattern.txt`, `.github/fixtures/pr-titles.tsv`, `.github/scripts/check-pr-title-pattern.mjs`. The runner is dependency-free — it needs only Node 20+, no `npm ci`.
+- Add the `check-pattern-red-case` job from `lint-pr.yaml`. Without it the fixture is inert, and the pattern is once again a mechanism nobody has seen fail.
+- Re-sync `skills/issue/SKILL.md` if your repo vendors the KB skills — one character class in the mode router.
+- Re-sync `skills/pair/SKILL.md` (KB-114) if your repo vendors the KB skills — additive (one new section, three call-site pointers, three anti-patterns). Not required for the common case: `/pair` is consumed from `~/.claude/skills/`, and the Linear AI copy is redeployed by `linear-skill-deploy.yaml` on merge to `main`.
 
-No action is required for the common case. `/pair` is consumed from `~/.claude/skills/` rather than vendored per-repo, and the Linear AI copy is redeployed automatically by `linear-skill-deploy.yaml` on merge to `main`.
+**Repo settings (manual):**
+
+- If `check-pattern-red-case` should block merges, add it to the required status checks for your default branch — adding the job does not make it required.
+
+**Tickets:**
+
+- If your team key contains a digit, PRs merged before this fix may carry parenthesised or missing IDs in their squash subjects. `git log --merges --oneline` on the default branch will show them; record any commit-sha ↔ ticket mappings on the Linear issues out-of-band rather than rewriting history.
+
+> **Why this needed a second migration entry:** KB-81's entry existed and was correct, and `anyone.work` still never adopted it — the stale copy was invisible because `lint-pr.yaml` is not in `templates/`, so `/align` had nothing to diff a downstream copy against. KB-64 tracks that gap.
 
 ## [2026-07-22]
 

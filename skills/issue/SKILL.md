@@ -62,7 +62,7 @@ The skill does not declare `Write` — it never creates new files. It only edits
 
 Examine the first argument (or the full prompt if no explicit argument):
 
-- **Iteration mode** — if the input contains a Linear issue URL (`https://linear.app/...`) or a bare issue identifier matching the pattern `[A-Z]+-\d+` (e.g. `VID-123`, `Z-419`), enter **iteration mode**. Capture the issue ID and the rest of the prompt as the user's intent. Skip to the [Iteration mode](#iteration-mode) section below; do not run the filing-mode phases.
+- **Iteration mode** — if the input contains a Linear issue URL (`https://linear.app/...`) or a bare issue identifier matching the pattern `[A-Z][A-Z0-9]*-\d+` (e.g. `VID-123`, `Z-419`, `A1-221`), enter **iteration mode**. The character class admits digits after the first letter because a team key may contain them; `[A-Z]+` would not match `A1-221`, silently dropping through to freeform mode and filing a *new* ticket instead of iterating on the existing one. Capture the issue ID and the rest of the prompt as the user's intent. Skip to the [Iteration mode](#iteration-mode) section below; do not run the filing-mode phases.
 - **Filing mode** — if the input references a decision record path (explicitly or inferable from `docs/decisions/`), enter **filing mode**. Continue with the filing-mode phases below.
 - **Freeform mode** — if the input is neither a Linear URL/ID nor a design note path — e.g. "create an issue for X", "file a ticket about Y", "new issue: Z", a bare description of work to be ticketed, or a batch of items to file — enter **freeform mode**. Skip to the [Freeform mode](#freeform-mode) section below.
 
