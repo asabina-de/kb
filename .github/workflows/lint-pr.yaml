@@ -48,12 +48,23 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # The action needs the pattern as a string, and GitHub expressions
-      # cannot read files — so load it into a step output first.
-      - name: Load ticket-ID subject pattern
-        id: pattern
-        run: printf 'value=%s\n' "$(cat .github/pr-title-pattern.txt)" >> "$GITHUB_OUTPUT"
-
+      # Type and scope only. The ticket-ID rule deliberately does NOT live
+      # here as a `subjectPattern` (KB-121).
+      #
+      # It used to, and the escape hatch rode along in the same option as a
+      # GitHub expression that chose between '^.+$' and the strict pattern
+      # depending on whether the body carried [noticket]. No test could reach
+      # that expression: the fixture proved the regex rejected bad subjects,
+      # but nothing proved the hatch still let a ticketless PR through. An
+      # escape hatch never seen escaping must be assumed broken — and this
+      # one had never been exercised, since every ID-less PR in this repo
+      # predates enforcement.
+      #
+      # The rule now lives in .github/scripts/pr-title-rule.mjs, which the
+      # step below runs and the red-case fixture imports. Same code, both
+      # paths. Splitting the check across two steps costs nothing because the
+      # pattern is anchored at the END of the title, so it never needed the
+      # action to strip the `type(scope):` prefix for it.
       - uses: amannn/action-semantic-pull-request@v6
         with:
           # Conventional commit types matching CONTRIBUTING.md
@@ -66,46 +77,27 @@ jobs:
             chore
             style
             perf
-          # Ticket ID suffix is REQUIRED. The previous pattern
-          # (^.+(\s\[[A-Z]+-\d+\])?$) made the ID group optional behind
-          # ^.+ — it accepted every non-empty subject, so the check was
-          # a no-op (KB-81). Traceability lives in git log via the
-          # squash-merge PR title, so the ID must be in the title.
-          #
-          # The pattern itself lives in .github/pr-title-pattern.txt, not
-          # inline here (KB-116). It is loaded by the step above and read
-          # by .github/scripts/check-pr-title-pattern.mjs, so the pattern
-          # CI enforces and the pattern the red-case fixture tests are the
-          # same string by construction — they cannot drift apart.
-          #
-          # Its character class is [A-Z][A-Z0-9]*, not [A-Z]+: a team key
-          # may contain digits (A1-221), and [A-Z]+ silently rejects those
-          # — turning a correctly formatted title into a red check.
-          #
-          # Escape hatch: a PR that legitimately has no ticket declares
-          # [noticket] (or [noissue]) in the PR *description body* — the
-          # ID requirement is lifted while type/scope validation still
-          # applies. The marker lives in the body, not the title, to keep
-          # titles short. The `edited` trigger above re-runs this check
-          # when the body changes, so adding the marker un-blocks the PR
-          # without a new push.
-          subjectPattern: ${{ (contains(github.event.pull_request.body, '[noticket]') || contains(github.event.pull_request.body, '[noissue]')) && '^.+$' || steps.pattern.outputs.value }}
-          subjectPatternError: |
-            The subject "{subject}" doesn't look right.
-            Expected format: type(scope): description [TICKET-ID]
-            Examples:
-              feat(auth): add OAuth callback [KB-31]
-              fix: handle null response [KB-45]
-            The ticket ID must be wrapped in SQUARE BRACKETS [KB-31] and
-            come last. Parentheses (KB-31) do not satisfy this check — the
-            squash-merged commit takes this title as its subject, and
-            anything scanning git log for [TICKET-ID] looks for brackets.
-            A team key may contain digits, so [A1-221] is valid too.
-            If this PR legitimately has no ticket, add [noticket] (or
-            [noissue]) to the PR description body — the ID requirement is
-            lifted, type/scope still checked.
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # PR_BODY goes through `env:`, never interpolated into the run line.
+      # `node script.mjs "${{ github.event.pull_request.body }}"` is the
+      # documented script-injection footgun — a body containing
+      #   a"; ls $GITHUB_WORKSPACE"
+      # would execute. Passing it as an environment variable keeps the value
+      # in memory and out of shell script generation:
+      # https://docs.github.com/en/actions/reference/security/secure-use
+      #
+      # In practice the script reads the title and body from
+      # GITHUB_EVENT_PATH, so nothing untrusted reaches the shell at all —
+      # but the env form is kept as the explicit, reviewable contract.
+      #
+      # The `edited` trigger above re-runs this when the body changes, so
+      # adding [noticket] un-blocks a PR without a new push.
+      - name: Validate ticket ID (honours the [noticket] escape hatch)
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: node .github/scripts/pr-title-rule.mjs
 
   # Permanent red case for the pattern above (KB-116), modelled on
   # lint-settings.yaml. CONTRIBUTING.md "Enforcement Mechanisms" requires a
