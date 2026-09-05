@@ -1,0 +1,11 @@
+# Deliberately INVALID — permanent red-case fixture (KB-117).
+#
+# allowed_methods is undeclared. GitHub enables all three merge methods by
+# default, so squash IS reachable and the norms still apply. Absence must not
+# be treated as an exemption — that would let any spec opt out of the guard
+# simply by omitting a field.
+
+merge:
+  default_method: squash
+  # VIOLATION: squash reachable (allowed_methods undeclared), norms missing.
+  delete_branch_on_merge: true

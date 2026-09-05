@@ -1,0 +1,15 @@
+# Deliberately INVALID — permanent red-case fixture (KB-117).
+#
+# Squash IS reachable here, so the REQUIRED squash norms apply and their
+# absence must be rejected. This is the case the KB-117 conditional could
+# most easily get wrong: relaxing the requirement for merge-only repos must
+# not relax it for repos where the footgun actually exists.
+
+merge:
+  allowed_methods:
+    - squash
+    - merge
+  default_method: squash
+  # VIOLATION: squash is allowed, so squash_title and squash_message are
+  # REQUIRED and both are missing.
+  delete_branch_on_merge: true

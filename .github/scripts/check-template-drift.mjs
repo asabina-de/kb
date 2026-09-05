@@ -11,16 +11,27 @@
 // failure. Editing the template alone ships a convention the KB does not run --
 // the "do as I say" failure. Neither is allowed.
 //
-// Comparison is bundle-scoped, NOT a symmetric tree diff: the repo's .github/
-// legitimately holds much more than any bundle carries. Every file the bundle
-// contains must match its counterpart at the repo root; extra root files are
-// none of the bundle's business.
+// Comparison is bundle-scoped, NOT a symmetric tree diff: the repo legitimately
+// holds much more than any bundle carries. Every file the bundle contains must
+// match its counterpart at the repo root; extra root files are none of the
+// bundle's business.
+//
+// A bundle root mirrors the REPO root, not .github/ (KB-117). The lint-settings
+// bundle carries schemas/ alongside .github/, so walking a hardcoded .github/
+// would silently skip six files and still report "in sync" -- partial coverage
+// that reads as full coverage, which is worse than failing outright.
+//
+// A bundle's own README.md documents adoption and is deliberately NOT copied
+// downstream, so it is excluded from comparison.
 
 import { readFileSync, readdirSync, statSync, existsSync, mkdtempSync, writeFileSync, mkdirSync, rmSync } from 'node:fs';
 import { join, relative, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
 
-const BUNDLES = ['templates/github-workflow-lint-pr'];
+const BUNDLES = [
+  'templates/github-workflow-lint-pr',
+  'templates/github-workflow-lint-settings',
+];
 
 function walk(dir) {
   const out = [];
@@ -33,14 +44,16 @@ function walk(dir) {
 }
 
 // Returns a list of human-readable problems; empty means the bundle is in sync.
+function carriedFiles(bundleRoot) {
+  // Everything the bundle ships downstream: the whole tree minus its own README.
+  return walk(bundleRoot).filter((f) => relative(bundleRoot, f) !== 'README.md');
+}
+
 function compareBundle(bundleRoot, repoRoot) {
   const problems = [];
-  const carried = join(bundleRoot, '.github');
-  if (!existsSync(carried)) {
-    return [`${bundleRoot} carries no .github/ directory — nothing to compare`];
-  }
-  const files = walk(carried);
-  if (files.length === 0) return [`${bundleRoot}/.github is empty`];
+  if (!existsSync(bundleRoot)) return [`${bundleRoot} does not exist`];
+  const files = carriedFiles(bundleRoot);
+  if (files.length === 0) return [`${bundleRoot} carries no files — nothing to compare`];
 
   for (const file of files) {
     const rel = relative(bundleRoot, file);           // e.g. .github/workflows/lint-pr.yaml
@@ -64,7 +77,7 @@ function selfTest() {
   const bundle = BUNDLES[0];
   const tmp = mkdtempSync(join(tmpdir(), 'drift-selftest-'));
   try {
-    for (const file of walk(join(bundle, '.github'))) {
+    for (const file of carriedFiles(bundle)) {
       const rel = relative(bundle, file);
       const dest = join(tmp, rel);
       mkdirSync(dirname(dest), { recursive: true });
@@ -75,7 +88,7 @@ function selfTest() {
       return 'self-test: an identical copy was reported as drifted';
     }
     // Mutate one carried file: must be caught.
-    const victim = join(tmp, '.github', 'pr-title-pattern.txt');
+    const victim = join(tmp, relative(bundle, carriedFiles(bundle)[0]));
     writeFileSync(victim, readFileSync(victim, 'utf8') + '\n# drift\n');
     if (compareBundle(bundle, tmp).length === 0) {
       return 'self-test: a mutated file was NOT detected — the drift guard is inert';
