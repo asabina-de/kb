@@ -214,6 +214,20 @@ Copying only the `.yaml` produces a workflow that fails immediately on a missing
 
 Adding the job does not make it blocking: add `Red case — PR-title pattern rejects bad subjects` to your default branch's required status checks.
 
+### Settings-spec validation
+
+Repos that declare a `.github-settings.yaml` should also adopt the `lint-settings` bundle from `templates/github-workflow-lint-settings/`, which validates that spec against the org schema so a misconfigured merge setting cannot be laundered into the file unnoticed.
+
+It is also a directory, and unlike `lint-pr` it carries files **outside `.github/`** — the schema and its fixtures live under `schemas/`. The bundle root mirrors your repo root:
+
+```bash
+cp -R "{kb-path}/templates/github-workflow-lint-settings/." .
+```
+
+Required status check: `Validate settings specs against schema`.
+
+The REQUIRED norms (`squash_title`, `squash_message`) are pinned as `const` and apply wherever squash merging is reachable — a merge-commit-only repo is not asked for them. `branch_protection` accepts keys beyond those the schema names, so declaring stricter protection than the norm is valid.
+
 ## PR Merge Strategy
 
 **Always use squash-merge** with "Pull request title" as the commit message source.
