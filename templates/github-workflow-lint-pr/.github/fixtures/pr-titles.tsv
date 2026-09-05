@@ -1,0 +1,41 @@
+# Red-case fixture for the PR-title ticket-ID pattern (KB-116).
+#
+# Format:  <expect>\t<subject>
+#   expect = pass | fail
+#   subject = the PR title AFTER the "type(scope): " prefix, which is what
+#             amannn/action-semantic-pull-request matches subjectPattern against.
+#
+# CONTRIBUTING.md "Enforcement Mechanisms" requires a demonstrated red case,
+# re-proven after every pattern edit. This table is that proof, and CI runs it
+# on every PR -- so the mechanism re-demonstrates it can still reject bad input
+# rather than having been seen working once at introduction.
+#
+# Add a row whenever the pattern changes. A row marked fail that starts passing
+# is the regression this file exists to catch.
+
+# --- the bug this fixture was created for: digit-bearing team keys (KB-116) ---
+pass	add a thing [A1-221]
+pass	normalize the Storybook taxonomy [A1-221]
+fail	add a thing [1A-221]
+
+# --- team keys without digits must keep working ---
+pass	add a thing [KB-115]
+pass	handle null response [VID-712]
+pass	ship it [YO-3]
+
+# --- wrong brackets: the mistake authors actually make ---
+fail	add a thing (A1-221)
+fail	normalize the Storybook taxonomy (A1-221)
+fail	add a thing (KB-115)
+fail	add a thing {KB-115}
+
+# --- missing or malformed IDs ---
+fail	add a thing
+fail	add a thing [KB]
+fail	add a thing [KB-]
+fail	add a thing [-115]
+fail	add a thing [kb-115]
+
+# --- the ID must come last ---
+fail	add a thing [KB-115] and then some
+pass	add a thing (finally) [KB-115]

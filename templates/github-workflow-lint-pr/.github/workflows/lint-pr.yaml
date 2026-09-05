@@ -1,0 +1,122 @@
+name: Lint PR
+
+# Why `pull_request` (not `pull_request_target`):
+#
+# The two triggers differ in which branch supplies the workflow file:
+#
+#   pull_request        → runs the workflow from the PR's HEAD branch
+#   pull_request_target → runs the workflow from the BASE branch (e.g. main)
+#
+# `pull_request_target` exists to protect repos that accept PRs from
+# forks. A forked PR using `pull_request` can modify the workflow to
+# exfiltrate repo secrets. `pull_request_target` prevents this by
+# ignoring the PR branch's workflow entirely — it always runs the base
+# branch copy. But this comes at a cost:
+#
+#   1. A workflow introduced in a PR won't run on that PR (the base
+#      branch doesn't have the file yet).
+#   2. Changes to an existing workflow are invisible on PRs — the base
+#      branch version runs, not yours. There is no partial pick-up.
+#   3. The only way to test workflow changes is to temporarily switch to
+#      `pull_request`, push, verify, then revert before merging.
+#
+# This repo is private with no fork contributions. The security benefit
+# of `pull_request_target` does not apply, and the testing friction is
+# pure cost. We use `pull_request` so workflow changes are testable on
+# the PRs that introduce them.
+#
+# If this repo ever accepts fork contributions, migrate to
+# `pull_request_target`:
+#   - Change `pull_request` → `pull_request_target` below
+#   - Accept that workflow changes require the test-revert dance above
+#   - Review GITHUB_TOKEN permissions (base branch context, not PR)
+
+on:
+  pull_request:
+    types:
+      - opened
+      - edited
+      - synchronize
+
+permissions:
+  pull-requests: read
+
+jobs:
+  validate-pr-title:
+    name: Validate PR title
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # The action needs the pattern as a string, and GitHub expressions
+      # cannot read files — so load it into a step output first.
+      - name: Load ticket-ID subject pattern
+        id: pattern
+        run: printf 'value=%s\n' "$(cat .github/pr-title-pattern.txt)" >> "$GITHUB_OUTPUT"
+
+      - uses: amannn/action-semantic-pull-request@v6
+        with:
+          # Conventional commit types matching CONTRIBUTING.md
+          types: |
+            feat
+            fix
+            refactor
+            doc
+            test
+            chore
+            style
+            perf
+          # Ticket ID suffix is REQUIRED. The previous pattern
+          # (^.+(\s\[[A-Z]+-\d+\])?$) made the ID group optional behind
+          # ^.+ — it accepted every non-empty subject, so the check was
+          # a no-op (KB-81). Traceability lives in git log via the
+          # squash-merge PR title, so the ID must be in the title.
+          #
+          # The pattern itself lives in .github/pr-title-pattern.txt, not
+          # inline here (KB-116). It is loaded by the step above and read
+          # by .github/scripts/check-pr-title-pattern.mjs, so the pattern
+          # CI enforces and the pattern the red-case fixture tests are the
+          # same string by construction — they cannot drift apart.
+          #
+          # Its character class is [A-Z][A-Z0-9]*, not [A-Z]+: a team key
+          # may contain digits (A1-221), and [A-Z]+ silently rejects those
+          # — turning a correctly formatted title into a red check.
+          #
+          # Escape hatch: a PR that legitimately has no ticket declares
+          # [noticket] (or [noissue]) in the PR *description body* — the
+          # ID requirement is lifted while type/scope validation still
+          # applies. The marker lives in the body, not the title, to keep
+          # titles short. The `edited` trigger above re-runs this check
+          # when the body changes, so adding the marker un-blocks the PR
+          # without a new push.
+          subjectPattern: ${{ (contains(github.event.pull_request.body, '[noticket]') || contains(github.event.pull_request.body, '[noissue]')) && '^.+$' || steps.pattern.outputs.value }}
+          subjectPatternError: |
+            The subject "{subject}" doesn't look right.
+            Expected format: type(scope): description [TICKET-ID]
+            Examples:
+              feat(auth): add OAuth callback [KB-31]
+              fix: handle null response [KB-45]
+            The ticket ID must be wrapped in SQUARE BRACKETS [KB-31] and
+            come last. Parentheses (KB-31) do not satisfy this check — the
+            squash-merged commit takes this title as its subject, and
+            anything scanning git log for [TICKET-ID] looks for brackets.
+            A team key may contain digits, so [A1-221] is valid too.
+            If this PR legitimately has no ticket, add [noticket] (or
+            [noissue]) to the PR description body — the ID requirement is
+            lifted, type/scope still checked.
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # Permanent red case for the pattern above (KB-116), modelled on
+  # lint-settings.yaml. CONTRIBUTING.md "Enforcement Mechanisms" requires a
+  # mechanism to be demonstrated rejecting bad input, and re-demonstrated
+  # after every edit — running the fixture on every PR makes that continuous
+  # instead of a one-off screenshot at introduction.
+  check-pattern-red-case:
+    name: Red case — PR-title pattern rejects bad subjects
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run fixture table against the pattern
+        run: node .github/scripts/check-pr-title-pattern.mjs
