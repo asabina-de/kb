@@ -1,23 +1,36 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "github-settings",
-  "description": "Schema for .github-settings.yaml repo settings specs. REQUIRED org norms (KB-82) are pinned as const — a spec declaring any other value is invalid by construction, deterministically, independent of any LLM reading the file. Keep the const values in sync with the norm comments in templates/github-settings.yaml.",
+  "description": "Schema for .github-settings.yaml repo settings specs. REQUIRED org norms (KB-82) are pinned as const \u2014 a spec declaring any other value is invalid by construction, deterministically, independent of any LLM reading the file. Keep the const values in sync with the norm comments in templates/github-settings.yaml. The squash norms are required only where squash merging is actually reachable (KB-117); branch_protection is open so a repo may declare stricter protection than the norm.",
   "type": "object",
-  "required": ["merge"],
+  "required": [
+    "merge"
+  ],
   "additionalProperties": false,
   "properties": {
     "merge": {
       "type": "object",
-      "required": ["squash_title", "squash_message"],
       "additionalProperties": false,
       "properties": {
         "allowed_methods": {
           "type": "array",
-          "items": { "enum": ["merge", "squash", "rebase"] },
+          "items": {
+            "enum": [
+              "merge",
+              "squash",
+              "rebase"
+            ]
+          },
           "minItems": 1,
           "uniqueItems": true
         },
-        "default_method": { "enum": ["merge", "squash", "rebase"] },
+        "default_method": {
+          "enum": [
+            "merge",
+            "squash",
+            "rebase"
+          ]
+        },
         "squash_title": {
           "const": "pr_title",
           "$comment": "REQUIRED org norm (KB-82): any other value drops [TICKET-ID] from single-commit squashes"
@@ -26,17 +39,55 @@
           "const": "commit_messages",
           "$comment": "REQUIRED org norm (KB-82): any other value drops provenance trailers from squash bodies"
         },
-        "delete_branch_on_merge": { "type": "boolean" }
-      }
+        "delete_branch_on_merge": {
+          "type": "boolean"
+        }
+      },
+      "allOf": [
+        {
+          "$comment": "KB-117: require the squash norms unless allowed_methods is present AND excludes squash. Absence is treated as reachable \u2014 GitHub enables all three methods by default, so an undeclared allowed_methods means squash is on and the footgun applies.",
+          "if": {
+            "required": [
+              "allowed_methods"
+            ],
+            "properties": {
+              "allowed_methods": {
+                "not": {
+                  "contains": {
+                    "const": "squash"
+                  }
+                }
+              }
+            }
+          },
+          "then": {
+            "$comment": "squash unreachable \u2014 the squash norms are meaningless here"
+          },
+          "else": {
+            "required": [
+              "squash_title",
+              "squash_message"
+            ]
+          }
+        }
+      ]
     },
     "branch_protection": {
       "type": "object",
-      "additionalProperties": false,
+      "additionalProperties": true,
       "properties": {
-        "default_branch": { "type": "string", "minLength": 1 },
-        "require_pr_reviews": { "type": "boolean" },
-        "require_status_checks": { "type": "boolean" }
-      }
+        "default_branch": {
+          "type": "string",
+          "minLength": 1
+        },
+        "require_pr_reviews": {
+          "type": "boolean"
+        },
+        "require_status_checks": {
+          "type": "boolean"
+        }
+      },
+      "$comment": "KB-117: open by design. A repo declaring MORE protection than the norm (approval counts, required check contexts, admin enforcement) is safer, not non-compliant \u2014 rejecting it is the same bug class as a lint pattern rejecting a correctly formatted title. Cost accepted: a typo'd key is not caught here."
     }
   }
 }

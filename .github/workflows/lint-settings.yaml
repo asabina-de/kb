@@ -6,11 +6,17 @@ name: Lint settings spec
 # launders a live footgun into the file fails CI — no LLM judgment
 # involved.
 #
-# The second step is a permanent red case (KB-84 principle: no
-# enforcement mechanism without a demonstrated red case): a deliberately
-# invalid fixture MUST fail validation on every run. If the validator
-# ever accepts it, this workflow fails — the mechanism re-proves on
-# every run that it can still reject bad input.
+# The fixture steps are a permanent red case (KB-84 principle: no
+# enforcement mechanism without a demonstrated red case). Every file under
+# schemas/fixtures/invalid/ MUST be rejected and every file under
+# schemas/fixtures/valid/ MUST be accepted, on every run — so the mechanism
+# re-proves continuously that it still discriminates.
+#
+# Both directions matter (KB-117). A schema that rejects everything would
+# pass a red-case check that only tested bad input, while rejecting specs
+# that are perfectly legitimate — which is what this schema did to
+# anyone.work, demanding squash norms from a merge-only repo and refusing
+# branch protection stricter than the norm.
 
 on:
   pull_request:
@@ -18,7 +24,7 @@ on:
       - '.github-settings.yaml'
       - 'templates/github-settings.yaml'
       - 'schemas/github-settings.schema.json'
-      - 'schemas/fixtures/github-settings.bad.yaml'
+      - 'schemas/fixtures/**'
       - '.github/workflows/lint-settings.yaml'
   push:
     branches: [main]
@@ -26,7 +32,7 @@ on:
       - '.github-settings.yaml'
       - 'templates/github-settings.yaml'
       - 'schemas/github-settings.schema.json'
-      - 'schemas/fixtures/github-settings.bad.yaml'
+      - 'schemas/fixtures/**'
       - '.github/workflows/lint-settings.yaml'
 
 permissions:
@@ -45,12 +51,42 @@ jobs:
             --schemafile schemas/github-settings.schema.json \
             .github-settings.yaml templates/github-settings.yaml
 
-      - name: Red case — bad fixture must be rejected
+      - name: Green case — every valid fixture must be accepted
         run: |
-          if pipx run check-jsonschema \
-               --schemafile schemas/github-settings.schema.json \
-               schemas/fixtures/github-settings.bad.yaml; then
-            echo "::error::Validator accepted a spec violating REQUIRED norms — enforcement is broken"
+          shopt -s nullglob
+          files=(schemas/fixtures/valid/*.yaml)
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "::error::No valid fixtures — the schema is untested against legitimate specs"
             exit 1
           fi
-          echo "Red case holds: bad fixture rejected."
+          rc=0
+          for f in "${files[@]}"; do
+            if pipx run check-jsonschema \
+                 --schemafile schemas/github-settings.schema.json "$f"; then
+              echo "  ok   $f accepted"
+            else
+              echo "::error file=$f::Validator REJECTED a legitimate spec — the schema is too strict"
+              rc=1
+            fi
+          done
+          exit $rc
+
+      - name: Red case — every invalid fixture must be rejected
+        run: |
+          shopt -s nullglob
+          files=(schemas/fixtures/invalid/*.yaml)
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "::error::No invalid fixtures — this cannot demonstrate a red case"
+            exit 1
+          fi
+          rc=0
+          for f in "${files[@]}"; do
+            if pipx run check-jsonschema \
+                 --schemafile schemas/github-settings.schema.json "$f" 2>/dev/null; then
+              echo "::error file=$f::Validator ACCEPTED a spec violating REQUIRED norms — enforcement is broken"
+              rc=1
+            else
+              echo "  ok   $f rejected"
+            fi
+          done
+          exit $rc
