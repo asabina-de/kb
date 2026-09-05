@@ -110,5 +110,5 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Run fixture table against the pattern
+      - name: Run fixture table against the rule
         run: node .github/scripts/check-pr-title-pattern.mjs
