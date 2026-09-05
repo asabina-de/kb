@@ -81,6 +81,24 @@ fail	This change has no ticket.	chore: tidy up stray imports
 fail		chore: tidy up stray imports
 fail	-	chore: tidy up stray imports
 
+# The marker must OWN ITS LINE. The GitHub expression this replaced used
+# contains(), which matched anywhere -- so a PR that merely DISCUSSED the hatch
+# was exempted by it. Observed live: PR #85, which introduced the rule module,
+# was itself waved through on its first CI run because its body explains what
+# [noticket] does. Its title carried a valid [KB-121] that was never checked.
+fail	The [noticket] escape hatch lifts the ID requirement.	doc: explain the escape hatch
+fail	Use `[noticket]` in the body when there is no ticket.	doc: explain the escape hatch
+fail	Add [noticket] to the body and CI goes green.	doc: explain the escape hatch
+fail	[noticket] is the marker	doc: explain the escape hatch
+fail	see [noissue]	doc: explain the escape hatch
+
+# ...but a marker standing alone still works, including as a list item and with
+# surrounding prose on OTHER lines. This is the shape /pr emits (KB-120).
+pass	## Summary\n\n- explains the hatch and how [noticket] behaves\n\n[noticket]	doc: explain the escape hatch
+pass	- [noticket]	chore: tidy up stray imports
+pass	  [noticket]  	chore: tidy up stray imports
+pass	[noticket].	chore: tidy up stray imports
+
 # A marker plus a real ID is not a contradiction to reject -- the PR is simply
 # exempt and also happens to be traceable. Rejecting it would punish a body
 # template that emits the marker unconditionally.

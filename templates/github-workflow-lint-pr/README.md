@@ -85,8 +85,20 @@ in its *description body*, lifting the ID requirement while type/scope validatio
 applies. The marker lives in the body rather than the title because the squash-merged
 title becomes the commit subject in `git log` forever.
 
-Two behaviours in `hasEscapeMarker()` are **inherited, not incidental** — they preserve
-what the GitHub expression did, and both are pinned by fixtures:
+**The marker must own its line.** `[noticket]` alone on a line — optionally as a list
+item — exempts the PR. `[noticket]` inside a sentence, or in backticks, does not.
+
+This is the one place the rule deliberately *departs* from the GitHub expression it
+replaces. `contains()` matches anywhere in the body, so a PR that merely **discussed**
+the hatch was exempted by it. That is not hypothetical: the KB PR that introduced this
+module was itself waved through on its first CI run — its title carried a valid ticket
+ID that was never checked, because its body explains what `[noticket]` does. Any PR
+documenting the marker silently lost ticket-ID enforcement, a narrower cousin of the
+no-op the strict pattern exists to prevent. The bug was inherited; making the hatch
+observable is what exposed it.
+
+Two other behaviours in `hasEscapeMarker()` are **inherited, not incidental** — they
+preserve what the expression did, and both are pinned by fixtures:
 
 - **Matching is case-insensitive.** `contains()` [is not case-sensitive][expr], so
   `[NOTICKET]` has always been accepted. A port using a plain
@@ -94,7 +106,7 @@ what the GitHub expression did, and both are pinned by fixtures:
 - **A null body coerces to empty** rather than throwing, so a PR opened with no
   description falls through to the strict pattern.
 
-If you change the markers, keep both properties or drop them deliberately.
+If you change the markers, keep all three properties or drop them deliberately.
 
 [expr]: https://docs.github.com/en/actions/reference/workflows-and-actions/expressions
 

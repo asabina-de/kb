@@ -52,6 +52,8 @@ Tag manual-only steps with **(manual)** so readers know an agent can't automate 
 
 - **Two inherited `contains()` behaviours were nearly lost in the port** (KB-121) — GitHub's [`contains()`](https://docs.github.com/en/actions/reference/workflows-and-actions/expressions) "is not case-sensitive and casts values to strings", so `[NOTICKET]` and `[NoTicket]` have **always** been accepted, and a null body has always coerced to `''` rather than throwing. A port using a plain `body.includes('[noticket]')` would silently narrow the hatch and turn PRs that pass today red — the exact regression class the ticket exists to catch, found while designing the fix for it. `hasEscapeMarker()` lowercases and coerces; fixture rows pin all three casings, and the runner asserts case-insensitivity directly so deleting the `.toLowerCase()` requires deleting the assertion too.
 
+- **Any PR that *documented* `[noticket]` silently lost ticket-ID enforcement** (KB-121) — `contains()` matches anywhere in the body, so a body explaining what the marker does tripped the hatch just as surely as one declaring it. **Found live, on the PR that introduced the rule module:** its title carried a valid `[KB-121]`, and CI logged `Ticket ID not required: the PR body declares the no-ticket escape hatch` — the title was never checked. This is a narrower cousin of the KB-81 no-op, and it was inherited from the expression, not introduced by the refactor; making the hatch observable is precisely what exposed it. **The marker must now own its line** (optionally as a list item), so prose and inline-code mentions are inert. This is the one place the rule deliberately departs from the expression it replaces. It matches what `/pr` already emits — KB-120 has it write the marker on its own line — so no `/pr`-authored PR is affected.
+
 - **The red-case runner could not detect a dead escape hatch** (KB-121) — it already refused a table with no `fail` rows, since an all-pass table goes green against an accept-everything rule (the KB-81 no-op). It now equally refuses a table where **no row takes the exempt branch**, because a table that never escapes goes green against a hatch that no longer works. Mutation-tested: dropping `.toLowerCase()`, returning `false` from the marker check, an accept-everything pattern, and the KB-116 `[A-Z]+` char class each turn the fixture red, with the unmutated baseline green.
 
 ### Security
@@ -66,6 +68,10 @@ Tag manual-only steps with **(manual)** so readers know an agent can't automate 
 - If you hand-merge instead, note that `subjectPattern` and `subjectPatternError` are **removed** from the action's `with:` block and replaced by a separate `Validate ticket ID` step. Leaving the old `subjectPattern` in place alongside the new step double-enforces the rule and re-breaks the escape hatch — the action would reject a ticketless title before the hatch-aware step ever runs.
 - `.github/pr-title-pattern.txt` is unchanged. If yours still contains `[A-Z]+-\d+` you are on a pre-KB-116 copy; adopt that change too.
 - Your existing `.github/fixtures/pr-titles.tsv` rows will not survive as-is — the column layout changed and rows are now full titles. Take the bundle's table and re-add any repo-specific rows on top.
+
+**Open PRs (check before merging this):**
+
+- The marker now has to stand on its own line. An **open** PR that relies on `[noticket]` mid-sentence goes from exempt to enforced the moment you adopt this — put the marker on its own line, or give the PR a real ticket ID. Find them with `gh pr list --state open --json number,title,body --jq '.[] | select((.body // "") | test("(?i)\\[no(ticket|issue)\\]")) | select(((.body // "") | test("(?im)^\\s*(?:[-*+]\\s+)?\\[no(ticket|issue)\\]\\s*\\.?\\s*$")) | not) | "#\(.number) \(.title)"'`. Merged PRs are unaffected — the check only ever runs on open ones.
 
 **Repo settings:**
 

@@ -28,6 +28,25 @@ export const PATTERN_FILE = '.github/pr-title-pattern.txt';
 // [noticket] is scaffolding for the PR, not history worth keeping.
 export const ESCAPE_MARKERS = ['[noticket]', '[noissue]'];
 
+// The marker must OWN ITS LINE, optionally as a list item.
+//
+// The GitHub expression this replaces used contains(), which matches anywhere
+// in the body -- so a PR that merely *discussed* the hatch was exempted by it.
+// That is not hypothetical: PR #85, the one that introduced this module, was
+// itself waved through on its first run. Its title carried a valid [KB-121]
+// and CI still logged "Ticket ID not required", because the body explains what
+// [noticket] does. Any PR documenting the marker silently lost ticket-ID
+// enforcement -- a narrower cousin of the KB-81 no-op.
+//
+// The bug is inherited, not introduced here; making the hatch observable is
+// what exposed it. Requiring the marker to stand alone leaves prose and
+// inline-code mentions inert, and matches what /pr already emits (KB-120 has
+// it write the marker on its own line).
+const MARKER_LINE = new RegExp(
+  `^\\s*(?:[-*+]\\s+)?(?:${ESCAPE_MARKERS.map((m) => m.replace(/[[\]]/g, '\\$&')).join('|')})\\s*\\.?\\s*$`,
+  'i',
+);
+
 /**
  * Does the PR body declare the escape hatch?
  *
@@ -38,15 +57,20 @@ export const ESCAPE_MARKERS = ['[noticket]', '[noissue]'];
  * been accepted and a PR opened with an empty description has always fallen
  * through to the strict pattern rather than crashing.
  *
- * Dropping the `.toLowerCase()` would silently narrow the hatch and turn PRs
- * that pass today red -- the exact class of regression this module exists to
- * make visible. The fixture pins both.
+ * Dropping the `i` flag would silently narrow the hatch and turn PRs that pass
+ * today red -- the exact class of regression this module exists to make
+ * visible. The fixture pins both, and the runner asserts case-insensitivity
+ * directly so the guard cannot be removed without noticing.
+ *
+ * What is deliberately NOT preserved is contains()'s match-anywhere behaviour
+ * -- see MARKER_LINE above.
  *
  * [1] https://docs.github.com/en/actions/reference/workflows-and-actions/expressions
  */
 export function hasEscapeMarker(body) {
-  const haystack = String(body ?? '').toLowerCase();
-  return ESCAPE_MARKERS.some((marker) => haystack.includes(marker));
+  return String(body ?? '')
+    .split(/\r?\n/)
+    .some((line) => MARKER_LINE.test(line));
 }
 
 /** Read the ticket-ID pattern, single-sourced so CI and the fixture agree. */
