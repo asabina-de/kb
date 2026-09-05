@@ -98,7 +98,29 @@ For each migration step, check whether the target repo has already applied it:
 
 **CI/CD:**
 - Check for expected workflows (e.g. `lint-pr.yaml`)
-- Compare workflow content against KB template version
+- Compare workflow content against the KB template — the canonical copy lives in `templates/`, **never** in the KB's own `.github/workflows/`. Reading the KB's live copy instead happens to work today only because CI keeps the two identical; it is not the contract, and it breaks the moment a workflow is KB-specific.
+
+**Workflow templates are bundles, not files.** A workflow may depend on sibling files — a pattern it reads, a fixture and script its red-case job runs — so a template is a **directory mirroring the exact paths its files take downstream**:
+
+```
+templates/github-workflow-lint-pr/
+└── .github/
+    ├── workflows/lint-pr.yaml
+    ├── pr-title-pattern.txt
+    ├── fixtures/pr-titles.tsv
+    └── scripts/check-pr-title-pattern.mjs
+```
+
+Adopt with a recursive copy from the repo root, and detect drift with a direct diff:
+
+```bash
+cp -R "{kb-path}/templates/github-workflow-lint-pr/." .
+diff -r "{kb-path}/templates/github-workflow-lint-pr/.github" .github
+```
+
+Compare **only the files the bundle carries** — the target repo's `.github/` legitimately holds much more, so a symmetric tree diff reports noise as drift. Copying just the workflow `.yaml` out of a bundle produces a workflow that fails immediately on a missing sibling file; take the whole directory or none of it.
+
+Flat single-file templates (`templates/github-workflow-{ci,design,update-skills}.y*ml`) have no sibling dependencies and are copied to `.github/workflows/` directly.
 
 ## Phase 2 — Present the gap analysis
 
@@ -183,7 +205,8 @@ Present the full migration plan as a numbered checklist:
 ```
 Migration plan ({N} steps)
 
- 1. [auto]    Copy .github/workflows/lint-pr.yaml from KB template
+ 1. [auto]    Copy the lint-pr bundle from templates/github-workflow-lint-pr/
+              (workflow + pattern + fixture + runner — all four, or none)
  2. [auto]    Add PR Title Convention section to CONTRIBUTING.md
  3. [auto]    Add AI Co-authorship section to CONTRIBUTING.md
  4. [manual]  Set squash-merge title format in GitHub Settings
@@ -232,7 +255,7 @@ Print what was accomplished:
 Alignment complete for {repo-name}
 
 Applied:
- ✅ Step 1: Copied lint-pr.yaml workflow
+ ✅ Step 1: Copied lint-pr bundle (4 files)
  ✅ Step 2: Added PR Title Convention to CONTRIBUTING.md
  ✅ Step 3: Added AI Co-authorship to CONTRIBUTING.md
  ✅ Step 5: Created .github-settings.yaml
@@ -262,6 +285,8 @@ Transition the ticket to Done if all steps are complete (including manual ones c
 ## Anti-patterns
 
 - **Don't hardcode conventions.** Read them from the KB CHANGELOG. If the CHANGELOG doesn't mention it, the skill doesn't enforce it.
+- **Don't read a template from the KB's own `.github/workflows/`.** The canonical copy is in `templates/`. The KB's live copy is its *instance* of the template, not the source — for `lint-pr` the two are kept identical by CI, and for every other workflow no template exists at all. Sourcing from the wrong place is how a downstream copy silently rots (KB-64).
+- **Don't copy a workflow out of a bundle on its own.** A bundle's files depend on each other; a lone `.yaml` fails on the first missing sibling. Copy the whole directory.
 - **Don't silently skip resource types.** If a convention change implies tickets should be audited but the CHANGELOG entry only covers files, flag the gap — don't ignore it.
 - **Don't auto-execute destructive operations.** File deletions, renames, repo setting changes, and ticket modifications always require individual confirmation.
 - **Don't auto-execute external changes.** Repo settings, CI config, and anything outside the local repo are HITL — surface commands, don't run them unless explicitly approved.

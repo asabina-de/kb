@@ -1,0 +1,53 @@
+name: Lint templates
+
+# Drift guard between templates/ bundles and the KB's own live files (KB-64).
+#
+# The KB is a consumer of exactly one of its own workflow templates: lint-pr.
+# That copy must not drift from the bundle downstream repos adopt -- in either
+# direction. Editing the live workflow alone ships a stale template to every
+# downstream repo (the KB-64 failure, observed as anyone.work running a
+# two-month-old pattern). Editing the template alone ships a convention the KB
+# does not itself run.
+#
+# Scoped deliberately to workflows that genuinely exist in both places. The
+# other templates (github-workflow-{ci,design,update-skills}) have no KB
+# counterpart -- the KB does not run them and has no reason to -- so there is
+# nothing to compare and no check is claimed.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - 'templates/github-workflow-lint-pr/**'
+      - '.github/workflows/lint-pr.yaml'
+      - '.github/pr-title-pattern.txt'
+      - '.github/fixtures/pr-titles.tsv'
+      - '.github/scripts/check-pr-title-pattern.mjs'
+      - '.github/scripts/check-template-drift.mjs'
+      - '.github/workflows/lint-templates.yaml'
+  push:
+    branches: [main]
+    paths:
+      - 'templates/github-workflow-lint-pr/**'
+      - '.github/workflows/lint-pr.yaml'
+      - '.github/pr-title-pattern.txt'
+      - '.github/fixtures/pr-titles.tsv'
+      - '.github/scripts/check-pr-title-pattern.mjs'
+      - '.github/scripts/check-template-drift.mjs'
+      - '.github/workflows/lint-templates.yaml'
+
+permissions:
+  contents: read
+
+jobs:
+  check-template-drift:
+    name: Template bundles match the KB's live files
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # The runner self-tests before comparing: it mutates a throwaway copy and
+      # asserts it catches the change, so a guard that has gone inert fails loudly
+      # instead of passing silently (CONTRIBUTING.md "Enforcement Mechanisms").
+      - name: Compare template bundles against live files
+        run: node .github/scripts/check-template-drift.mjs

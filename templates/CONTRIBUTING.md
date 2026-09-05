@@ -202,7 +202,17 @@ The ticket ID suffix is the visual signal that distinguishes a squash-merged PR 
 
 ### CI enforcement
 
-Repos using this convention should add the `amannn/action-semantic-pull-request` GitHub Action to validate PR titles on open/edit. See `templates/github-workflow-ci.yml` patterns and `.github/workflows/lint-pr.yaml` for a working example.
+Repos using this convention adopt the `lint-pr` bundle from the KB's `templates/github-workflow-lint-pr/`. It wires up the `amannn/action-semantic-pull-request` GitHub Action to validate PR titles on open/edit, and ships the red case proving the pattern still rejects bad input.
+
+It is a **directory, not a single file** — the workflow reads its pattern from a sibling file, and its red-case job runs a script against a fixture table. The directory mirrors the paths those files take in your repo, so adoption is a recursive copy from your repo root:
+
+```bash
+cp -R "{kb-path}/templates/github-workflow-lint-pr/." .
+```
+
+Copying only the `.yaml` produces a workflow that fails immediately on a missing sibling. Take all four files or none. See the bundle's own `README.md` for what each file does and how to customise the pattern — in particular, changing the pattern requires adding a fixture row, since a red case must be re-proven after every edit.
+
+Adding the job does not make it blocking: add `Red case — PR-title pattern rejects bad subjects` to your default branch's required status checks.
 
 ## PR Merge Strategy
 
