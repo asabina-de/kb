@@ -34,6 +34,20 @@ Tag manual-only steps with **(manual)** so readers know an agent can't automate 
 
 ---
 
+## [2026-09-05]
+
+### Added
+
+- **`/pair` skill — closing-block convention for chat check-ins** (KB-114) — every chat-facing check-in now ends with a **closing block**: detail first, then the TL;DR and the ask fused into one unit at the bottom. Wired into the three check-ins that carry the most (Phase 1 assessment, plan-changing spike findings, Phase 4 wrap-up), with three anti-patterns guarding it. The block always carries linked ticket and PR, stating absence explicitly (`no PR yet`) rather than implying it by omission, so the operator never has to fall back on the harness status bar. **Deliberately the inverse of `/troubleshoot`**, which opens with its TL;DR: returning to a chat, the operator lands at the *bottom* of the exchange, so the last paragraph is spotted for free while the top costs a scroll and a visual scan. The rationale is recorded in the skill section and in an anti-pattern specifically so it is not later "corrected" into alignment with `/troubleshoot`.
+
+### Migration
+
+**Files:**
+
+- Re-sync `skills/pair/SKILL.md` if your repo vendors the KB skills — additive (one new section, three call-site pointers, three anti-patterns); no other skill behavior changed.
+
+No action is required for the common case. `/pair` is consumed from `~/.claude/skills/` rather than vendored per-repo, and the Linear AI copy is redeployed automatically by `linear-skill-deploy.yaml` on merge to `main`.
+
 ## [2026-07-22]
 
 ### Changed
