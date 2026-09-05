@@ -44,15 +44,23 @@ Tag manual-only steps with **(manual)** so readers know an agent can't automate 
 - **`lint-pr` template bundle** (KB-64) — `templates/github-workflow-lint-pr/` is the first template that is a **directory rather than a flat file**, because KB-116 made the workflow depend on three siblings: the pattern it reads, and the fixture and runner its red-case job executes. The directory mirrors the exact paths those files take downstream, so adoption is `cp -R templates/github-workflow-lint-pr/. .` with no path reconstruction, and drift is a direct diff. The bundle carries its own `README.md` explaining adoption, customisation, and why it is not flat.
 - **`lint-templates.yaml` — drift guard between templates and the KB's live files** (KB-64) — CI now fails if `templates/github-workflow-lint-pr/` and the KB's own `.github/` copies diverge **in either direction**: editing the live workflow alone ships a stale template downstream, editing the template alone ships a convention the KB does not run. Comparison is bundle-scoped, not a symmetric tree diff, since a repo's `.github/` legitimately holds more than any bundle carries. The runner self-tests before comparing — it mutates and deletes files in a throwaway copy and asserts both are caught — which satisfies the red-case requirement without checking in a permanently-broken fixture, something a tree comparison cannot express.
 
+- **`lint-settings` template bundle** (KB-117) — `templates/github-workflow-lint-settings/`. Downstream repos adopt `templates/github-settings.yaml` but nothing validated it there, so a live footgun could be laundered into a spec with no check firing — the failure KB-82's schema exists to prevent. This is the first bundle whose root mirrors the **repo root** rather than `.github/`: the schema and fixtures live under `schemas/`.
+- **Settings fixtures now prove both directions** (KB-117) — `schemas/fixtures/` is split into `valid/` and `invalid/`. A red case that only tests bad input passes trivially for a schema that rejects everything, which is precisely how the over-strictness above went unnoticed. Green cases pin both loosened rules; red cases pin that squash-enabled and `allowed_methods`-absent specs still require the norms.
+
 ### Changed
 
 - **Workflow templates are canonical in `templates/`; `lint-pr` is now a bundle** (KB-64) — `/align` instructed agents to "copy `.github/workflows/lint-pr.yaml` from KB template" and to "compare workflow content against KB template version" **against a template that never existed**. An agent either failed that step or silently improvised by reading the KB's own live copy — which is why a downstream copy could rot with nothing able to see it (`anyone.work` ran the pre-KB-81 pattern for two months; see KB-116). The canonical copy now lives at `templates/github-workflow-lint-pr/`, and `/align` is pointed at `templates/` explicitly, with anti-patterns for sourcing a template from the KB's live workflows and for lifting a lone `.yaml` out of a bundle.
 - **`templates/CONTRIBUTING.md` CI-enforcement section** — previously sent readers to `github-workflow-ci.yml` (a different workflow) and to the KB's live `lint-pr.yaml` (not adoptable). Now points at the bundle with the copy command and the required-status-check step.
 
+- **`lint-settings.yaml` validates whichever specs are present** (KB-117) — it previously hard-coded both `.github-settings.yaml` and `templates/github-settings.yaml`; downstream repos have no `templates/` copy, so the templated workflow would have failed on a missing file. Making the template differ from the KB's copy would defeat the drift guard, so the workflow now tolerates the absent one and requires at least one — a single file correct in both repos, staying byte-identical.
+
 ### Fixed
 
 - **`lint-pr.yaml` — ticket-ID pattern could not match team keys containing digits** (KB-116) — the `subjectPattern` matched the team key with `[A-Z]+`, which cannot match a key containing a digit. Because KB-81 made the ID **required**, this did not merely skip validation: it **rejected correctly formatted titles**. `feat(ui): add a thing [A1-221]` failed a check it satisfies exactly, leaving any repo with a digit-bearing team key unable to go green short of `[noticket]`. The class is now `[A-Z][A-Z0-9]*`. Observed live in `asabina-de/anyone.work` (team key `A1`), patched locally there in [#173](https://github.com/asabina-de/anyone.work/pull/173) — a patch that should have come from here.
 - **`/issue` skill — digit-bearing IDs missed iteration mode** (KB-116) — the mode router used the same `[A-Z]+-\d+` class, so `/issue A1-221 …` fell through to freeform mode and filed a **new** ticket instead of iterating on the existing one. Same defect, different surface.
+
+- **Settings schema rejected legitimate specs** (KB-117) — validating `asabina-de/anyone.work`'s real spec produced **six** failures, four of them the schema's own fault. Templating `lint-settings` for downstream adoption would have turned its only consumer red, mostly for being *safer* than the norm — the same bug class as a title lint rejecting a correctly formatted title (KB-116). Two changes: the REQUIRED squash norms (`squash_title`, `squash_message`) are now required **only where squash merging is reachable**, since a merge-commit-only repo has no squash settings to get wrong; and `branch_protection` accepts keys beyond those the schema names, so a repo declaring approval counts, required check contexts or admin enforcement is valid rather than non-compliant. Omitting `allowed_methods` still requires the norms — GitHub enables all three methods by default, so absence must not become an opt-out. Verified against the pre-change schema: `anyone.work` and both new green fixtures flip from rejected to accepted, while the laundered-footgun and missing-norm fixtures stay rejected.
+- **Template drift guard silently skipped files outside `.github/`** (KB-117) — `check-template-drift.mjs` walked a hardcoded `.github/`, so the `lint-settings` bundle's six `schemas/` files would have been ignored while the guard still reported "in sync". Partial coverage reading as full coverage is worse than failing outright. It now walks the whole bundle, excluding only the bundle's own `README.md`.
 
 ### Migration
 
@@ -78,6 +86,19 @@ Tag manual-only steps with **(manual)** so readers know an agent can't automate 
 > **Only `lint-pr` is drift-checked.** The other workflow templates (`github-workflow-{ci,design,update-skills}`) have no counterpart in the KB's own `.github/workflows/` — the KB does not run them and has no reason to — so there is nothing to compare and no check is claimed for them. `lint-settings.yaml` is a second bundle candidate (schema + bad fixture) and is tracked separately.
 
 > **Why this needed a second migration entry:** KB-81's entry existed and was correct, and `anyone.work` still never adopted it — the stale copy was invisible because `lint-pr.yaml` is not in `templates/`, so `/align` had nothing to diff a downstream copy against. KB-64 tracks that gap.
+
+**Files:**
+
+- Adopt the bundle as a unit: `cp -R "$KB/templates/github-workflow-lint-settings/." .` from your repo root, then delete the `README.md` it brings along (it documents adoption and is not part of the workflow). It carries files under **both** `.github/` and `schemas/`.
+- The bundle needs a `.github-settings.yaml` to validate. If you have none, start from `$KB/templates/github-settings.yaml`. Adopting the workflow without a spec fails rather than passing vacuously.
+- If you already vendor `schemas/github-settings.schema.json` or `schemas/fixtures/github-settings.bad.yaml`, re-sync: the fixture moved to `schemas/fixtures/invalid/laundered-squash-norms.yaml` and the schema's strictness changed. Check with `ls schemas/fixtures/` — a flat `github-settings.bad.yaml` means you are pre-KB-117.
+- Re-sync `skills/align/SKILL.md` if your repo vendors the KB skills — bundle guidance now states that a bundle root mirrors the repo root, not `.github/`.
+
+**Repo settings (manual):**
+
+- Add `Validate settings specs against schema` to your default branch's required status checks. Adding the job does not make it blocking.
+
+> **If your spec was previously rejected for declaring stricter branch protection, it should now pass unchanged** — do not weaken it to satisfy the old schema.
 
 ## [2026-07-22]
 

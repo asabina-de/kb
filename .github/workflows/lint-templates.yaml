@@ -18,21 +18,31 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
     paths:
+      # Every bundle, and every live file any bundle mirrors. A path missing
+      # here means a change to it never triggers the drift check (KB-117).
       - 'templates/github-workflow-lint-pr/**'
+      - 'templates/github-workflow-lint-settings/**'
       - '.github/workflows/lint-pr.yaml'
       - '.github/pr-title-pattern.txt'
       - '.github/fixtures/pr-titles.tsv'
       - '.github/scripts/check-pr-title-pattern.mjs'
+      - '.github/workflows/lint-settings.yaml'
+      - 'schemas/**'
       - '.github/scripts/check-template-drift.mjs'
       - '.github/workflows/lint-templates.yaml'
   push:
     branches: [main]
     paths:
+      # Every bundle, and every live file any bundle mirrors. A path missing
+      # here means a change to it never triggers the drift check (KB-117).
       - 'templates/github-workflow-lint-pr/**'
+      - 'templates/github-workflow-lint-settings/**'
       - '.github/workflows/lint-pr.yaml'
       - '.github/pr-title-pattern.txt'
       - '.github/fixtures/pr-titles.tsv'
       - '.github/scripts/check-pr-title-pattern.mjs'
+      - '.github/workflows/lint-settings.yaml'
+      - 'schemas/**'
       - '.github/scripts/check-template-drift.mjs'
       - '.github/workflows/lint-templates.yaml'
 

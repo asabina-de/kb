@@ -1,0 +1,20 @@
+# Deliberately VALID — permanent green-case fixture (KB-117).
+#
+# Squash is not an allowed method, so the REQUIRED squash norms are
+# meaningless here and must NOT be demanded. Modelled on the real
+# asabina-de/anyone.work spec, which this schema previously rejected on two
+# counts for settings its repo cannot use.
+#
+# Whether a repo SHOULD use merge commits is a convention question
+# (CONTRIBUTING.md says squash) — but that is a matter for review, not
+# something a schema should express by demanding dead fields.
+
+merge:
+  allowed_methods:
+    - merge
+  default_method: merge
+  delete_branch_on_merge: true
+
+branch_protection:
+  default_branch: main
+  require_status_checks: true

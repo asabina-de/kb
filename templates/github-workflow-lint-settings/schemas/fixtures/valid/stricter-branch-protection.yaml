@@ -1,0 +1,27 @@
+# Deliberately VALID — permanent green-case fixture (KB-117).
+#
+# Declares MORE branch protection than the KB template models: approval
+# counts, explicit required check contexts, admin enforcement. A repo doing
+# more than the norm is safer, not non-compliant, and the schema previously
+# rejected all four of these keys under additionalProperties: false.
+#
+# Modelled on the real asabina-de/anyone.work spec.
+
+merge:
+  allowed_methods:
+    - squash
+  default_method: squash
+  squash_title: pr_title
+  squash_message: commit_messages
+  delete_branch_on_merge: true
+
+branch_protection:
+  default_branch: main
+  require_pr_reviews: true
+  require_status_checks: true
+  require_pull_request: true
+  required_approving_review_count: 0
+  required_status_check_contexts:
+    - "Validate PR title"
+    - "Red case — PR-title pattern rejects bad subjects"
+  enforce_admins: false

@@ -100,27 +100,37 @@ For each migration step, check whether the target repo has already applied it:
 - Check for expected workflows (e.g. `lint-pr.yaml`)
 - Compare workflow content against the KB template — the canonical copy lives in `templates/`, **never** in the KB's own `.github/workflows/`. Reading the KB's live copy instead happens to work today only because CI keeps the two identical; it is not the contract, and it breaks the moment a workflow is KB-specific.
 
-**Workflow templates are bundles, not files.** A workflow may depend on sibling files — a pattern it reads, a fixture and script its red-case job runs — so a template is a **directory mirroring the exact paths its files take downstream**:
+**Workflow templates are bundles, not files.** A workflow may depend on sibling files — a pattern it reads, a schema it validates against, a fixture and script its red-case job runs — so a template is a **directory mirroring the exact paths its files take downstream**. A bundle root mirrors the **repo root**, not `.github/`: files may live anywhere the workflow needs them.
 
 ```
-templates/github-workflow-lint-pr/
-└── .github/
-    ├── workflows/lint-pr.yaml
-    ├── pr-title-pattern.txt
-    ├── fixtures/pr-titles.tsv
-    └── scripts/check-pr-title-pattern.mjs
+templates/github-workflow-lint-pr/        templates/github-workflow-lint-settings/
+└── .github/                              ├── .github/
+    ├── workflows/lint-pr.yaml            │   └── workflows/lint-settings.yaml
+    ├── pr-title-pattern.txt              └── schemas/
+    ├── fixtures/pr-titles.tsv                ├── github-settings.schema.json
+    └── scripts/                              └── fixtures/
+        └── check-pr-title-pattern.mjs            ├── valid/*.yaml
+                                                  └── invalid/*.yaml
 ```
 
-Adopt with a recursive copy from the repo root, and detect drift with a direct diff:
+Adopt with a recursive copy from the repo root, and detect drift with a direct diff per top-level directory the bundle carries:
 
 ```bash
 cp -R "{kb-path}/templates/github-workflow-lint-pr/." .
 diff -r "{kb-path}/templates/github-workflow-lint-pr/.github" .github
+
+cp -R "{kb-path}/templates/github-workflow-lint-settings/." .
+diff -r "{kb-path}/templates/github-workflow-lint-settings/.github" .github
+diff -r "{kb-path}/templates/github-workflow-lint-settings/schemas" schemas
 ```
+
+A bundle's own `README.md` documents adoption and is **not** copied downstream — it sits at the bundle root, outside the mirrored paths, so a recursive copy of `bundle/.` would bring it along. Delete it after copying, or copy the mirrored directories individually.
 
 Compare **only the files the bundle carries** — the target repo's `.github/` legitimately holds much more, so a symmetric tree diff reports noise as drift. Copying just the workflow `.yaml` out of a bundle produces a workflow that fails immediately on a missing sibling file; take the whole directory or none of it.
 
 Flat single-file templates (`templates/github-workflow-{ci,design,update-skills}.y*ml`) have no sibling dependencies and are copied to `.github/workflows/` directly.
+
+**`lint-settings` needs a spec to validate.** Adopting the bundle without a `.github-settings.yaml` at the repo root leaves the workflow with nothing to check; it fails rather than passing vacuously. Pair the bundle with `templates/github-settings.yaml` if the repo has no spec yet.
 
 ## Phase 2 — Present the gap analysis
 
