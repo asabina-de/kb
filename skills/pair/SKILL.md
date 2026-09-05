@@ -61,6 +61,43 @@ Default to **checkpoint** for non-trivial work (multiple steps, unknowns). Defau
 
 **Important:** In both modes, code review happens via PR on GitHub — not in the CLI chat. Checkpoints are for design steering, not line-by-line code review. When the navigator wants to review code, offer to prep a PR: "Shall I ship a PR so you can review on GitHub?"
 
+## Check-in shape
+
+Every chat-facing check-in ends with a **closing block**: the detail comes first, the conclusion and the ask come last, fused into one unit at the very bottom of the message.
+
+**Why the conclusion closes rather than leads.** Returning to a chat, the operator lands at the *bottom* of the exchange. The top is off-screen, and finding it costs a scroll plus a visual scan; the last paragraph is spotted for free. This is the deliberate inverse of `/troubleshoot`, which opens with its TL;DR — do not "correct" it into alignment with that skill.
+
+**Order within the block: TL;DR, then the ask.** An ask is only actionable once the state it arises from is known, so reading order matches reasoning order — and the final thing on screen is still the item requiring the navigator's action.
+
+The TL;DR has **no fixed field list** (again unlike `/troubleshoot`). A handful of lines carrying facts, not topic labels: what was found, what changed, what state the work is in. "Assessment complete, plan drafted" is a label; "Gate passes, ticket's premise about an existing rule is wrong, nothing committed" is a fact.
+
+**The block carries its own navigation.** Always state, as clickable links rather than bare identifiers:
+
+- the **ticket** — identifier linked to its Linear URL
+- the **PR** — number linked to its GitHub URL
+- the **branch**, when it isn't otherwise obvious
+
+The navigator should never have to fall back on the harness status bar, which is neither always visible nor always current. You always know the ticket and the PR, so always state them. **State absence explicitly** — write `no PR yet`, never omit the field, because a missing PR link is ambiguous between *there is none* and *it was forgotten*.
+
+The shape:
+
+```
+[ findings, tables, detail — as long as it needs to be ]
+
+---
+
+**TL;DR** — Readiness gate passes. Two unknowns spiked out, one blocker left:
+the ticket's token-expiry requirement is underspecified. Nothing committed.
+
+[Z-123](https://linear.app/acme/issue/Z-123/add-oauth2-support) · no PR yet · `vidbina/z-123-add-oauth2-google-login`
+
+**Ask:** silent refresh, explicit re-login, or both with fallback?
+```
+
+When there is genuinely nothing to ask — a progress note mid-step, a step completion in yolo mode — the block is just the TL;DR and its navigation. Don't manufacture a question to fill the slot.
+
+This applies at every check-in that reports back to the navigator, and specifically at the three that carry the most: the Phase 1 assessment, spike findings, and the Phase 4 wrap-up.
+
 ## Phase 0 — Pick up the ticket
 
 ### Identify the work
@@ -245,6 +282,8 @@ For each feasibility unknown, spawn a subagent to investigate:
 
 Subagents are read-only investigators. They don't write production code.
 
+When a spike returns something that **changes the plan** — a chosen approach is not viable, a dependency is missing, an assumption in the ticket is wrong — surface it to the navigator in chat, not only as a Linear comment. Shape that message per **Check-in shape**: the finding and its evidence first, then the closing block carrying the consequence for the plan and what you need decided.
+
 **Wait for all spikes to complete before commenting.** Don't post "starting spike" comments — post one consolidated findings anchor per spike after the subagent returns, via the comment skill:
 
 ```
@@ -294,27 +333,36 @@ This is why the spike subagents are told to return source URLs: so a finding can
 
 ### Check in with the navigator
 
-Present findings to the human:
+Present findings to the human, shaped per **Check-in shape** — detail first, closing block last:
 
 ```
 Ready to implement:
  1. Add Google OAuth callback endpoint
  2. Store refresh tokens in existing session table
 
-Need your input:
- 3. Token expiry handling — ticket says "handle gracefully" but doesn't specify.
-    Options: (a) silent refresh, (b) redirect to login, (c) both with fallback
- 4. Scope of Google permissions — email only, or also profile?
-
 Spiked and resolved:
- 5. Google OAuth library — compatible ✓ (see ticket comment)
- 6. Session table schema — can use metadata JSONB column ✓ (see ticket comment)
+ 3. Google OAuth library — compatible ✓ (see ticket comment)
+ 4. Session table schema — can use metadata JSONB column ✓ (see ticket comment)
 
 Blocked:
  (none)
+
+---
+
+**TL;DR** — Two of the four unknowns are spiked out: the library works on our
+Node version and the tokens fit an existing JSONB column, so no migration.
+Token expiry is underspecified in the ticket and blocks Step 3. Nothing
+committed.
+
+[Z-123](https://linear.app/acme/issue/Z-123/add-oauth2-support) · no PR yet · `vidbina/z-123-add-oauth2-google-login`
+
+**Ask:**
+ - Token expiry — ticket says "handle gracefully" but doesn't specify.
+   Options: (a) silent refresh, (b) redirect to login, (c) both with fallback
+ - Google permission scope — email only, or also profile?
 ```
 
-Ask the user for the items that need input. In pair programming, asking questions as they arise is expected. Batch questions that are ready at the same time rather than asking them one by one.
+Note where the open questions live: **not** in the body as a "Need your input" section, but in the ask at the end. The body reports what is settled; the closing block carries what is not. In pair programming, asking questions as they arise is expected — batch the ones that are ready at the same time rather than asking them one by one.
 
 ## Phase 2 — Plan the work
 
@@ -469,6 +517,18 @@ Print what was accomplished:
 - What's left (if anything) and whether it needs a follow-up session or more design
 - Any blockers or open questions that surfaced during implementation
 
+Shape it per **Check-in shape**. The wrap-up is the message most likely to be read cold — days later, from a phone, with no memory of the session — so the closing block matters most here. Its navigation is fully known by now, so it carries the real links:
+
+```
+**TL;DR** — All four steps landed; OAuth callback, token storage, re-login
+flow, and the login button. Silent refresh was dropped mid-session in favour
+of explicit re-login. PR is out of draft and ready for review.
+
+[Z-123](https://linear.app/acme/issue/Z-123/add-oauth2-support) · [#47](https://github.com/acme/app/pull/47) · `vidbina/z-123-add-oauth2-google-login`
+
+**Ask:** review #47 when you get a chance — nothing blocking.
+```
+
 ### Commit threshold
 
 If there are uncommitted changes (checkpoint mode only):
@@ -510,6 +570,9 @@ Skill("comment", "Reply to anchor {plan-comment-id} on {ticket-id} titled \"✅ 
 
 ## Anti-patterns
 
+- **Don't bury the conclusion mid-body.** Every chat-facing check-in ends with the closing block — detail first, TL;DR then ask last (see **Check-in shape**). A check-in that opens with a heading and a table and leaves the load-bearing finding three paragraphs down makes the navigator excavate it. Do not flip the TL;DR to the top to match `/troubleshoot`; the inversion is deliberate.
+- **Don't drop the ticket and PR links.** The closing block always carries them, as links, and states `no PR yet` when there is none. Silently omitting the PR is ambiguous between "there is none" and "forgot", and the navigator should never have to fall back on the harness status bar to find out which.
+- **Don't pad the TL;DR with topic labels.** "Assessment complete, plan drafted" tells the navigator nothing they couldn't infer from the phase. Carry facts: what was found, what it changes, what state the work is in.
 - **Don't work silently for long stretches.** This is pairing, not autonomous mode. Check in after each atomic step. If exploration takes a while, print progress notes.
 - **Don't commit in checkpoint mode.** All git write operations are HITL unless the navigator explicitly switched to yolo mode.
 - **Don't leave a finished branch's PR in draft.** When the work is complete, flip the draft to ready (`gh pr ready`) and move the ticket to In Review at wrap-up (Phase 4). A completed PR stuck in draft blocks the merge button and reads as WIP.
