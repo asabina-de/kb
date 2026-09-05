@@ -241,6 +241,8 @@ Derive the summary from commit messages and the Linear ticket description. Deriv
 
 So when Phase 1 detected no ticket ID, **add `[noticket]` to the body as its own line** before the trailer. Do not wait for CI to reject the PR and then patch the body — the marker is a routine part of drafting a ticketless PR, not a remedy for a failed check.
 
+**Its own line is a requirement, not a formatting preference.** `lint-pr.yaml` only honours a marker that stands alone (a leading `-` list bullet is fine). A marker inside a sentence is inert. The check used to match it anywhere in the body, which meant any PR that merely *described* the hatch — a doc change, a CHANGELOG entry, this very section — was silently exempted from the ticket-ID rule with its own title never checked (KB-121). Writing it standalone is what makes the exemption real, and keeping it standalone is what keeps prose mentions harmless.
+
 Two things this preserves:
 
 - **The choice stays deliberate.** The marker is visible in the PR body, so reviewers see that "no ticket" was declared rather than forgotten. Surface it in the Phase 4 pitch (below) so the operator can override and file a ticket instead.
