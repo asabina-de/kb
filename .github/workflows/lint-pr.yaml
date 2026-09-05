@@ -46,6 +46,14 @@ jobs:
     name: Validate PR title
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+
+      # The action needs the pattern as a string, and GitHub expressions
+      # cannot read files — so load it into a step output first.
+      - name: Load ticket-ID subject pattern
+        id: pattern
+        run: printf 'value=%s\n' "$(cat .github/pr-title-pattern.txt)" >> "$GITHUB_OUTPUT"
+
       - uses: amannn/action-semantic-pull-request@v6
         with:
           # Conventional commit types matching CONTRIBUTING.md
@@ -64,6 +72,16 @@ jobs:
           # a no-op (KB-81). Traceability lives in git log via the
           # squash-merge PR title, so the ID must be in the title.
           #
+          # The pattern itself lives in .github/pr-title-pattern.txt, not
+          # inline here (KB-116). It is loaded by the step above and read
+          # by .github/scripts/check-pr-title-pattern.mjs, so the pattern
+          # CI enforces and the pattern the red-case fixture tests are the
+          # same string by construction — they cannot drift apart.
+          #
+          # Its character class is [A-Z][A-Z0-9]*, not [A-Z]+: a team key
+          # may contain digits (A1-221), and [A-Z]+ silently rejects those
+          # — turning a correctly formatted title into a red check.
+          #
           # Escape hatch: a PR that legitimately has no ticket declares
           # [noticket] (or [noissue]) in the PR *description body* — the
           # ID requirement is lifted while type/scope validation still
@@ -71,16 +89,20 @@ jobs:
           # titles short. The `edited` trigger above re-runs this check
           # when the body changes, so adding the marker un-blocks the PR
           # without a new push.
-          subjectPattern: ${{ (contains(github.event.pull_request.body, '[noticket]') || contains(github.event.pull_request.body, '[noissue]')) && '^.+$' || '^.+\s\[[A-Z]+-\d+\]$' }}
+          subjectPattern: ${{ (contains(github.event.pull_request.body, '[noticket]') || contains(github.event.pull_request.body, '[noissue]')) && '^.+$' || steps.pattern.outputs.value }}
           subjectPatternError: |
             The subject "{subject}" doesn't look right.
             Expected format: type(scope): description [TICKET-ID]
             Examples:
               feat(auth): add OAuth callback [KB-31]
               fix: handle null response [KB-45]
-            The ticket ID suffix is required so the squash-merged commit
-            stays traceable in git log. If this PR legitimately has no
-            ticket, add [noticket] (or [noissue]) to the PR description
-            body — the ID requirement is lifted, type/scope still checked.
+            The ticket ID must be wrapped in SQUARE BRACKETS [KB-31] and
+            come last. Parentheses (KB-31) do not satisfy this check — the
+            squash-merged commit takes this title as its subject, and
+            anything scanning git log for [TICKET-ID] looks for brackets.
+            A team key may contain digits, so [A1-221] is valid too.
+            If this PR legitimately has no ticket, add [noticket] (or
+            [noissue]) to the PR description body — the ID requirement is
+            lifted, type/scope still checked.
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
