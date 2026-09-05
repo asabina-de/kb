@@ -34,6 +34,45 @@ Tag manual-only steps with **(manual)** so readers know an agent can't automate 
 
 ---
 
+## [2026-09-06]
+
+### Changed
+
+- **The PR-title ticket-ID rule is no longer a `subjectPattern`** (KB-121) — it moved out of `lint-pr.yaml` into `.github/scripts/pr-title-rule.mjs`, which the workflow runs and the red-case fixture **imports**. The rule CI enforces and the rule under test are now one function rather than two things that agree by inspection. The `amannn/action-semantic-pull-request` step keeps only its `types:` list; a second step in the same job applies the ticket-ID rule. Job names are deliberately unchanged — renaming a required status check stops it reporting until every downstream repo edits branch protection, which blocks merges for a cosmetic gain.
+
+  This costs nothing in coverage because the pattern is anchored at the **end** of the title (`…\s\[KEY-123\]$`). It never needed the action to strip the `type(scope):` prefix for it, so applying it to the whole title is the same assertion — which is why removing `subjectPattern` did not require reimplementing the action's prefix parser. `.github/pr-title-pattern.txt` is byte-identical; only what it is matched against changed.
+
+- **`.github/fixtures/pr-titles.tsv` is now `expect`/`body`/`title`** (KB-121) — rows carry the full PR title instead of the bare subject, plus the PR body that decides whether the ID is required at all. `-` in the body column means no body; `\n` encodes a newline. The table proves the whole rule end to end rather than half of it.
+
+### Fixed
+
+- **The `[noticket]` escape hatch was untestable, and had never been exercised** (KB-121) — the hatch was a GitHub expression riding along inside `subjectPattern`, choosing between `^.+$` and the strict pattern by grepping the PR body. **No test could reach it.** The fixture proved the regex rejected bad subjects; the half of the rule that decides whether the regex applies at all was assumed. It had also never fired on a real PR: every ID-less PR in this repo predates KB-81 enforcement, and #66's "verified live" claim is not reproducible, since its title carries `[KB-81]` and passes either way. Per `CONTRIBUTING.md` "Enforcement Mechanisms", a mechanism never seen rejecting bad input enforces nothing — the inverse holds for an escape hatch never seen escaping. KB-120 made this urgent rather than theoretical: `/pr` now emits `[noticket]` by default on every ticketless PR, so a silently dead hatch would break the tooling's default path.
+
+  Rejected alternative: an evaluator shim for the GitHub expression. It means reimplementing GitHub's expression semantics in JS and asserting against the reimplementation — if the model is wrong the same way a future edit is wrong, it goes green. It would also have cost the bundle its dependency-free property.
+
+- **Two inherited `contains()` behaviours were nearly lost in the port** (KB-121) — GitHub's [`contains()`](https://docs.github.com/en/actions/reference/workflows-and-actions/expressions) "is not case-sensitive and casts values to strings", so `[NOTICKET]` and `[NoTicket]` have **always** been accepted, and a null body has always coerced to `''` rather than throwing. A port using a plain `body.includes('[noticket]')` would silently narrow the hatch and turn PRs that pass today red — the exact regression class the ticket exists to catch, found while designing the fix for it. `hasEscapeMarker()` lowercases and coerces; fixture rows pin all three casings, and the runner asserts case-insensitivity directly so deleting the `.toLowerCase()` requires deleting the assertion too.
+
+- **The red-case runner could not detect a dead escape hatch** (KB-121) — it already refused a table with no `fail` rows, since an all-pass table goes green against an accept-everything rule (the KB-81 no-op). It now equally refuses a table where **no row takes the exempt branch**, because a table that never escapes goes green against a hatch that no longer works. Mutation-tested: dropping `.toLowerCase()`, returning `false` from the marker check, an accept-everything pattern, and the KB-116 `[A-Z]+` char class each turn the fixture red, with the unmutated baseline green.
+
+### Security
+
+- **The PR body reaches the check through `env:`, never the `run:` line** (KB-121) — moving the hatch into a script step put attacker-controlled text next to shell script generation for the first time. `node script.mjs "${{ github.event.pull_request.body }}"` is [the documented script-injection pattern](https://docs.github.com/en/actions/concepts/security/script-injections); a body containing `a"; ls $GITHUB_WORKSPACE"` would execute. The workflow uses [the intermediate-environment-variable form](https://docs.github.com/en/actions/reference/security/secure-use), with a comment saying why, so it is not "simplified" back later. No injection existed before this change — the body was only ever read inside `contains()` — so this is a constraint the refactor introduced and closed, not a pre-existing hole.
+
+### Migration
+
+**Files:**
+
+- Re-adopt the `lint-pr` bundle as a unit — `cp -R "$KB/templates/github-workflow-lint-pr/." .`. The bundle gained a fifth file (`.github/scripts/pr-title-rule.mjs`); copying only the previous four yields a workflow that fails on a missing import.
+- If you hand-merge instead, note that `subjectPattern` and `subjectPatternError` are **removed** from the action's `with:` block and replaced by a separate `Validate ticket ID` step. Leaving the old `subjectPattern` in place alongside the new step double-enforces the rule and re-breaks the escape hatch — the action would reject a ticketless title before the hatch-aware step ever runs.
+- `.github/pr-title-pattern.txt` is unchanged. If yours still contains `[A-Z]+-\d+` you are on a pre-KB-116 copy; adopt that change too.
+- Your existing `.github/fixtures/pr-titles.tsv` rows will not survive as-is — the column layout changed and rows are now full titles. Take the bundle's table and re-add any repo-specific rows on top.
+
+**Repo settings:**
+
+- None. Both job names (`Validate PR title`, `Red case — PR-title pattern rejects bad subjects`) are unchanged, so required status checks keep reporting without edits.
+
+---
+
 ## [2026-09-05]
 
 ### Added
