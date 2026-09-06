@@ -85,6 +85,24 @@ in its *description body*, lifting the ID requirement while type/scope validatio
 applies. The marker lives in the body rather than the title because the squash-merged
 title becomes the commit subject in `git log` forever.
 
+The rule the check enforces is **"if you claim a ticket ID, it must be well-formed"** —
+not "you must have a ticket." Quick fixes and drive-by refactors are legitimate work, and
+the marker is how a PR says so.
+
+**Both spellings are supported on purpose — do not consolidate them.** `[noticket]` and
+`[noissue]` are the same marker. The two words come from different vocabularies: Linear
+and GitHub both say *issue*, this convention says *ticket*. Whichever one an author
+reaches for, they are right, and nobody guesses a marker they have not seen — they copy
+it from the error message or these docs. The cost of the alias is one array:
+
+```js
+export const ESCAPE_MARKERS = ['[noticket]', '[noissue]'];
+```
+
+The matcher is generated from that array and the fixtures pin both, so this is one code
+path over a two-element list rather than two things to keep in step. Dropping either
+spelling breaks PRs in repos that already use it, for no gain.
+
 **The marker must own its line.** `[noticket]` alone on a line — optionally as a list
 item — exempts the PR. `[noticket]` inside a sentence, or in backticks, does not.
 

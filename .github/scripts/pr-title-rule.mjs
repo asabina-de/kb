@@ -26,6 +26,14 @@ export const PATTERN_FILE = '.github/pr-title-pattern.txt';
 // the ID requirement. The marker lives in the body, not the title, because the
 // squash-merged title becomes the commit subject in git log forever --
 // [noticket] is scaffolding for the PR, not history worth keeping.
+//
+// BOTH SPELLINGS ARE DELIBERATE -- do not consolidate to one. They are the same
+// marker, drawn from different vocabularies: Linear and GitHub both say
+// "issue", this convention says "ticket". Whichever an author reaches for, they
+// are right, and nobody guesses a marker they have not seen -- they copy it from
+// the failure message or the docs. The alias costs one array element, since the
+// matcher below is generated from this list and the fixtures pin both. Dropping
+// either breaks PRs in repos already using it, for no gain.
 export const ESCAPE_MARKERS = ['[noticket]', '[noissue]'];
 
 // The marker must OWN ITS LINE, optionally as a list item.
