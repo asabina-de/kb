@@ -142,7 +142,7 @@ The branch with the **fewest commits between its tip and HEAD** is the most like
 1. **Determine the type** from the nature of the change: `feat`, `fix`, `doc`, `refactor`, `chore`, `test`, `style`, or `perf` — same types as commit conventions in CONTRIBUTING.md.
 2. **Determine the scope** (optional) from the primary area of the codebase affected.
 3. **Draft the subject** — use the Linear ticket title as a starting point if available, otherwise derive from the branch name slug (strip the owner prefix and ticket ID, humanize the remainder). The ticket title is a starting point, not a passthrough — always run it through the quality gate (step 6) and rewrite if it doesn't meet PR title standards. Ticket titles follow the same imperative voice convention (see quality gate below), so they should already be close to PR-ready.
-4. **Append the ticket ID** when one was detected from the branch name in Phase 1. Format: `[KB-10]` in square brackets at the end. This is required for traceability — merged commits produce `type(scope): subject [KB-10] (#N)`, preserving the Linear issue link in `git log`. Omit only for ad-hoc branches without a ticket.
+4. **Append the ticket ID** when one was detected from the branch name in Phase 1. Format: `[KB-10]` in square brackets at the end. This is required for traceability — merged commits produce `type(scope): subject [KB-10] (#N)`, preserving the Linear issue link in `git log`. Omit only for ad-hoc branches without a ticket — and when you omit it, declare `[noticket]` in the **body** (see below). An ID-less title with no body marker is a red check, not a valid PR.
 5. **Assemble the title:** `type(scope): subject [TICKET-ID]`.
 6. Run the title through the **title quality gate** below.
 
@@ -230,11 +230,23 @@ Warning:   <what triggered the gate — e.g. "banned verb 'Implement'", "67 char
 <bullet checklist of how to verify the change>
 
 <Linear ticket link if available>
+<[noticket] — only when Phase 1 found no ticket ID>
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
 ```
 
 Derive the summary from commit messages and the Linear ticket description. Derive the test plan from the nature of the changes (e.g. "run tests", "manually verify X flow", "check CI passes").
+
+**Ticketless PRs — inject `[noticket]`.** Not every change earns a ticket. Quick fixes, small refactors, and drive-by cleanups are legitimate work, and forcing a ticket for them is ceremony that buys nothing. `lint-pr.yaml` accommodates this: `[noticket]` (or `[noissue]`) anywhere in the PR *description body* lifts the ticket-ID requirement while type/scope validation still applies.
+
+So when Phase 1 detected no ticket ID, **add `[noticket]` to the body as its own line** before the trailer. Do not wait for CI to reject the PR and then patch the body — the marker is a routine part of drafting a ticketless PR, not a remedy for a failed check.
+
+Two things this preserves:
+
+- **The choice stays deliberate.** The marker is visible in the PR body, so reviewers see that "no ticket" was declared rather than forgotten. Surface it in the Phase 4 pitch (below) so the operator can override and file a ticket instead.
+- **Titles stay clean.** The marker lives in the body, not the title, precisely because the squash-merged title becomes the commit subject in `git log` forever. `[noticket]` is scaffolding for the PR, not history worth keeping.
+
+Never add the marker when a ticket ID *was* detected — the ID is the stronger signal, and a body carrying both is contradictory.
 
 ## Phase 4 — Pitch in chat
 
@@ -248,6 +260,7 @@ Suggested: type(scope): rewritten subject [TICKET-ID]  ← only if quality gate 
 Warning:   <what triggered>                             ← only if quality gate fired
 Base:   <base-branch>  [stacked ⚠] or [default branch]
 Branch: <current-branch>
+Ticket: none — declaring [noticket] in the body         ← only if no ticket was detected
 
 Body:
 ---
@@ -258,6 +271,8 @@ Create this PR? yes / edit / cancel
 ```
 
 If the title quality gate fired, the `Suggested:` and `Warning:` lines appear. The operator can accept the original, use the suggestion, or type their own via the `edit` flow. If no issues were detected, omit those lines.
+
+The `Ticket:` line appears only when Phase 1 found no ticket ID, and exists to make the exemption a decision rather than a default. If the operator would rather file a ticket, they say so — pause, create it (`/issue`), then re-pitch with the ID in the title and the marker dropped from the body.
 
 Ask the user for their response. Options:
 - **yes** → proceed to Phase 5
