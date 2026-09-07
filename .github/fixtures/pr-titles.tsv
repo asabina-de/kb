@@ -1,41 +1,105 @@
-# Red-case fixture for the PR-title ticket-ID pattern (KB-116).
+# Red-case fixture for the PR-title ticket-ID rule (KB-116, KB-121).
 #
-# Format:  <expect>\t<subject>
-#   expect = pass | fail
-#   subject = the PR title AFTER the "type(scope): " prefix, which is what
-#             amannn/action-semantic-pull-request matches subjectPattern against.
+# Format:  <expect>\t<body>\t<title>
+#   expect = pass | fail   -- whether the rule ACCEPTS this PR
+#   body   = the PR description body, or "-" for none (null).
+#            Use \n for a newline. The body is what carries the escape hatch.
+#   title  = the FULL PR title, prefix included.
+#
+# Two things changed in KB-121 and both matter when adding rows:
+#
+#   1. Rows are now full titles, not bare subjects. The pattern is anchored at
+#      the end of the title, so it never needed the `type(scope):` prefix
+#      stripped -- which is why the rule could stop being a `subjectPattern`
+#      on the semantic-pull-request action and move into code we can test.
+#
+#   2. The body column exists at all. Before KB-121 the escape hatch lived in
+#      a GitHub expression no test could reach, so the table proved only half
+#      the rule. These rows are the other half, end to end.
 #
 # CONTRIBUTING.md "Enforcement Mechanisms" requires a demonstrated red case,
-# re-proven after every pattern edit. This table is that proof, and CI runs it
-# on every PR -- so the mechanism re-demonstrates it can still reject bad input
-# rather than having been seen working once at introduction.
+# re-proven after every edit. This table is that proof, and CI runs it on every
+# PR -- so the mechanism re-demonstrates it can still reject bad input rather
+# than having been seen working once at introduction.
 #
-# Add a row whenever the pattern changes. A row marked fail that starts passing
-# is the regression this file exists to catch.
+# Add a row whenever the rule changes. A row marked fail that starts passing is
+# the regression this file exists to catch.
 
 # --- the bug this fixture was created for: digit-bearing team keys (KB-116) ---
-pass	add a thing [A1-221]
-pass	normalize the Storybook taxonomy [A1-221]
-fail	add a thing [1A-221]
+pass	-	feat(ui): add a thing [A1-221]
+pass	-	refactor(ui): normalize the Storybook taxonomy [A1-221]
+fail	-	feat(ui): add a thing [1A-221]
 
 # --- team keys without digits must keep working ---
-pass	add a thing [KB-115]
-pass	handle null response [VID-712]
-pass	ship it [YO-3]
+pass	-	doc(skills): add a thing [KB-115]
+pass	-	fix: handle null response [VID-712]
+pass	-	chore: ship it [YO-3]
 
 # --- wrong brackets: the mistake authors actually make ---
-fail	add a thing (A1-221)
-fail	normalize the Storybook taxonomy (A1-221)
-fail	add a thing (KB-115)
-fail	add a thing {KB-115}
+fail	-	feat(ui): add a thing (A1-221)
+fail	-	refactor(ui): normalize the Storybook taxonomy (A1-221)
+fail	-	doc: add a thing (KB-115)
+fail	-	doc: add a thing {KB-115}
 
 # --- missing or malformed IDs ---
-fail	add a thing
-fail	add a thing [KB]
-fail	add a thing [KB-]
-fail	add a thing [-115]
-fail	add a thing [kb-115]
+fail	-	chore: add a thing
+fail	-	chore: add a thing [KB]
+fail	-	chore: add a thing [KB-]
+fail	-	chore: add a thing [-115]
+fail	-	chore: add a thing [kb-115]
 
 # --- the ID must come last ---
-fail	add a thing [KB-115] and then some
-pass	add a thing (finally) [KB-115]
+fail	-	chore: add a thing [KB-115] and then some
+pass	-	chore: add a thing (finally) [KB-115]
+
+# --- the escape hatch: a ticketless PR declares itself in the BODY (KB-121) ---
+# Never exercised before this fixture existed. Every row below is new coverage.
+pass	[noticket]	chore: tidy up stray imports
+pass	[noissue]	chore: tidy up stray imports
+pass	Fixes a typo in the README.\n\n[noticket]	doc: fix a broken link
+pass	## Summary\n\n- drive-by cleanup\n\n[noticket]\n\nGenerated with Claude Code	refactor: drop the unused helper
+
+# Case-insensitivity is INHERITED BEHAVIOUR, not a nicety. The GitHub
+# expression this replaced used contains(), which "is not case-sensitive"[1],
+# so these have always passed. A port using a plain body.includes('[noticket]')
+# would turn all three red -- exactly the silent narrowing this table exists to
+# catch. [1] https://docs.github.com/en/actions/reference/workflows-and-actions/expressions
+pass	[NOTICKET]	chore: tidy up stray imports
+pass	[NoTicket]	chore: tidy up stray imports
+pass	[NoIssue]	chore: tidy up stray imports
+
+# An exempt PR is exempt from the ID rule ENTIRELY -- including from the
+# bracket convention. This is the '^.+$' branch of the old expression.
+pass	[noticket]	feat(ui): add a thing (KB-115)
+pass	[noticket]	chore: no ticket for this one
+
+# --- the hatch must not fire on near-misses ---
+fail	noticket	chore: tidy up stray imports
+fail	no ticket	chore: tidy up stray imports
+fail	(noticket)	chore: tidy up stray imports
+fail	This change has no ticket.	chore: tidy up stray imports
+fail		chore: tidy up stray imports
+fail	-	chore: tidy up stray imports
+
+# The marker must OWN ITS LINE. The GitHub expression this replaced used
+# contains(), which matched anywhere -- so a PR that merely DISCUSSED the hatch
+# was exempted by it. Observed live: PR #85, which introduced the rule module,
+# was itself waved through on its first CI run because its body explains what
+# [noticket] does. Its title carried a valid [KB-121] that was never checked.
+fail	The [noticket] escape hatch lifts the ID requirement.	doc: explain the escape hatch
+fail	Use `[noticket]` in the body when there is no ticket.	doc: explain the escape hatch
+fail	Add [noticket] to the body and CI goes green.	doc: explain the escape hatch
+fail	[noticket] is the marker	doc: explain the escape hatch
+fail	see [noissue]	doc: explain the escape hatch
+
+# ...but a marker standing alone still works, including as a list item and with
+# surrounding prose on OTHER lines. This is the shape /pr emits (KB-120).
+pass	## Summary\n\n- explains the hatch and how [noticket] behaves\n\n[noticket]	doc: explain the escape hatch
+pass	- [noticket]	chore: tidy up stray imports
+pass	  [noticket]  	chore: tidy up stray imports
+pass	[noticket].	chore: tidy up stray imports
+
+# A marker plus a real ID is not a contradiction to reject -- the PR is simply
+# exempt and also happens to be traceable. Rejecting it would punish a body
+# template that emits the marker unconditionally.
+pass	[noticket]	feat(ci): add a thing [KB-121]
