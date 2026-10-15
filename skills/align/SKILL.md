@@ -206,7 +206,7 @@ Before executing any migrations, file a tracking ticket via `/issue` scoped to t
 
 If the operator prefers not to file a ticket (e.g. the alignment is trivial), skip — but offer it. For non-trivial runs (3+ steps, destructive operations, ticket audits), strongly recommend it.
 
-Store the ticket ID — all Phase 3 progress comments thread on it via `/comment`.
+Store the ticket ID — all Phase 3 progress comments go to it via `/comment`. The alignment run is one thread on the ticket (`T1: …` on a fresh tracking ticket): keep its thread ID in context and reply into it, rather than opening a top-level comment per step.
 
 ## Phase 3 — Execute migrations
 
@@ -245,7 +245,7 @@ For each approved step:
    - **Ticket changes:** delegate to the `/issue` skill for title rewrites and scope fixes. Present proposed changes and get approval before applying.
    - **Manual steps:** print instructions clearly. Mark as done only when the operator confirms they've completed it.
 3. **Verify** the step succeeded — re-run the gap check for that specific item.
-4. **Comment progress** — if a tracking ticket was filed, post a progress comment via `/comment` threaded on it. Include what was done, what resource type it affected, and any decisions made (e.g. "operator chose to keep original title for KB-14"). This builds the audit trail.
+4. **Comment progress** — if a tracking ticket was filed, post a progress reply via `/comment` in the alignment run's thread. Include what was done, what resource type it affected, and any decisions made (e.g. "operator chose to keep original title for KB-14"). This builds the audit trail.
 5. **Mark complete** and move to the next step.
 
 ### Defensive measures
@@ -288,7 +288,7 @@ Do not commit — git is HITL. Present the suggested commit message using `commi
 
 ### Close the tracking ticket
 
-If a tracking ticket was filed in Phase 2, post a resolution comment via `/comment` with the full summary above (applied, manual, skipped, tickets audited). This is the audit record — anyone reviewing the alignment run later sees exactly what was checked, what was changed, and what decisions the operator made.
+If a tracking ticket was filed in Phase 2, close the alignment run's thread via `/comment`: a ✅ reply carrying the full summary above (applied, manual, skipped, tickets audited), then ask the operator to resolve the thread in Linear — agents cannot resolve threads. This is the audit record — anyone reviewing the alignment run later sees exactly what was checked, what was changed, and what decisions the operator made.
 
 Transition the ticket to Done if all steps are complete (including manual ones confirmed by the operator). If manual steps remain, leave it In Progress with the outstanding items listed in the comment.
 
