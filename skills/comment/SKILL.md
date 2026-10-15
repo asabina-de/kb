@@ -43,7 +43,7 @@ Every top-level comment is titled `T{n}[ {Type}]: {one-line summary}`:
 - **Type** — optional. General work has none. Anything else names what the thread is, e.g. `Spike`, `Fix`, `Refactor`. These are examples, not an enforced list.
 - **Summary** — one line saying what the thread is about, not what happened in it.
 
-Examples: `T1: redesign the auth flow`, `T2 Spike: does the SDK support PKCE`, `T3 Fix: token refresh drops the session`.
+Example titles: `T1: redesign the auth flow`, `T2 Spike: does the SDK support PKCE`, `T3 Fix: token refresh drops the session`. These are the title alone; the heading line wraps it in bold and appends `(skill: {caller-skill})` (see **Comment anatomy**).
 
 **The current thread** is the highest-numbered unresolved thread with no type. It is where anything without a better home goes.
 
@@ -53,14 +53,24 @@ Issues that predate this protocol have top-level comments without a `T{n}` title
 
 Every comment has three parts:
 
-1. **Heading line:** for a top-level comment, `**T{n}[ {Type}]: {summary}** ({caller-skill})`; for a reply, `**{Title}** ({caller-skill})`
+1. **Heading line:** for a top-level comment, `**T{n}[ {Type}]: {summary}** (skill: {caller-skill})`; for a reply, `**{Title}** (skill: {caller-skill})`. Spell out `skill:` — a bare `(pair)` means nothing to a reader who doesn't know the skill names
 2. **Provenance line:** `*[ai:claude-code]*`
 3. **Body:** the content, in markdown
+
+Example top-level comment, with every part present — number, type, summary, caller skill, provenance and body:
+
+```markdown
+**T2 Spike: does the SDK support PKCE** (skill: pair)
+
+*[ai:claude-code]*
+
+**Verdict:** Feasible, with caveats.
+```
 
 Example reply:
 
 ```markdown
-**Assessment** (pair)
+**Assessment** (skill: pair)
 
 *[ai:claude-code]*
 
