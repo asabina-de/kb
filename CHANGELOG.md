@@ -34,6 +34,34 @@ Tag manual-only steps with **(manual)** so readers know an agent can't automate 
 
 ---
 
+## [2026-10-15]
+
+### Changed
+
+- **`/comment` — numbered threads that close, routed by topic** (KB-126) — every top-level comment on an issue is now a thread titled `T{n}[ Type]: one-line summary`, numbered in one sequence per issue. The type is optional (general work has none; `Spike`, `Fix`, `Refactor` are examples, not an enforced list), and `T` replaces `#` because a bare `#85` already reads as a PR. Each comment is **routed** to the best-fitting unresolved thread, falling back to the **current thread** (the highest-numbered unresolved untyped one). When nothing fits and the topic may deserve its own thread, the agent asks the user; with no one to ask, it replies in the current thread and flags it. Routing is written as one self-contained choice (draft plus open threads in, one thread or "none of the above" out) so a fast judgment model such as TypeSafe's Jev can take it over later. A thread closes with a ✅ reply summarising what was tried and how it ended; a human resolves it, since the Linear MCP can read `resolvedAt` but not set it. Threads are discovered by reading `list_comments` in full at session start and trusted from context afterwards — no thread index is kept in the description, because a copy of live state goes stale.
+- **"Anchor" dropped across the skills** (KB-126) — it meant the ticket description in `/issue` and a top-level comment in `/comment`, so the two rules talked past each other. Skills now name the things themselves: description, thread, top-level comment, reply. `/issue`'s "source anchor" is now the **backlink** to the **note section** a ticket came from — a word the skill already used.
+- **`/pair`, `/issue`, `/align`, `/design`, `/pr` follow the thread protocol** (KB-126) — `/pair`'s assessment, plan, step completions and wrap-up reply in the current thread; a spike gets its own `T{n} Spike:` thread only when it needs a separate discussion. A session ending no longer closes anything: unfinished work gets a `Session wrap-up` reply and the thread stays open for the next session. An `/align` run is one thread on its tracking ticket. `/comment` carries a sync note naming these callers.
+
+### Fixed
+
+- **Agent comments piled up as a wall of top-level comments** (KB-126) — `/comment` prescribed "one anchor per logical unit of work (one assessment, one spike, one plan…)" and `/pair` posted each as its own top-level comment, while thread IDs were kept only "for the duration of its session", so the next session could not find the old thread and opened another. An issue page showed every one expanded. Observed on [A1-373](https://linear.app/asabina/issue/A1-373/build-a-real-intake-questionnaire-and-let-the-landing-cta-try-it): one session left three top-level comments, and its later "Shipped", "Re-signed" and "CI green" replies landed under *Decision* only because it was the newest. [KB-126](https://linear.app/asabina/issue/KB-126/fix-the-comment-wall-on-a-linear-issue) itself is the worked example of the new shape: one `T1` thread with everything folded under it. **The agents were following the rules; the rules produced the wall.**
+
+### Migration
+
+**Files:**
+
+- Re-sync `skills/comment`, `skills/pair`, `skills/issue`, `skills/align`, `skills/design` and `skills/pr` from the KB.
+- In any repo-local agent instructions (`AGENTS.md`, `CLAUDE.md`, local skills) that tell agents to post "an anchor comment" or one top-level comment per assessment, plan or spike, replace that with "post via `/comment`, which routes into the issue's `T{n}` threads".
+
+**Tickets:**
+
+- No backfill. Existing top-level comments cannot be moved under a thread (`save_comment` accepts `parentId` only when creating). Unresolved untitled ones stay routing candidates but never become the current thread; the next routine comment on such an issue opens `T1`.
+- **(manual)** Resolve old top-level comments you no longer need expanded, so they fold away and drop out of routing.
+
+**Agent memory:**
+
+- Rename any memory or local rule that says "anchor" for a ticket description or a top-level comment, and point "post a comment" instructions at a reply in the current thread.
+
 ## [2026-09-05]
 
 ### Added
