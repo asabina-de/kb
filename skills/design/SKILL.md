@@ -238,7 +238,7 @@ The navigator steers:
 When the navigator is satisfied (or the session ends):
 
 1. Summarize what was accomplished
-2. If a ticket is attached, comment the progress to Linear (via `/comment`)
+2. If a ticket is attached, comment the progress to Linear (via `/comment`) as a reply in the ticket's current thread. If the design work the thread holds is finished, close the thread with a ✅ summary and ask the navigator to resolve it
 3. If the Figma work produced a reviewable artifact, note the file and frame name
 4. If there's follow-up work, note it
 

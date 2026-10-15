@@ -475,7 +475,8 @@ If the landed subject carries the ticket ID (or the escape hatch applied), repor
    1. Fix the repo setting so it can't recur:
       gh api repos/{owner}/{repo} -X PATCH -f squash_merge_commit_title=PR_TITLE
    2. Record the commit-sha ↔ ticket mapping in a comment on the Linear
-      issue so the trace survives out-of-band.
+      issue (via /comment, a reply in its current thread) so the trace
+      survives out-of-band.
 ```
 
 ### Merge strategy

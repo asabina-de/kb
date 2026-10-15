@@ -25,7 +25,7 @@ The defining design principles are:
 >
 > **Comment everything back to the ticket.** Assessments, spike findings, plans, and step completions are posted as Linear comments. This means a cancelled session can be picked up later — the ticket carries the full context.
 
-**Commenting protocol.** All Linear comments are posted via the `comment` skill (`Skill("comment", ...)`). This skill describes what to comment; the comment skill handles formatting, provenance, and threading. Store anchor comment IDs returned by the comment skill to thread subsequent replies.
+**Commenting protocol.** All Linear comments are posted via the `comment` skill (`Skill("comment", ...)`). This skill describes what to comment; the comment skill handles formatting, provenance, and threading. A session's assessment, plan, step completions and wrap-up are all routine progress: they go as replies into the issue's **current thread** (`T{n}: …`), not as a top-level comment each. Keep the thread IDs the comment skill returns in context and reply to them directly for the rest of the session.
 
 ## Commit modes
 
@@ -126,7 +126,7 @@ If the user passed a branch name directly rather than a ticket ID, check it out 
 Once the ticket ID is known and the branch is checked out, fetch all of these in parallel:
 
 - **Linear ticket:** fetch the Linear issue (e.g. `get_issue`) with the ticket ID. Capture title, description, state, priority, labels, project, parent issue.
-- **Linear comments:** fetch existing comments (e.g. `list_comments`) — read existing comments. If a previous pair session left assessment/plan/spike comments, note them. This is the resumption path.
+- **Linear comments:** read all comments in full (e.g. `list_comments`). This is the resumption path and the one greedy read the comment protocol asks for at session start: note the `T{n}` threads, which are unresolved, which one is current, and what earlier sessions assessed, planned and completed in them.
 - **Branch state:** `git log --oneline -10`, `git status`, `git diff main...HEAD` (or appropriate base branch) to understand what's already been done on this branch.
 - **Codebase orientation:** Use a subagent to understand the areas of the codebase most likely relevant to the ticket (based on ticket title/description keywords).
 - **Repo conventions:** Read `CLAUDE.md` / `AGENTS.md` / `CONTRIBUTING.md` at the repo root for development workflow, testing, and quality requirements.
@@ -248,10 +248,10 @@ Read the ticket and existing branch work. Categorize what remains:
 
 ### Comment the assessment to Linear
 
-Post the assessment as an anchor comment via the comment skill. Include the categorized unknowns (Clear and ready / Unclear / Feasibility unknowns / Blocked) as the body content:
+Post the assessment via the comment skill. It is routine progress, so it lands in the current thread, or opens `T1` on a ticket with no threads yet. Include the categorized unknowns (Clear and ready / Unclear / Feasibility unknowns / Blocked) as the body content:
 
 ```
-Skill("comment", "Post an anchor comment on {ticket-id} titled \"Assessment\" from skill \"pair\" with body:
+Skill("comment", "Post to {ticket-id} titled \"Assessment\" from skill \"pair\" with body:
 
 **Clear and ready:**
 - Add Google OAuth callback endpoint
@@ -269,7 +269,7 @@ Skill("comment", "Post an anchor comment on {ticket-id} titled \"Assessment\" fr
 - (none)")
 ```
 
-Store the returned anchor comment ID — spike findings and other assessment follow-ups thread under it.
+Keep the returned thread ID in context — the plan, step completions and wrap-up reply into the same thread.
 
 ### Spike on feasibility (parallel)
 
@@ -284,10 +284,12 @@ Subagents are read-only investigators. They don't write production code.
 
 When a spike returns something that **changes the plan** — a chosen approach is not viable, a dependency is missing, an assumption in the ticket is wrong — surface it to the navigator in chat, not only as a Linear comment. Shape that message per **Check-in shape**: the finding and its evidence first, then the closing block carrying the consequence for the plan and what you need decided.
 
-**Wait for all spikes to complete before commenting.** Don't post "starting spike" comments — post one consolidated findings anchor per spike after the subagent returns, via the comment skill:
+**Wait for all spikes to complete before commenting.** Don't post "starting spike" comments — post one consolidated finding per spike after the subagent returns, via the comment skill.
+
+**Where a spike's finding goes.** A spike that settles its question in one finding is routine progress: reply in the current thread. Open a typed `T{n} Spike: …` thread only when the question will need its own discussion and can be resolved on its own — the finding is contested, it changes the plan, or follow-up work hangs off it. When unsure, ask the navigator which; that judgment is theirs while the boundary is still being learned.
 
 ```
-Skill("comment", "Post an anchor comment on {ticket-id} titled \"Spike: Google OAuth library compatibility\" from skill \"pair\" with body:
+Skill("comment", "Post to {ticket-id} titled \"Spike: Google OAuth library compatibility\" from skill \"pair\" with body:
 
 **Verdict:** Feasible ✓
 
@@ -410,10 +412,10 @@ Wait for the navigator's approval or adjustment before proceeding.
 
 ### Comment the plan to Linear
 
-After the navigator approves (or adjusts) the plan, post it as an anchor comment via the comment skill:
+After the navigator approves (or adjusts) the plan, post it as a reply in the current thread via the comment skill:
 
 ```
-Skill("comment", "Post an anchor comment on {ticket-id} titled \"Plan\" from skill \"pair\" with body:
+Skill("comment", "Reply in thread {thread-id} on {ticket-id} titled \"Plan\" from skill \"pair\" with body:
 
 - [ ] Step 1: Add Google OAuth callback route
 - [ ] Step 2: Token storage in session metadata (parallel with 3)
@@ -421,7 +423,7 @@ Skill("comment", "Post an anchor comment on {ticket-id} titled \"Plan\" from ski
 - [ ] Step 4: Update login UI with Google button (after 1-3)")
 ```
 
-Store the returned plan anchor comment ID — all step completions and mid-session adaptations thread under it. This checklist serves as the resumption point if the session is interrupted.
+Step completions and mid-session adaptations reply into the same thread. The plan checklist is the resumption point if the session is interrupted.
 
 ## Phase 3 — Execute
 
@@ -454,10 +456,10 @@ If the PR already exists (resuming a prior session), skip this step — just pus
 
 ### Comment step completions to Linear
 
-After each step is committed (by the navigator in checkpoint mode, or auto-committed in yolo mode), post a reply threaded under the plan anchor via the comment skill:
+After each step is committed (by the navigator in checkpoint mode, or auto-committed in yolo mode), post a reply in the current thread via the comment skill:
 
 ```
-Skill("comment", "Reply to anchor {plan-comment-id} on {ticket-id} titled \"Step 1 complete\" from skill \"pair\" with body:
+Skill("comment", "Reply in thread {thread-id} on {ticket-id} titled \"Step 1 complete\" from skill \"pair\" with body:
 
 Added Google OAuth callback route in `src/routes/auth.ts` and `src/config/oauth.ts`.
 Test added in `src/routes/__tests__/auth.test.ts` — passing.
@@ -487,10 +489,10 @@ Pair programming is fluid. The plan from Phase 2 is a starting point, not a cont
 
 Accommodate without friction. The navigator steers.
 
-When mid-session adaptation happens, post the change as a reply to the plan anchor via the comment skill. Use the appropriate emoji prefix in the title:
+When mid-session adaptation happens, post the change as a reply in the current thread via the comment skill. Use the appropriate emoji prefix in the title:
 
 ```
-Skill("comment", "Reply to anchor {plan-comment-id} on {ticket-id} titled \"🚨 Plan adjusted\" from skill \"pair\" with body:
+Skill("comment", "Reply in thread {thread-id} on {ticket-id} titled \"🚨 Plan adjusted\" from skill \"pair\" with body:
 
 Step 3 (Silent token refresh middleware) replaced with:
 Step 3a: Explicit re-login flow on token expiry
@@ -551,10 +553,13 @@ The flip is tied to completion, not memory — don't leave a finished branch's P
 
 ### Comment wrap-up to Linear
 
-Post a final session summary as a resolution reply to the plan anchor via the comment skill:
+A session ending is not a thread ending. Which one you post depends on whether the work the current thread holds is done:
+
+- **Work continues in a later session** — post a plain `Session wrap-up` reply in the current thread: what was completed, what remains. The thread stays open, and the next session picks it up as the current thread.
+- **The work is done** (PR promoted to ready, or the approach abandoned) — close the thread: a ✅ reply whose body is the summary of what was tried and how it concluded, then ask the navigator to resolve the thread in Linear. Agents cannot resolve threads. A later attempt at the same ticket opens the next `T{n}`.
 
 ```
-Skill("comment", "Reply to anchor {plan-comment-id} on {ticket-id} titled \"✅ Session complete\" from skill \"pair\" with body:
+Skill("comment", "Close thread {thread-id} on {ticket-id} from skill \"pair\" with summary:
 
 **Completed:**
 - [x] Step 1: OAuth callback route
@@ -586,6 +591,7 @@ Skill("comment", "Reply to anchor {plan-comment-id} on {ticket-id} titled \"✅ 
 - **Don't touch unrelated code.** Stay within the scope of the ticket. If you notice unrelated issues, mention them verbally — don't fix them unless the navigator asks.
 - **Don't post "starting spike" comments.** Wait for the spike to complete, then post findings. One comment per spike, not a running log.
 - **Don't post bare research findings.** A spike finding — a verifiable claim about the outside world — links inline to its source wherever it's written, comment or doc (see Phase 1 "Source-linking"). A claim a reader must re-google defeats the spike. Process/coordination comments (plans, step completions, blockers) are exempt — they make no external claim.
+- **Don't open a top-level comment per phase.** The assessment, plan, step completions and wrap-up are replies in the current thread. A session that leaves three top-level comments on a ticket is the wall the comment protocol exists to prevent.
 - **Don't interleave parallel step comments.** When subagents work concurrently, post one combined comment after both complete.
 - **Don't create PRs without pitching first.** Always show the proposed PR content in chat and get explicit approval before running `gh pr create`.
 - **Don't skip Status Log maintenance on decision records.** If a step touches `docs/decisions/*.md`, append a Status Log row. The record's audit trail must reflect every mutation.
